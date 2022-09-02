@@ -1,0 +1,10 @@
+docutils==0.16
+sphinx
+sphinx-automodapi
+breathe
+exhale
+pybind11
+cmake
+ninja
+pennylane
+xanadu-sphinx-theme==0.1.0
