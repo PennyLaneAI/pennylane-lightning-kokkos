@@ -153,6 +153,10 @@ if(PLKOKKOS_ENABLE_WARNINGS)
     # Explicitly disable warnings for Kokkos-specific library issues.
 endif()
 
+if(MSVC) # For M_PI
+    target_compile_options(pennylane_lightning_kokkos INTERFACE /D_USE_MATH_DEFINES)
+endif()
+
 if(PLKOKKOS_ENABLE_NATIVE)
     message(STATUS "ENABLE_NATIVE is ON. Using -march=native")
     add_compile_options(-march=native)
