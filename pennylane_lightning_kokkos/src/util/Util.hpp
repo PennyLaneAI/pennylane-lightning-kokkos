@@ -19,13 +19,7 @@
 
 #include <cassert>
 #include <climits>
-
-#ifndef _USE_MATH_DEFINES
-#define _USE_MATH_DEFINES // for C++
-#include "m_def.hpp"
-#endif
 #include <cmath>
-
 #include <complex>
 #include <cstddef>
 #include <iostream>
@@ -40,6 +34,10 @@
 #include <vector>
 
 #include <Kokkos_Core.hpp>
+
+#ifdef _WIN32
+#include "m_def.hpp"
+#endif
 
 #if __has_include(<version>)
 #include <version>
