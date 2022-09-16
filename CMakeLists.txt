@@ -11,7 +11,7 @@ message(${LOGO})
 
 project(pennylane_lightning_kokkos
     DESCRIPTION "Lightning-Kokkos bindings for PennyLane. Backed by the Kokkos library."
-    LANGUAGES CXX C
+    LANGUAGES CXX
 )
 
 ##########################
