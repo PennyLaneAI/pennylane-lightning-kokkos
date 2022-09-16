@@ -35,9 +35,9 @@
 
 #include <Kokkos_Core.hpp>
 
-#ifdef _WIN32
-#include "m_def.hpp"
-#endif
+//#ifdef _WIN32
+//#include "m_def.hpp"
+//#endif
 
 #if __has_include(<version>)
 #include <version>
