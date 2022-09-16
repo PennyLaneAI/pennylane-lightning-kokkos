@@ -14,7 +14,7 @@ env:
 
 jobs:
   cpptests_threads:
-    name: C++ tests (Windows) for Threads Kokkos backend
+    name: C++ tests (Windows) for SERIAL Kokkos backend
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -27,6 +27,11 @@ jobs:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 2
+
+      - uses: actions/setup-python@v3
+        name: Install Python
+        with:
+          python-version: '3.10'
 
       - uses: actions/checkout@v2
         with:
@@ -44,8 +49,13 @@ jobs:
 
       - name: Build and run unit tests for code coverage
         run: |
-            cmake . -BBuild -DKokkos_ENABLE_THREADS=ON -DPLKOKKOS_BUILD_TESTS=ON -DPLKOKKOS_ENABLE_SANITIZER=ON
-            cmake --build ./Build
+            cmake . -BBuild -DPLKOKKOS_BUILD_TESTS=ON `
+                    -DPLKOKKOS_ENABLE_SANITIZER=ON `
+                    -DKokkos_ENABLE_DEPRECATION_WARNINGS=OFF `
+                    -DCMAKE_POSITION_INDEPENDENT_CODE=ON `
+                    -DCMAKE_BUILD_TYPE=RelWithDebInfo `
+                    -T clangcl
+            cmake --build .\Build
             mkdir -p ./Build/tests/results
             .\Build\tests\Debug\runner_kokkos.exe --order lex --reporter junit --out .\Build\tests\results\report.xml
             OpenCppCoverage --sources pennylane_lightning_kokkos\src --export_type cobertura:coverage.xml Build\tests\Debug\runner_kokkos.exe
@@ -77,10 +87,10 @@ jobs:
           path: main
           fetch-depth: 2
 
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v3
         name: Install Python
         with:
-          python-version: '3.7'
+          python-version: '3.10'
 
       - name: Get required Python packages
         run: |
