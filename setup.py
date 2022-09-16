@@ -68,6 +68,7 @@ if not os.getenv("READTHEDOCS"):
 
             # Set Python_EXECUTABLE instead if you use PYBIND11_FINDPYTHON
             configure_args = [
+                f"-DCMAKE_CXX_STANDARD=17",
                 f"-DCMAKE_CXX_FLAGS=-fno-lto", 
                 f"-DCMAKE_LIBRARY_OUTPUT_DIRECTORY={extdir}",
                 f"-DPYTHON_EXECUTABLE={sys.executable}",

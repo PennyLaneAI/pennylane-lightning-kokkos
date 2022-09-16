@@ -8,6 +8,10 @@
 namespace {
 using namespace Pennylane::Util;
 namespace KE = Kokkos::Experimental;
+
+#ifndef _USE_MATH_DEFINES
+#define _USE_MATH_DEFINES // for C++
+#endif
 } // namespace
 
 namespace Pennylane {
