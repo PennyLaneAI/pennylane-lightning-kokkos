@@ -19,7 +19,12 @@
 
 #include <cassert>
 #include <climits>
+
+#ifndef _USE_MATH_DEFINES
+#define _USE_MATH_DEFINES // for C++
+#endif
 #include <cmath>
+
 #include <complex>
 #include <cstddef>
 #include <iostream>
