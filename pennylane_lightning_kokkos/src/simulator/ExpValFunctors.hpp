@@ -3,7 +3,7 @@
 #ifndef _USE_MATH_DEFINES
 #define _USE_MATH_DEFINES // for C++
 #endif
-#include<cmath>
+#include <cmath>
 
 #include "Util.hpp"
 #include <Kokkos_Core.hpp>
