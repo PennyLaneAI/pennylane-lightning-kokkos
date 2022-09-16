@@ -37,11 +37,6 @@ jobs:
         with:
           fetch-depth: 2 # for codecov
 
-      - name: Configure MSVC for amd64 # Use cl.exe as a default compiler
-        uses: ilammy/msvc-dev-cmd@v1
-        with:
-          arch: amd64
-
       - name: Setup OpenCppCoverage and add to PATH
         run: |
           choco install OpenCppCoverage -y
@@ -102,7 +97,6 @@ jobs:
       - name: Install ML libraries for interfaces
         run: |
           pip install --upgrade torch==${{ env.TORCH_VERSION }} -f https://download.pytorch.org/whl/cpu/torch_stable.html
-          pip install --upgrade "jax[cpu]"  # This also installs jaxlib
           pip install --upgrade tensorflow~=${{ env.TF_VERSION }}
       - name: Install lightning.kokkos device
         run: |
