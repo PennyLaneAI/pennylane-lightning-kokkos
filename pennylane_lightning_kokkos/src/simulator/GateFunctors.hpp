@@ -5,13 +5,13 @@
 
 #include "Util.hpp"
 
-namespace {
-using namespace Pennylane::Util;
-namespace KE = Kokkos::Experimental;
-
 #ifndef _USE_MATH_DEFINES
 #define _USE_MATH_DEFINES // for C++
 #endif
+
+namespace {
+using namespace Pennylane::Util;
+namespace KE = Kokkos::Experimental;
 } // namespace
 
 namespace Pennylane {
