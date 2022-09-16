@@ -1,13 +1,14 @@
 #pragma once
 
+#ifndef _USE_MATH_DEFINES
+#define _USE_MATH_DEFINES // for C++
+#endif
+#include <cmath>
+
 #include <Kokkos_Core.hpp>
 #include <Kokkos_StdAlgorithms.hpp>
 
 #include "Util.hpp"
-
-#ifndef _USE_MATH_DEFINES
-#define _USE_MATH_DEFINES // for C++
-#endif
 
 namespace {
 using namespace Pennylane::Util;
