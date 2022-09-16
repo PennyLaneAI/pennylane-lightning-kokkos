@@ -42,7 +42,7 @@ if not os.getenv("READTHEDOCS"):
             ("arch=", "A", "Define backend targetted architecture"),
         ]
 
-        backends = {"CUDA", "HIP", "OPENMP", "THREADS", "SERIAL"}
+        backends = {"CUDA", "HIP", "OPENMP", "THREADS", "SERIAL", "SYCL"}
 
         def initialize_options(self):
             super().initialize_options()
@@ -91,8 +91,29 @@ if not os.getenv("READTHEDOCS"):
                 if self.arch:
                     configure_args.append(f"-DKokkos_ARCH_{self.arch}=ON")
 
-            if not platform.system() == "Linux":
-                raise RuntimeError(f"Unsupported '{platform.system()}' platform")
+            # Add more platform dependent options
+            if platform.system() == "Darwin":
+                #To support ARM64
+                if os.getenv('ARCHS') == "arm64":
+                    configure_args += ["-DCMAKE_CXX_COMPILER_TARGET=arm64-apple-macos11",
+                                    "-DCMAKE_SYSTEM_NAME=Darwin",
+                                    "-DCMAKE_SYSTEM_PROCESSOR=ARM64"]
+                else: # X64 arch
+                    llvmpath = subprocess.check_output(["brew", "--prefix", "llvm"]).decode().strip()
+                    configure_args += [
+                            f"-DCMAKE_CXX_COMPILER={llvmpath}/bin/clang++",
+                            f"-DCMAKE_LINKER={llvmpath}/bin/lld",
+                    ] # Use clang instead of appleclang
+                # Disable OpenMP in M1 Macs
+                if os.environ.get("USE_OMP"):
+                    configure_args += []
+                else:
+                    configure_args += ["-DENABLE_OPENMP=OFF"]
+            elif platform.system() == "Windows":
+                configure_args += ["-DENABLE_OPENMP=OFF", "-DENABLE_BLAS=OFF"]
+            else:
+                if platform.system() != "Linux":
+                    raise RuntimeError(f"Unsupported '{platform.system()}' platform")
 
             if not Path(self.build_temp).exists():
                 os.makedirs(self.build_temp)
