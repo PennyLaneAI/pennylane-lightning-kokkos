@@ -154,8 +154,8 @@ if(PLKOKKOS_ENABLE_WARNINGS)
 endif()
 
 if(MSVC) # For M_PI
-    target_compile_options(lightning_kokkos_qubit_ops INTERFACE /D_USE_MATH_DEFINES)
-    target_compile_options(pennylane_lightning_kokkos INTERFACE /D_USE_MATH_DEFINES)
+    target_compile_options(lightning_kokkos_qubit_ops INTERFACE /D_USE_MATH_DEFINES=ON)
+    target_compile_options(pennylane_lightning_kokkos INTERFACE /D_USE_MATH_DEFINES=ON)
 endif()
 
 if(PLKOKKOS_ENABLE_NATIVE)
