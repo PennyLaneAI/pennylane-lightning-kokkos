@@ -45,7 +45,6 @@ jobs:
       - name: Build and run unit tests for code coverage
         run: |
             cmake . -BBuild -DPLKOKKOS_BUILD_TESTS=ON `
-                    -DPLKOKKOS_ENABLE_SANITIZER=ON `
                     -DKokkos_ENABLE_DEPRECATION_WARNINGS=OFF `
                     -DCMAKE_POSITION_INDEPENDENT_CODE=ON `
                     -DCMAKE_BUILD_TYPE=RelWithDebInfo `
