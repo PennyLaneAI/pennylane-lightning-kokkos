@@ -22,6 +22,7 @@
 
 #ifndef _USE_MATH_DEFINES
 #define _USE_MATH_DEFINES // for C++
+#include "m_def.hpp"
 #endif
 #include <cmath>
 

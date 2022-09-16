@@ -98,7 +98,8 @@ jobs:
       - name: Install lightning.kokkos device
         run: |
           cd main
-          BACKEND="THREADS" python -m pip install -e .
+          Set-Variable -Name BACKEND -Value "SERIAL"
+          python -m pip install -e .
       - name: Run PennyLane-Lightning unit tests
         run: |
           cd main/
