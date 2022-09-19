@@ -112,6 +112,7 @@ if not os.getenv("READTHEDOCS"):
                     configure_args += ["-DENABLE_OPENMP=OFF"]
             elif platform.system() == "Windows":
                 configure_args += ["-T clangcl"] # only build with Clang under Windows
+                configure_args.remove("-GNinja")
             else:
                 if platform.system() != "Linux":
                     raise RuntimeError(f"Unsupported '{platform.system()}' platform")
