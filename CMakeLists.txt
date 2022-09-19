@@ -95,14 +95,50 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 option(Kokkos_ENABLE_DEPRECATION_WARNINGS "Enable Kokkos deprecation warnings" OFF)
 
-include(FetchContent)
-FetchContent_Declare(kokkos
-  GIT_REPOSITORY https://github.com/kokkos/kokkos.git
-  GIT_TAG        3.6.00
+find_package(Kokkos
+HINTS   ${CMAKE_SOURCE_DIR}/Kokkos
+        /usr
+        /usr/local
+        /opt
 )
-FetchContent_MakeAvailable(kokkos)
-get_target_property(PLKOKKOS_KOKKOS_INC_DIR kokkos INTERFACE_INCLUDE_DIRECTORIES)
-set_target_properties(kokkos PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${PLKOKKOS_KOKKOS_INC_DIR}")
+if(Kokkos_FOUND)
+    message(STATUS "Found existing Kokkos library")
+endif()
+
+find_package(KokkosKernels
+HINTS   ${CMAKE_SOURCE_DIR}/Kokkos
+        ${CMAKE_SOURCE_DIR}/KokkosKernels
+        /usr
+        /usr/local
+        /opt
+)
+if(KokkosKernels_FOUND)
+    message(STATUS "Found existing Kokkos Kernels library")
+endif()
+
+
+if (NOT (Kokkos_FOUND AND KokkosKernels_FOUND))
+    # Setting the Serial device.
+    option(Kokkos_ENABLE_SERIAL  "Enable Kokkos SERIAL device" ON)
+    message(STATUS "KOKKOS SERIAL DEVICE ENABLED.")
+
+    option(Kokkos_ENABLE_COMPLEX_ALIGN "Enable complex alignment in memory" OFF)
+
+    set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+    include(FetchContent)
+
+    FetchContent_Declare(kokkos
+                        GIT_REPOSITORY https://github.com/kokkos/kokkos.git
+                        GIT_TAG        3.6.00
+                        GIT_SUBMODULES "" # Avoid recursively cloning all submodules
+    )
+
+    FetchContent_MakeAvailable(kokkos)
+
+    get_target_property(PLKOKKOS_KOKKOS_INC_DIR kokkos INTERFACE_INCLUDE_DIRECTORIES)
+    set_target_properties(kokkos PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${PLKOKKOS_KOKKOS_INC_DIR}")
+
+endif()
 
 
 ############################

@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 # Default build type for test code is Debug
 if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE Debug)
+    set(CMAKE_BUILD_TYPE RelWithDebInfo)
 endif()
 
 option(PLKOKKOS_ENABLE_NATIVE "Enable native CPU build tuning" OFF)

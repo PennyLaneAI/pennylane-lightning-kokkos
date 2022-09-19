@@ -1,84 +1,150 @@
 name: Testing (Windows)
 on:
+  pull_request:
   push:
     branches:
       - master
-  pull_request:
+  release:
+    types: [published]
 
 env:
-  TF_VERSION: 2.8.0
-  TORCH_VERSION: 1.11.0+cpu
-  COVERAGE_FLAGS: "--cov=pennylane_lightning_kokkos --cov-report=term-missing --cov-report=xml:./coverage.xml --no-flaky-report -p no:warnings --tb=native"
+  DISTUTILS_USE_SDK: 1
+  MSSdk: 1
 
 jobs:
-  cpptests_threads:
-    name: C++ tests (Windows) for SERIAL Kokkos backend
-    runs-on: ${{ matrix.os }}
+  win-set-matrix-x86:
+    name: Set builder matrix
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.10.0
+        with:
+          access_token: ${{ github.token }}
+
+      - uses: actions/checkout@v2
+
+      - name: Kokkos execution strategy
+        id: exec_model
+        run: echo "::set-output name=exec_model::[\"SERIAL\"]" # We may also adopt [OPENMP, THREADS] in later iterations
+
+      - name: Kokkos version
+        id: kokkos_version
+        run: echo "::set-output name=kokkos_version::[\"3.6.00\"]"
+
+    outputs:
+      exec_model: ${{ steps.exec_model.outputs.exec_model }}
+      kokkos_version: ${{ steps.kokkos_version.outputs.kokkos_version }}
+
+  build_dependencies:
+    needs: [win-set-matrix-x86]
     strategy:
+      fail-fast: false
       matrix:
-        os: [windows-latest]
+        os: [windows-2019]
+        exec_model: ${{ fromJson(needs.win-set-matrix-x86.outputs.exec_model) }}
+        kokkos_version: ${{ fromJson(needs.win-set-matrix-x86.outputs.kokkos_version) }}
+
+    name: Kokkos core & kernels (${{ matrix.exec_model }})
+    runs-on: ${{ matrix.os }}
+
     steps:
       - name: Cancel previous runs
         uses: styfle/cancel-workflow-action@0.10.0
         with:
           access_token: ${{ github.token }}
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 2
 
-      - uses: actions/setup-python@v3
-        name: Install Python
+      - name: Cache installation directories
+        id: kokkos-cache
+        uses: actions/cache@v3
         with:
-          python-version: '3.10'
+          path: D:\a\install_dir\${{ matrix.exec_model }}
+          key: ${{ matrix.os }}-kokkos${{ matrix.kokkos_version }}-${{ matrix.exec_model }}
 
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 2 # for codecov
-
-      - name: Setup OpenCppCoverage and add to PATH
+      - name: Clone Kokkos libs
+        if: steps.kokkos-cache.outputs.cache-hit != 'true'
         run: |
-          choco install OpenCppCoverage -y
-          echo "C:\Program Files\OpenCppCoverage" >> $env:GITHUB_PATH
+          cd D:\a
+          git clone https://github.com/kokkos/kokkos.git
+          cd D:\a\kokkos
+          git checkout ${{ matrix.kokkos_version }}
+          cd D:\a\
+          git clone https://github.com/kokkos/kokkos-kernels.git
+          cd D:\a\kokkos-kernels
+          git checkout ${{ matrix.kokkos_version }}
+          cd ..
 
-      - name: Build and run unit tests for code coverage
+      - name: Create installation directory
+        if: steps.kokkos-cache.outputs.cache-hit != 'true'
+        run: mkdir -p D:\a\install_dir\${{ matrix.exec_model }}
+
+      - name: Install dependencies
+        if: steps.kokkos-cache.outputs.cache-hit != 'true'
         run: |
-            cmake . -BBuild -DPLKOKKOS_BUILD_TESTS=ON `
-                    -DKokkos_ENABLE_DEPRECATION_WARNINGS=OFF `
-                    -DCMAKE_POSITION_INDEPENDENT_CODE=ON `
-                    -DCMAKE_BUILD_TYPE=RelWithDebInfo `
-                    -DCMAKE_CXX_STANDARD=17 `
-                    -T clangcl
-            cmake --build .\Build --verbose
-            mkdir -p ./Build/tests/results
-            .\Build\tests\Debug\runner_kokkos.exe --order lex --reporter junit --out .\Build\tests\results\report.xml
-            OpenCppCoverage --sources pennylane_lightning_kokkos\src --export_type cobertura:coverage.xml Build\tests\Debug\runner_kokkos.exe
+          python -m pip install cmake build
 
-      - name: Upload test results
-        uses: actions/upload-artifact@v2
-        if: always()
-        with:
-          name: windows-test-report
-          path: .\Build\tests\results\report.xml
+      - name: Build Kokkos core library
+        if: steps.kokkos-cache.outputs.cache-hit != 'true'
+        run: |
+          cd D:\a\kokkos
+          cmake -BBuild . -DCMAKE_INSTALL_PREFIX=D:\a\install_dir\${{ matrix.exec_model }} `
+                          -DKokkos_ENABLE_COMPLEX_ALIGN=OFF `
+                          -DKokkos_ENABLE_${{ matrix.exec_model }}=ON `
+                          -DKokkos_ENABLE_DEPRECATION_WARNINGS=OFF `
+                          -DCMAKE_CXX_STANDARD=17 `
+                          -DCMAKE_POSITION_INDEPENDENT_CODE=ON `
+                          -DCMAKE_BUILD_TYPE=RelWithDebInfo `
+                          -T clangcl
+          cmake --build ./Build --config RelWithDebInfo --verbose
+          cmake --install ./Build --config RelWithDebInfo --verbose
 
-      - name: Upload Report to Codecov
-        uses: codecov/codecov-action@v2
-        with:
-          files: ./coverage.xml
-          fail_ci_if_error: true
+      - name: Build Kokkos kernels library
+        if: steps.kokkos-cache.outputs.cache-hit != 'true'
+        run: |
+          cd D:\a\kokkos-kernels
+          cmake -BBuild . -DCMAKE_INSTALL_PREFIX=D:\a\install_dir\${{ matrix.exec_model }} `
+                          -DKokkos_ENABLE_${{ matrix.exec_model }}=ON `
+                          -DCMAKE_CXX_STANDARD=17 `
+                          -DCMAKE_PREFIX_PATH=D:\a\install_dir\${{ matrix.exec_model }} `
+                          -DCMAKE_POSITION_INDEPENDENT_CODE=ON `
+                          -DCMAKE_BUILD_TYPE=RelWithDebInfo `
+                          -T clangcl
+          cmake --build ./Build --config RelWithDebInfo --verbose
+          cmake --install ./Build --config RelWithDebInfo --verbose
 
-  pythontests_threads:
-    name: Python tests (Windows) for Threads Kokkos Backend
-    runs-on: ${{ matrix.os }}
+  pythontests_serial:
+    needs: [win-set-matrix-x86, build_dependencies]
     strategy:
+      fail-fast: false
       matrix:
-        os: [windows-latest]
+        os: [windows-2019]
+        arch: [AMD64]
+        cibw_build: ${{ fromJson(needs.win-set-matrix-x86.outputs.matrix) }}
+        exec_model: ${{ fromJson(needs.win-set-matrix-x86.outputs.exec_model) }}
+        kokkos_version: ${{ fromJson(needs.win-set-matrix-x86.outputs.kokkos_version) }}
+    name: Python tests (SERIAL)
+    runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Checkout PennyLane-Lightning-Kokkos
-        uses: actions/checkout@v2
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.10.0
         with:
-          path: main
-          fetch-depth: 2
+          access_token: ${{ github.token }}
+
+      - name: Restoring cached dependencies
+        id: kokkos-cache
+        uses: actions/cache@v3
+        with:
+          path: D:\a\install_dir\${{ matrix.exec_model }}
+          key: ${{ matrix.os }}-kokkos${{ matrix.kokkos_version }}-${{ matrix.exec_model }}
+
+      - uses: actions/checkout@v3
+
+      - name: Copy cached libraries
+        if: steps.kokkos-cache.outputs.cache-hit == 'true'
+        run: |
+          Copy-Item -Path "D:\a\install_dir\${{ matrix.exec_model }}\" `
+                    -Destination "D:\a\pennylane-lightning-kokkos\pennylane-lightning-kokkos\Kokkos" -Recurse -Force
 
       - uses: actions/setup-python@v3
         name: Install Python
@@ -95,13 +161,15 @@ jobs:
         run: |
           pip install --upgrade torch==${{ env.TORCH_VERSION }} -f https://download.pytorch.org/whl/cpu/torch_stable.html
           pip install --upgrade tensorflow~=${{ env.TF_VERSION }}
+
       - name: Install lightning.kokkos device
         run: |
           cd main
           Set-Variable -Name BACKEND -Value "SERIAL"
-          python setup.py build_ext -DKokkos_ENABLE_SERIAL=ON
+          python setup.py build_ext
           python -m pip install -e .
-      - name: Run PennyLane-Lightning unit tests
+
+      - name: Run unit tests
         run: |
           cd main/
           pytest tests/
