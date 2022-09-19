@@ -73,10 +73,11 @@ if not os.getenv("READTHEDOCS"):
                 f"-DCMAKE_LIBRARY_OUTPUT_DIRECTORY={extdir}",
                 f"-DPYTHON_EXECUTABLE={sys.executable}",
                 f"-DCMAKE_BUILD_TYPE={cfg}",  # not used on MSVC, but no harm
-                "-GNinja",
-                f"-DCMAKE_MAKE_PROGRAM={ninja_path}",
                 *(self.cmake_defines),
             ]
+
+            if platform.system() != "Windows":
+                configure_args += ["-GNinja", f"-DCMAKE_MAKE_PROGRAM={ninja_path}"]
 
             build_args = []
             if os.getenv("BACKEND") and not self.backend:
@@ -112,7 +113,6 @@ if not os.getenv("READTHEDOCS"):
                     configure_args += ["-DENABLE_OPENMP=OFF"]
             elif platform.system() == "Windows":
                 configure_args += ["-T clangcl"] # only build with Clang under Windows
-                configure_args.remove("-GNinja")
             else:
                 if platform.system() != "Linux":
                     raise RuntimeError(f"Unsupported '{platform.system()}' platform")
