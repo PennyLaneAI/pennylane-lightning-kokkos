@@ -111,7 +111,7 @@ if not os.getenv("READTHEDOCS"):
                 else:
                     configure_args += ["-DENABLE_OPENMP=OFF"]
             elif platform.system() == "Windows":
-                configure_args += ["-DENABLE_OPENMP=OFF", "-DENABLE_BLAS=OFF"]
+                configure_args += []
             else:
                 if platform.system() != "Linux":
                     raise RuntimeError(f"Unsupported '{platform.system()}' platform")

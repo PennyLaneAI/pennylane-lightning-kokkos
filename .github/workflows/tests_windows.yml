@@ -47,6 +47,7 @@ jobs:
                     -DCMAKE_POSITION_INDEPENDENT_CODE=ON `
                     -DCMAKE_BUILD_TYPE=RelWithDebInfo `
                     -DCMAKE_CXX_STANDARD=17 
+                    -T clangcl
             cmake --build .\Build --verbose
             mkdir -p ./Build/tests/results
             .\Build\tests\Debug\runner_kokkos.exe --order lex --reporter junit --out .\Build\tests\results\report.xml
@@ -98,6 +99,7 @@ jobs:
         run: |
           cd main
           Set-Variable -Name BACKEND -Value "SERIAL"
+          python setup.py build_ext -DKokkos_ENABLE_SERIAL=ON
           python -m pip install -e .
       - name: Run PennyLane-Lightning unit tests
         run: |
