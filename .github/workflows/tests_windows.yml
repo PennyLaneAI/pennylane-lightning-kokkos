@@ -54,6 +54,11 @@ jobs:
         with:
           access_token: ${{ github.token }}
 
+      - name: Configure MSVC for amd64 # Use cl.exe as a default compiler
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: amd64
+
       - name: Cache installation directories
         id: kokkos-cache
         uses: actions/cache@v3
@@ -111,6 +116,11 @@ jobs:
         uses: styfle/cancel-workflow-action@0.10.0
         with:
           access_token: ${{ github.token }}
+
+      - name: Configure MSVC for amd64 # Use cl.exe as a default compiler
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: amd64
 
       - name: Restoring cached dependencies
         id: kokkos-cache
