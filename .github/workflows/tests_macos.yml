@@ -11,12 +11,15 @@ env:
 
 jobs:
 
-  cpptests_serial:
-    name: C++ tests (MacOS) for Serial Kokkos backend
-    runs-on: ${{ matrix.os }}
+  cpptests:
     strategy:
       matrix:
         os: [macos-11]
+        exec_model: ["SERIAL"]
+
+    name: C++ tests (MacOS) for ${{ matrix.exec_model }} Kokkos backend
+    runs-on: ${{ matrix.os }}
+
     steps:
       - name: Cancel previous runs
         uses: styfle/cancel-workflow-action@0.10.0
@@ -40,16 +43,18 @@ jobs:
 
       - name: Build and run unit tests
         run: |
-            cmake . -BBuild -DPLKOKKOS_BUILD_TESTS=ON -DPLKOKKOS_ENABLE_SANITIZER=ON -DCMAKE_CXX_COMPILER=$(brew --prefix llvm)/bin/clang++ -G Ninja
+            cmake . -BBuild -DKokkos_ENABLE_${{ matrix.exec_model }}=ON -DPLKOKKOS_BUILD_TESTS=ON -DPLKOKKOS_ENABLE_SANITIZER=ON -DCMAKE_CXX_COMPILER=$(brew --prefix llvm)/bin/clang++ -G Ninja
             cmake --build ./Build --verbose
             ./Build/pennylane_lightning_kokkos/src/tests/runner_kokkos
 
-  pythontests_serial:
-    name: Python tests for Serial Kokkos Backend
-    runs-on: ${{ matrix.os }}
+  pythontests:
     strategy:
       matrix:
         os: [macos-11]
+        exec_model: ["SERIAL", "THREADS"]
+
+    name: Python tests for ${{ matrix.exec_model }} Kokkos Backend
+    runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout PennyLane-Lightning-Kokkos
@@ -81,9 +86,8 @@ jobs:
       - name: Install lightning.kokkos device
         run: |
           cd main
-          python setup.py build_ext -DCMAKE_CXX_COMPILER=$(brew --prefix llvm)/bin/clang++
-          python setup.py bdist_wheel
-          pip install ./dist/PennyLane*.whl --force-reinstall
+          python setup.py build_ext -i --define="Kokkos_ENABLE_${{ matrix.exec_model }}=ON;CMAKE_CXX_COMPILER=$(brew --prefix llvm)/bin/clang++"
+          pip install -e .
       - name: Run PennyLane-Lightning unit tests
         run: |
           cd main/
