@@ -41,7 +41,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-2019]
+        os: [windows-latest]
         exec_model: ${{ fromJson(needs.win-set-matrix-x86.outputs.exec_model) }}
         kokkos_version: ${{ fromJson(needs.win-set-matrix-x86.outputs.kokkos_version) }}
 
@@ -104,7 +104,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-2019]
+        os: [windows-latest]
         arch: [AMD64]
         exec_model: ${{ fromJson(needs.win-set-matrix-x86.outputs.exec_model) }}
         kokkos_version: ${{ fromJson(needs.win-set-matrix-x86.outputs.kokkos_version) }}
