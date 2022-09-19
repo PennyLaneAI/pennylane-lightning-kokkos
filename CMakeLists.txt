@@ -202,6 +202,11 @@ if(PLKOKKOS_ENABLE_NATIVE)
     target_compile_options(lightning_kokkos_qubit_ops PRIVATE -march=native)
 endif()
 
+
+IF(MSVC)
+    SET(CMAKE_CXX_FLAGS "/EHsc")
+ENDIF(MSVC)
+
 if (PLKOKKOS_BUILD_TESTS)
     enable_testing()
 endif()
