@@ -15,7 +15,7 @@ jobs:
     strategy:
       matrix:
         os: [macos-11]
-        exec_model: ["SERIAL"]
+        exec_model: ["SERIAL", "THREADS"]
 
     name: C++ tests (MacOS) for ${{ matrix.exec_model }} Kokkos backend
     runs-on: ${{ matrix.os }}
