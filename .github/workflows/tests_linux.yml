@@ -155,8 +155,9 @@ jobs:
       - name: Install lightning.kokkos device
         run: |
           cd main
-          python setup.py build_ext -i --define="Kokkos_ENABLE_THREADS=ON;CMAKE_CXX_COMPILER=$(which g++-${{ env.GCC_VERSION }})"
-          pip install -e .
+          CXX=$(which g++-10) BACKEND="THREADS" python -m pip install -e . --verbose
+          # python setup.py build_ext -i --define="Kokkos_ENABLE_THREADS=ON;CMAKE_CXX_COMPILER=$(which g++-${{ env.GCC_VERSION }});CMAKE_C_COMPILER=$(which gcc-${{ env.GCC_VERSION }})"
+          # pip install -e .
       - name: Run PennyLane-Lightning unit tests
         run: |
           cd main/
