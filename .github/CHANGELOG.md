@@ -14,9 +14,9 @@
 
 ### Contributors
 
-Amintor Dusko
-
 This release contains contributions from (in alphabetical order):
+
+Amintor Dusko
 
 ---
 # Release 0.26.0
