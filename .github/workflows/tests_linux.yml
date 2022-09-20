@@ -81,8 +81,7 @@ jobs:
       - name: Install lightning.kokkos device
         run: |
           cd main
-          python setup.py build_ext -i --define="Kokkos_ENABLE_OPENMP=ON;CMAKE_CXX_COMPILER=$(which g++-${{ env.GCC_VERSION }})"
-          pip install -e .
+          CXX=$(which g++-10) BACKEND="OPENMP" python -m pip install -e . --verbose
       - name: Run PennyLane-Lightning unit tests
         run: |
           cd main/
@@ -156,8 +155,6 @@ jobs:
         run: |
           cd main
           CXX=$(which g++-10) BACKEND="THREADS" python -m pip install -e . --verbose
-          # python setup.py build_ext -i --define="Kokkos_ENABLE_THREADS=ON;CMAKE_CXX_COMPILER=$(which g++-${{ env.GCC_VERSION }});CMAKE_C_COMPILER=$(which gcc-${{ env.GCC_VERSION }})"
-          # pip install -e .
       - name: Run PennyLane-Lightning unit tests
         run: |
           cd main/
@@ -230,8 +227,7 @@ jobs:
       - name: Install lightning.kokkos device
         run: |
           cd main
-          python setup.py build_ext -i --define="Kokkos_ENABLE_SERIAL=ON;CMAKE_CXX_COMPILER=$(which g++-${{ env.GCC_VERSION }})"
-          pip install -e .
+          CXX=$(which g++-10) BACKEND="SERIAL" python -m pip install -e . --verbose
       - name: Run PennyLane-Lightning unit tests
         run: |
           cd main/
