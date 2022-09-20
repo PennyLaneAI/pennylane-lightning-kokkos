@@ -68,14 +68,22 @@ if not os.getenv("READTHEDOCS"):
 
             # Set Python_EXECUTABLE instead if you use PYBIND11_FINDPYTHON
             configure_args = [
-                f"-DCMAKE_CXX_FLAGS=-fno-lto", 
+                f"-DCMAKE_CXX_FLAGS=-fno-lto",
                 f"-DCMAKE_LIBRARY_OUTPUT_DIRECTORY={extdir}",
                 f"-DPYTHON_EXECUTABLE={sys.executable}",
                 f"-DCMAKE_BUILD_TYPE={cfg}",  # not used on MSVC, but no harm
-                "-GNinja",
-                f"-DCMAKE_MAKE_PROGRAM={ninja_path}",
                 *(self.cmake_defines),
             ]
+
+            if platform.system() == "Windows":
+                configure_args += [
+                    "-T clangcl",
+                ]
+            else:
+                configure_args += [
+                    "-GNinja",
+                    f"-DCMAKE_MAKE_PROGRAM={ninja_path}",
+                ]
 
             build_args = []
             if os.getenv("BACKEND") and not self.backend:
@@ -91,8 +99,29 @@ if not os.getenv("READTHEDOCS"):
                 if self.arch:
                     configure_args.append(f"-DKokkos_ARCH_{self.arch}=ON")
 
-            if not platform.system() == "Linux":
-                raise RuntimeError(f"Unsupported '{platform.system()}' platform")
+            # Add more platform dependent options
+            if platform.system() == "Darwin":
+                #To support ARM64
+                if os.getenv('ARCHS') == "arm64":
+                    configure_args += ["-DCMAKE_CXX_COMPILER_TARGET=arm64-apple-macos11",
+                                    "-DCMAKE_SYSTEM_NAME=Darwin",
+                                    "-DCMAKE_SYSTEM_PROCESSOR=ARM64"]
+                else: # X64 arch
+                    llvmpath = subprocess.check_output(["brew", "--prefix", "llvm"]).decode().strip()
+                    configure_args += [
+                            f"-DCMAKE_CXX_COMPILER={llvmpath}/bin/clang++",
+                            f"-DCMAKE_LINKER={llvmpath}/bin/lld",
+                    ] # Use clang instead of appleclang
+                # Disable OpenMP in M1 Macs
+                if os.environ.get("USE_OMP"):
+                    configure_args += []
+                else:
+                    configure_args += ["-DKokkos_ENABLE_OPENMP=OFF"]
+            elif platform.system() == "Windows":
+                configure_args += ["-DKokkos_ENABLE_OPENMP=OFF"] # only build with Clang under Windows
+            else:
+                if platform.system() != "Linux":
+                    raise RuntimeError(f"Unsupported '{platform.system()}' platform")
 
             if not Path(self.build_temp).exists():
                 os.makedirs(self.build_temp)
