@@ -5,12 +5,16 @@
 ### Breaking changes
 
 ### Improvements
+ * Add tests for MacOS.
+  [(#3)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/3)
 
 ### Documentation
 
 ### Bug fixes
 
 ### Contributors
+
+Amintor Dusko
 
 This release contains contributions from (in alphabetical order):
 
