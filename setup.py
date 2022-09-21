@@ -76,8 +76,15 @@ if not os.getenv("READTHEDOCS"):
                 *(self.cmake_defines),
             ]
 
-            if platform.system() != "Windows":
-                configure_args += ["-GNinja", f"-DCMAKE_MAKE_PROGRAM={ninja_path}"]
+            if platform.system() == "Windows":
+                configure_args += [
+                    "-T clangcl",
+                ]
+            else:
+                configure_args += [
+                    "-GNinja",
+                    f"-DCMAKE_MAKE_PROGRAM={ninja_path}",
+                ]
 
             build_args = []
             if os.getenv("BACKEND") and not self.backend:
@@ -110,9 +117,9 @@ if not os.getenv("READTHEDOCS"):
                 if os.environ.get("USE_OMP"):
                     configure_args += []
                 else:
-                    configure_args += ["-DENABLE_OPENMP=OFF"]
+                    configure_args += ["-DKokkos_ENABLE_OPENMP=OFF"]
             elif platform.system() == "Windows":
-                configure_args += ["-T clangcl"] # only build with Clang under Windows
+                configure_args += ["-DKokkos_ENABLE_OPENMP=OFF"]
             else:
                 if platform.system() != "Linux":
                     raise RuntimeError(f"Unsupported '{platform.system()}' platform")

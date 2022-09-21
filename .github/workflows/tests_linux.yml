@@ -81,9 +81,7 @@ jobs:
       - name: Install lightning.kokkos device
         run: |
           cd main
-          python setup.py build_ext -DKokkos_ENABLE_OPENMP=ON -DCMAKE_CXX_COMPILER="$(which g++-${{ env.GCC_VERSION }})"
-          python setup.py bdist_wheel
-          pip install ./dist/PennyLane*.whl --force-reinstall
+          CXX=$(which g++-10) BACKEND="OPENMP" python -m pip install -e . --verbose
       - name: Run PennyLane-Lightning unit tests
         run: |
           cd main/
@@ -156,9 +154,7 @@ jobs:
       - name: Install lightning.kokkos device
         run: |
           cd main
-          python setup.py build_ext -DKokkos_ENABLE_THREADS=ON -DCMAKE_CXX_COMPILER="$(which g++-${{ env.GCC_VERSION }})"
-          python setup.py bdist_wheel
-          pip install ./dist/PennyLane*.whl --force-reinstall
+          CXX=$(which g++-10) BACKEND="THREADS" python -m pip install -e . --verbose
       - name: Run PennyLane-Lightning unit tests
         run: |
           cd main/
@@ -231,9 +227,7 @@ jobs:
       - name: Install lightning.kokkos device
         run: |
           cd main
-          python setup.py build_ext -DCMAKE_CXX_COMPILER="$(which g++-${{ env.GCC_VERSION }})"
-          python setup.py bdist_wheel
-          pip install ./dist/PennyLane*.whl --force-reinstall
+          CXX=$(which g++-10) BACKEND="SERIAL" python -m pip install -e . --verbose
       - name: Run PennyLane-Lightning unit tests
         run: |
           cd main/

@@ -9,6 +9,8 @@ set(LOGO [=[
 ]=])
 message(${LOGO})
 
+set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15" CACHE STRING "Minimum OS X deployment version")
+
 project(pennylane_lightning_kokkos
     DESCRIPTION "Lightning-Kokkos bindings for PennyLane. Backed by the Kokkos library."
     LANGUAGES C CXX
@@ -83,7 +85,11 @@ endif()
 
 if(PLKOKKOS_ENABLE_SANITIZER)
     add_compile_options(-fsanitize=address)
-    add_link_options(-fsanitize=address -static-libasan)
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+        add_link_options(-fsanitize=address)
+    else ()
+        add_link_options(-fsanitize=address -static-libasan)
+    endif()
     set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
     set (CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
 ENDIF()
@@ -159,7 +165,7 @@ FetchContent_Declare(
     GIT_TAG        v2.9.1
 )
 FetchContent_MakeAvailable(pybind11)
-  
+
 find_package (Python COMPONENTS Interpreter Development)
     if(Kokkos_ENABLE_CUDA)
         add_library(lightning_kokkos_qubit_ops MODULE "pennylane_lightning_kokkos/src/bindings/Bindings.cpp")
@@ -178,11 +184,11 @@ endif()
 
 
 if(PLKOKKOS_ENABLE_WARNINGS)
-    target_compile_options(pennylane_lightning_kokkos INTERFACE 
+    target_compile_options(pennylane_lightning_kokkos INTERFACE
         $<$<COMPILE_LANGUAGE:CXX>:-Wall;-Wextra;-Werror;>
     )
     if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-        target_compile_options(pennylane_lightning_kokkos INTERFACE 
+        target_compile_options(pennylane_lightning_kokkos INTERFACE
             $<$<COMPILE_LANGUAGE:CXX>:-Wno-error=volatile;-Wno-error=deprecated-declarations>
         )
     endif()
