@@ -8,6 +8,9 @@
  * Add tests for MacOS.
   [(#3)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/3)
 
+ * Upgrade Kokkos Core to 3.7.00.
+  [(#3)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/7)
+
 ### Documentation
 
 ### Bug fixes
