@@ -104,7 +104,7 @@ option(Kokkos_ENABLE_DEPRECATION_WARNINGS "Enable Kokkos deprecation warnings" O
 include(FetchContent)
 FetchContent_Declare(kokkos
   GIT_REPOSITORY https://github.com/kokkos/kokkos.git
-  GIT_TAG        3.6.00
+  GIT_TAG        3.7.00
 )
 FetchContent_MakeAvailable(kokkos)
 get_target_property(PLKOKKOS_KOKKOS_INC_DIR kokkos INTERFACE_INCLUDE_DIRECTORIES)
