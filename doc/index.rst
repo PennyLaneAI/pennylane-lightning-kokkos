@@ -24,7 +24,6 @@ PennyLane-Lightning-Kokkos provides the following device:
 
 .. toctree::
    :maxdepth: 2
-   :caption: PennyLane-Lightning-Kokkos
    :titlesonly:
    :hidden:
 
