@@ -12,7 +12,7 @@ Devices
 
 PennyLane-Lightning-Kokkos provides the following device:
 
-.. devicegalleryitem::
+.. title-card::
     :name: 'lightning.kokkos'
     :description: A heterogeneous-backend state-vector simulator with Kokkos library support.
     :link: devices.html
