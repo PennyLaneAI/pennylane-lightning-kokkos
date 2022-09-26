@@ -171,7 +171,7 @@ html_static_path = ["_static"]
 
 
 # -- Xanadu theme ---------------------------------------------------------
-html_theme = "xanadu"
+html_theme = "pennylane"
 html_theme_path = ["."]
 
 # xanadu theme options (see theme.conf for more information)
