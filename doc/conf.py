@@ -177,6 +177,7 @@ html_theme_path = ["."]
 # xanadu theme options (see theme.conf for more information)
 html_theme_options = {
     "navbar_name": "Lightning Kokkos",
+    "navbar_active_link": 3,
     "extra_copyrights": [
         "TensorFlow, the TensorFlow logo, and any related marks are trademarks "
         "of Google Inc."
