@@ -811,6 +811,31 @@ template <class Precision> class StateVectorKokkos {
         }
     }
 
+
+   /**
+     * @brief Calculate the expectation value of a matrix. Typically this
+     * this function will be used for dense hamiltonians. 
+     *
+     * @param obsName observable name
+     * @param wires wires the observable acts on
+     * @param params parameters for the observable
+     * @param gate_matrix optional matrix
+     */
+    auto getExpectationValue(
+        const std::vector<size_t> &wires,
+        const std::vector<Kokkos::complex<Precision>> &gate_matrix) {
+
+      auto && par =  std::vector<Precision>{0.0};
+      KokkosVector matrix("gate_matrix", gate_matrix.size());
+      Kokkos::deep_copy(
+			matrix, UnmanagedConstComplexHostView(gate_matrix.data(),
+							      gate_matrix.size()));
+      return getExpectationValueMultiQubitOp(matrix, wires, par);
+    }
+
+
+  
+
     /**
      * @brief Calculate expectation value with respect to identity observable on
      * specified wire. For normalised states this function will always return 1.
