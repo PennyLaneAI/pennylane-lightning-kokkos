@@ -210,12 +210,25 @@ class LightningKokkos(LightningQubit):
     def expval(self, observable, shot_range=None, bin_size=None):
         if observable.name in [
             "Projector",
-            "Hamiltonian",
-            "SparseHamiltonian",
         ]:
             self.syncD2H()
             return super().expval(observable, shot_range=shot_range, bin_size=bin_size)
 
+        if observable.name in ["SparseHamiltonian"]:
+            CSR_SparseHamiltonian = observable.sparse_matrix().tocsr()
+            return self._gpu_state.ExpectationValue(
+                CSR_SparseHamiltonian.indptr,
+                CSR_SparseHamiltonian.indices,
+                CSR_SparseHamiltonian.data,
+            )
+        
+        if observable.name in ["Hamiltonian"]:
+            device_wires = self.map_wires(observable.wires)
+            # Since we currently offload hermitian observables to default.qubit, we can assume the matrix exists
+            return self._gpu_state.ExpectationValue(
+                device_wires, qml.matrix(observable).ravel(order="C")
+            )
+        
         if self.shots is not None:
             # estimate the expectation value
             samples = self.sample(observable, shot_range=shot_range, bin_size=bin_size)
