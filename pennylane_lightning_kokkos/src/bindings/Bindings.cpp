@@ -437,6 +437,33 @@ void StateVectorKokkos_class_bindings(py::module &m) {
                     obs_concat, wires, std::vector<ParamT>{}, conv_matrix);
             },
             "Calculate the expectation value of the given observable.")
+
+        .def("GenerateSamples",
+             [](StateVectorKokkos<PrecisionT> &sv, size_t num_wires,
+                size_t num_shots) {
+                 auto result_d = sv.generate_samples(num_shots);
+
+                 auto result_h = Kokkos::create_mirror_view_and_copy(
+                     Kokkos::HostSpace{}, result_d);
+
+                 Kokkos::deep_copy(result_h, result_d);
+
+                 size_t *result = static_cast<size_t *>(result_h.data());
+
+                 const size_t ndim = 2;
+                 const std::vector<size_t> shape{num_shots, num_wires};
+                 constexpr auto sz = sizeof(size_t);
+                 const std::vector<size_t> strides{sz * num_wires, sz};
+                 // return 2-D NumPy array
+                 return py::array(py::buffer_info(
+                     result, /* data as contiguous array  */
+                     sz,     /* size of one scalar        */
+                     py::format_descriptor<size_t>::format(), /* data type */
+                     ndim,   /* number of dimensions      */
+                     shape,  /* shape of the matrix       */
+                     strides /* strides for each axis     */
+                     ));
+             })
         .def(
             "DeviceToHost",
             [](StateVectorKokkos<PrecisionT> &gpu_sv, np_arr_c &cpu_sv) {
