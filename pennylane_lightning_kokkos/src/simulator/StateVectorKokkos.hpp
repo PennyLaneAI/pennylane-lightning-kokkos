@@ -499,7 +499,7 @@ template <class Precision> class StateVectorKokkos {
 
         Kokkos::deep_copy(samples_h, samples);
 
-        data_.reset(); // fix data_ deallocation issue
+        //data_.reset(); // fix data_ deallocation issue
 
         return samples_h;
     }
