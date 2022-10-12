@@ -62,6 +62,7 @@ template <class Precision> class StateVectorKokkos {
   public:
     using KokkosExecSpace = Kokkos::DefaultExecutionSpace;
     using KokkosVector = Kokkos::View<Kokkos::complex<Precision> *>;
+    using KokkosSizeTVector = Kokkos::View<size_t *>;
     using KokkosRangePolicy = Kokkos::RangePolicy<KokkosExecSpace>;
     using UnmanagedComplexHostView =
         Kokkos::View<Kokkos::complex<Precision> *, Kokkos::HostSpace,
@@ -69,7 +70,11 @@ template <class Precision> class StateVectorKokkos {
     using UnmanagedConstComplexHostView =
         Kokkos::View<const Kokkos::complex<Precision> *, Kokkos::HostSpace,
                      Kokkos::MemoryTraits<Kokkos::Unmanaged>>;
+    using UnmanagedConstSizeTHostView =
+        Kokkos::View<const size_t*, Kokkos::HostSpace,
+                     Kokkos::MemoryTraits<Kokkos::Unmanaged>>;
 
+  
     StateVectorKokkos() = delete;
     StateVectorKokkos(size_t num_qubits)
         : gates_{
@@ -833,6 +838,39 @@ template <class Precision> class StateVectorKokkos {
       return getExpectationValueMultiQubitOp(matrix, wires, par);
     }
 
+
+
+   /**
+     * @brief Calculate the expectation value of a sparse hamiltonian in CSR format. Typically this
+     * this function will be used for dense hamiltonians. 
+     *
+     * @param obsName observable name
+     * @param wires wires the observable acts on
+     * @param params parameters for the observable
+     * @param gate_matrix optional matrix
+     */
+    auto getExpectationValue(
+			     const std::vector<Kokkos::complex<Precision>> &data,
+			     const std::vector<size_t> &indices,
+			     const std::vector<size_t> &index_ptr
+			     ) {
+
+      KokkosSizeTVector kok_indices("indices",indices.size());
+      KokkosSizeTVector kok_indptr("index_ptr",index_ptr.size());
+      KokkosVector kok_data("data", data.size());      
+
+      Kokkos::deep_copy(
+			kok_data, UnmanagedConstComplexHostView(data.data(),
+								data.size()));
+      Kokkos::deep_copy(
+			kok_indices, UnmanagedConstSizeTHostView(indices.data(),
+								 indices.size()));
+      Kokkos::deep_copy(
+			kok_indptr, UnmanagedConstSizeTHostView(indptr.data(),
+								indptr.size()));
+
+      return getExpectationValueSparseFunctor(*data_,kok_data,kok_indices,kok_indptr);
+    }
 
   
 
