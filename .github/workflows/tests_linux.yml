@@ -7,8 +7,8 @@ on:
 
 env:
   TF_VERSION: 2.6.0
-  TORCH_VERSION: 1.10.0+cpu
-  GCC_VERSION: 10
+  TORCH_VERSION: 1.11.0+cpu
+  GCC_VERSION: 11
   COVERAGE_FLAGS: "--cov=pennylane_lightning_kokkos --cov-report=term-missing --cov-report=xml:./coverage.xml --no-flaky-report -p no:warnings --tb=native"
   OMP_NUM_THREADS: "2"
 
@@ -35,7 +35,7 @@ jobs:
           fetch-depth: 2 # for codecov
 
       - name: Install dependencies
-        run: sudo apt-get update && sudo apt-get -y -q install cmake gcc-10 g++-10 gcovr lcov
+        run: sudo apt-get update && sudo apt-get -y -q install cmake gcc-11 g++-11 gcovr lcov
 
       - name: Build and run unit tests
         run: |
@@ -65,7 +65,7 @@ jobs:
           python-version: '3.7'
 
       - name: Install dependencies
-        run: sudo apt-get update && sudo apt-get -y -q install cmake gcc-10 g++-10
+        run: sudo apt-get update && sudo apt-get -y -q install cmake gcc-11 g++-11
 
       - name: Get required Python packages
         run: |
@@ -81,7 +81,7 @@ jobs:
       - name: Install lightning.kokkos device
         run: |
           cd main
-          CXX=$(which g++-10) BACKEND="OPENMP" python -m pip install -e . --verbose
+          CXX=$(which g++-11) BACKEND="OPENMP" python -m pip install -e . --verbose
       - name: Run PennyLane-Lightning unit tests
         run: |
           cd main/
@@ -110,7 +110,7 @@ jobs:
           fetch-depth: 2 # for codecov
 
       - name: Install dependencies
-        run: sudo apt-get update && sudo apt-get -y -q install cmake gcc-10 g++-10 gcovr lcov
+        run: sudo apt-get update && sudo apt-get -y -q install cmake gcc-11 g++-11 gcovr lcov
 
       - name: Build and run unit tests
         run: |
@@ -138,7 +138,7 @@ jobs:
           python-version: '3.7'
 
       - name: Install dependencies
-        run: sudo apt-get update && sudo apt-get -y -q install cmake gcc-10 g++-10
+        run: sudo apt-get update && sudo apt-get -y -q install cmake gcc-11 g++-11
 
       - name: Get required Python packages
         run: |
@@ -154,7 +154,7 @@ jobs:
       - name: Install lightning.kokkos device
         run: |
           cd main
-          CXX=$(which g++-10) BACKEND="THREADS" python -m pip install -e . --verbose
+          CXX=$(which g++-11) BACKEND="THREADS" python -m pip install -e . --verbose
       - name: Run PennyLane-Lightning unit tests
         run: |
           cd main/
@@ -183,7 +183,7 @@ jobs:
           fetch-depth: 2 # for codecov
 
       - name: Install dependencies
-        run: sudo apt-get update && sudo apt-get -y -q install cmake gcc-10 g++-10 gcovr lcov
+        run: sudo apt-get update && sudo apt-get -y -q install cmake gcc-11 g++-11 gcovr lcov
 
       - name: Build and run unit tests
         run: |
@@ -211,7 +211,7 @@ jobs:
           python-version: '3.7'
 
       - name: Install dependencies
-        run: sudo apt-get update && sudo apt-get -y -q install cmake gcc-10 g++-10
+        run: sudo apt-get update && sudo apt-get -y -q install cmake gcc-11 g++-11
 
       - name: Get required Python packages
         run: |
@@ -227,7 +227,7 @@ jobs:
       - name: Install lightning.kokkos device
         run: |
           cd main
-          CXX=$(which g++-10) BACKEND="SERIAL" python -m pip install -e . --verbose
+          CXX=$(which g++-11) BACKEND="SERIAL" python -m pip install -e . --verbose
       - name: Run PennyLane-Lightning unit tests
         run: |
           cd main/
