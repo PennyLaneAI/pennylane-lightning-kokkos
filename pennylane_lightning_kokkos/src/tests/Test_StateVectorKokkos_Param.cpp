@@ -1321,8 +1321,8 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyDoubleExcitationPlus",
     }
 }
 
-
-TEMPLATE_TEST_CASE("Sample", "[StateVectorKokkosManaged_Param]", float, double) {
+TEMPLATE_TEST_CASE("Sample", "[StateVectorKokkosManaged_Param]", float,
+                   double) {
 
     constexpr uint32_t twos[] = {
         1U << 0U,  1U << 1U,  1U << 2U,  1U << 3U,  1U << 4U,  1U << 5U,
@@ -1363,12 +1363,7 @@ TEMPLATE_TEST_CASE("Sample", "[StateVectorKokkosManaged_Param]", float, double) 
     size_t N = std::pow(2, num_qubits);
     size_t num_samples = 100000;
 
-    auto samples_d = measure_sv.generate_samples(num_samples);
-
-    auto samples_h =
-        Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, samples_d);
-
-    Kokkos::deep_copy(samples_h, samples_d);
+    auto samples_h = measure_sv.generate_samples(num_samples);
 
     size_t *samples = static_cast<size_t *>(samples_h.data());
 

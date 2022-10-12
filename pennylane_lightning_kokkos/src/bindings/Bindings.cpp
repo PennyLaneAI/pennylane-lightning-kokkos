@@ -441,12 +441,7 @@ void StateVectorKokkos_class_bindings(py::module &m) {
         .def("GenerateSamples",
              [](StateVectorKokkos<PrecisionT> &sv, size_t num_wires,
                 size_t num_shots) {
-                 auto result_d = sv.generate_samples(num_shots);
-
-                 auto result_h = Kokkos::create_mirror_view_and_copy(
-                     Kokkos::HostSpace{}, result_d);
-
-                 Kokkos::deep_copy(result_h, result_d);
+                 auto result_h = sv.generate_samples(num_shots);
 
                  size_t *result = static_cast<size_t *>(result_h.data());
 

@@ -28,6 +28,7 @@
 #include "Error.hpp"
 #include "ExpValFunctors.hpp"
 #include "GateFunctors.hpp"
+#include "MeasuresFunctors.hpp"
 
 /// @cond DEV
 namespace {
@@ -457,9 +458,9 @@ template <class Precision> class StateVectorKokkos {
      * number between 0 and num_samples-1.
      */
 
-    auto generate_samples(size_t num_samples)->Kokkos::View<size_t *> {
+    auto generate_samples(size_t num_samples) -> Kokkos::View<size_t *> {
 
-        const size_t num_qubits = getNumQubits(); // no need for dec
+        const size_t num_qubits = getNumQubits();
 
         const size_t N = getLength();
 
@@ -468,75 +469,39 @@ template <class Precision> class StateVectorKokkos {
 
         Kokkos::View<Kokkos::complex<Precision> *> arr_data = getData();
 
-        Kokkos::View<Precision *> probabilities("probabilities", N);
-
-        Kokkos::View<Precision *> cld("cld", N);
+        Kokkos::View<Precision *> cdf("cdf", N);
 
         Kokkos::View<size_t *> samples("num_samples", num_samples * num_qubits);
 
-        Kokkos::parallel_for(
-            Kokkos::RangePolicy<KokkosExecSpace>(0, N),
-            KOKKOS_LAMBDA(const size_t &i) {
-                probabilities[i] = imag(arr_data[i]) * imag(arr_data[i]) +
-                                   real(arr_data[i]) * real(arr_data[i]);
-            });
-
+        // Compute local CDF: each thread compute a chunk of local CDF
         Kokkos::parallel_for(
             Kokkos::RangePolicy<KokkosExecSpace>(0, Nsqrt),
-            KOKKOS_LAMBDA(const size_t &i) {
-                for (size_t j = 0; j < Nsqrt; j++) {
-                    size_t idx = j + i * Nsqrt;
-                    if (j == 0)
-                        cld[idx] = probabilities[idx];
-                    else
-                        cld[idx] = probabilities[idx] + cld[idx - 1];
-                }
-            });
+            getLocalCDFFunctor<Precision>(arr_data, cdf, Nsqrt));
 
+        // Convert local CDF to global CDF: each thread compute one element
+        // of a chunk
         for (size_t i = 1; i < Nsqrt; i++) {
             Kokkos::parallel_for(
                 Kokkos::RangePolicy<KokkosExecSpace>(0, Nsqrt),
-                KOKKOS_LAMBDA(const size_t &j) {
-                    size_t idx = i * Nsqrt + j;
-                    size_t idx0 = i * Nsqrt - 1;
-                    if (idx < N)
-                        cld[idx] += cld[idx0];
-                });
+                getGlobalCDFFunctor<Precision>(cdf, i, Nsqrt, N));
         }
 
+        // Sampling process
         Kokkos::Random_XorShift64_Pool<> rand_pool(5374857);
 
         Kokkos::parallel_for(
             Kokkos::RangePolicy<KokkosExecSpace>(0, num_samples),
-            KOKKOS_LAMBDA(const size_t &i) {
-                Kokkos::Random_XorShift64_Pool<>::generator_type rand_gen =
-                    rand_pool.get_state();
+            Sampler<Precision, Kokkos::Random_XorShift64_Pool>(
+                samples, cdf, rand_pool, num_qubits, N));
 
-                double U = rand_gen.drand(0.0, 1.0);
+        auto samples_h =
+            Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, samples);
 
-                size_t idx;
+        Kokkos::deep_copy(samples_h, samples);
 
-                if (U <= cld[0]) {
-                    idx = 0;
-                } else {
-                    size_t lo = 0, hi = N - 1;
-                    size_t mid;
-                    while (hi - lo > 1) {
-                        mid = (hi + lo) / 2;
-                        if (cld[mid] < U)
-                            lo = mid;
-                        else
-                            hi = mid;
-                    }
-                    idx = hi;
-                }
-                for (size_t j = 0; j < num_qubits; j++) {
-                    samples[i * num_qubits + (num_qubits - 1 - j)] =
-                        (idx >> j) & 1U;
-                }
-                rand_pool.free_state(rand_gen);
-            });
-        return samples;
+        data_.reset(); // fix data_ deallocation issue
+
+        return samples_h;
     }
 
     /**
