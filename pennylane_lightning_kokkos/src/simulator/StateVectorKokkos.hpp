@@ -476,7 +476,7 @@ template <class Precision> class StateVectorKokkos {
         // Compute local CDF: each thread compute a chunk of local CDF
         Kokkos::parallel_for(
             Kokkos::RangePolicy<KokkosExecSpace>(0, Nsqrt),
-            getLocalCDFFunctor<Precision>(arr_data, cdf, Nsqrt));
+            getLocalCDFFunctor<Precision>(arr_data, cdf, Nsqrt, N));
 
         // Convert local CDF to global CDF: each thread compute one element
         // of a chunk
@@ -499,7 +499,7 @@ template <class Precision> class StateVectorKokkos {
 
         Kokkos::deep_copy(samples_h, samples);
 
-        //data_.reset(); // fix data_ deallocation issue
+        data_.reset(); // fix data_ deallocation issue
 
         return samples_h;
     }

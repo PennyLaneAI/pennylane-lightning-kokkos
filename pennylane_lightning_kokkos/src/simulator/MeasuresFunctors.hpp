@@ -18,12 +18,15 @@ template <class Precision> struct getLocalCDFFunctor {
     Kokkos::View<Kokkos::complex<Precision> *> arr;
     Kokkos::View<Precision *> cdf;
     size_t Nsqrt;
+    size_t N;
 
     getLocalCDFFunctor(Kokkos::View<Kokkos::complex<Precision> *> arr_,
-                       Kokkos::View<Precision *> cdf_, const size_t Nsqrt_) {
+                       Kokkos::View<Precision *> cdf_, const size_t Nsqrt_,
+                       const size_t N_) {
         arr = arr_;
         cdf = cdf_;
         Nsqrt = Nsqrt_;
+        N = N_;
     }
 
     KOKKOS_INLINE_FUNCTION
@@ -34,7 +37,7 @@ template <class Precision> struct getLocalCDFFunctor {
             if (i == 0)
                 cdf[idx] = imag(arr[idx]) * imag(arr[idx]) +
                            real(arr[idx]) * real(arr[idx]);
-            else
+            else if (i < N)
                 cdf[idx] = imag(arr[idx]) * imag(arr[idx]) +
                            real(arr[idx]) * real(arr[idx]) + cdf[idx - 1];
         }
