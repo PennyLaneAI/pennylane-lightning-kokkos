@@ -478,6 +478,7 @@ template <class Precision> class StateVectorKokkos {
             Kokkos::RangePolicy<KokkosExecSpace>(0, Nsqrt),
             getLocalCDFFunctor<Precision>(arr_data, cdf, Nsqrt, N));
 
+	Kokkos::fence();
         // Convert local CDF to global CDF: each thread compute one element
         // of a chunk
         for (size_t i = 1; i < Nsqrt; i++) {
@@ -486,6 +487,7 @@ template <class Precision> class StateVectorKokkos {
                 getGlobalCDFFunctor<Precision>(cdf, i, Nsqrt, N));
         }
 
+	Kokkos::fence();
         // Sampling process
         Kokkos::Random_XorShift64_Pool<> rand_pool(5374857);
 
@@ -494,6 +496,7 @@ template <class Precision> class StateVectorKokkos {
             Sampler<Precision, Kokkos::Random_XorShift64_Pool>(
                 samples, cdf, rand_pool, num_qubits, N));
 
+	Kokkos::fence();
         auto samples_h =
             Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, samples);
 
