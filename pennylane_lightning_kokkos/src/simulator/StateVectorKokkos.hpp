@@ -467,7 +467,81 @@ template <class Precision> class StateVectorKokkos {
         const size_t Nsqrt =
             static_cast<size_t>(std::ceil(std::sqrt(static_cast<double>(N))));
 
-        Kokkos::View<Kokkos::complex<Precision> *> arr_data = getData();
+	Kokkos::View<Kokkos::complex<Precision> *> arr_data = getData();
+
+        Kokkos::View<Precision *> probabilities("probabilities", N);
+
+        Kokkos::View<Precision *> cld("cld", N);
+
+        Kokkos::View<size_t *> samples("num_samples", num_samples * num_qubits);
+
+        Kokkos::parallel_for(
+            Kokkos::RangePolicy<KokkosExecSpace>(0, N),
+            KOKKOS_LAMBDA(const size_t &i) {
+                probabilities[i] = imag(arr_data[i]) * imag(arr_data[i]) +
+                                   real(arr_data[i]) * real(arr_data[i]);
+            });
+
+        Kokkos::parallel_for(
+            Kokkos::RangePolicy<KokkosExecSpace>(0, Nsqrt),
+                    KOKKOS_LAMBDA(const size_t &i) {
+                for (size_t j = 0; j < Nsqrt; j++) {
+                    size_t idx = j + i * Nsqrt;
+                    if(idx<N)
+		    {
+		    	if (j == 0)
+                        	cld[idx] = probabilities[idx];
+                    	else
+                        	cld[idx] = probabilities[idx] + cld[idx - 1];
+		    }
+                }
+            });
+
+        for (size_t i = 1; i < Nsqrt; i++) {
+		            Kokkos::parallel_for(
+                Kokkos::RangePolicy<KokkosExecSpace>(0, Nsqrt),
+                KOKKOS_LAMBDA(const size_t &j) {
+                    size_t idx = i * Nsqrt + j;
+                    size_t idx0 = i * Nsqrt - 1;
+                    if (idx < N)
+                        cld[idx] += cld[idx0];
+                });
+        }
+
+        Kokkos::Random_XorShift64_Pool<> rand_pool(5374857);
+
+        Kokkos::parallel_for(
+            Kokkos::RangePolicy<KokkosExecSpace>(0, num_samples),
+            KOKKOS_LAMBDA(const size_t &i) {
+                Kokkos::Random_XorShift64_Pool<>::generator_type rand_gen =
+                    rand_pool.get_state();
+
+                double U = rand_gen.drand(0.0, 1.0);
+
+                size_t idx;
+
+                if (U <= cld[0]) {
+                    idx = 0;
+                } else {                    size_t lo = 0, hi = N - 1;
+                    size_t mid;
+                    while (hi - lo > 1) {
+                        mid = (hi + lo) / 2;
+                        if (cld[mid] < U)
+                            lo = mid;
+                        else
+                            hi = mid;
+                    }
+                    idx = hi;
+                }
+                for (size_t j = 0; j < num_qubits; j++) {
+                    samples[i * num_qubits + (num_qubits - 1 - j)] =
+                        (idx >> j) & 1U;
+                }
+                rand_pool.free_state(rand_gen);
+            });
+
+	/*
+	Kokkos::View<Kokkos::complex<Precision> *> arr_data = getData();
 
         Kokkos::View<Precision *> cdf("cdf", N);
 
@@ -495,8 +569,9 @@ template <class Precision> class StateVectorKokkos {
             Kokkos::RangePolicy<KokkosExecSpace>(0, num_samples),
             Sampler<Precision, Kokkos::Random_XorShift64_Pool>(
                 samples, cdf, rand_pool, num_qubits, N));
+	*/
 
-	Kokkos::fence();
+	//Kokkos::fence();
         auto samples_h =
             Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, samples);
 
