@@ -30,7 +30,7 @@ template <class Precision> struct getLocalCDFFunctor {
     }
 
     KOKKOS_INLINE_FUNCTION
-    void operator()(const std::size_t k) const {
+    void operator()(const size_t k) const {
 
         for (size_t i = 0; i < Nsqrt; i++) {
             size_t idx = i + k * Nsqrt;
@@ -51,8 +51,8 @@ template <class Precision> struct getGlobalCDFFunctor {
     size_t Nsqrt;
     size_t N;
 
-    getGlobalCDFFunctor(Kokkos::View<Precision *> cdf_, const std::size_t i_,
-                        const std::size_t Nsqrt_, const std::size_t N_) {
+    getGlobalCDFFunctor(Kokkos::View<Precision *> cdf_, size_t i_,
+                        const size_t Nsqrt_, const size_t N_) {
         cdf = cdf_;
         i = i_;
         Nsqrt = Nsqrt_;
@@ -60,7 +60,7 @@ template <class Precision> struct getGlobalCDFFunctor {
     }
 
     KOKKOS_INLINE_FUNCTION
-    void operator()(const std::size_t k) const {
+    void operator()(const size_t k) const {
 
         size_t idx = i * Nsqrt + k;
         size_t idx0 = i * Nsqrt - 1;
@@ -95,7 +95,7 @@ struct Sampler {
     }
 
     KOKKOS_INLINE_FUNCTION
-    void operator()(const std::size_t k) const {
+    void operator()(const size_t k) const {
         // Get a random number state from the pool for the active thread
         typename GeneratorPool<ExecutionSpace>::generator_type rand_gen =
             rand_pool.get_state();
