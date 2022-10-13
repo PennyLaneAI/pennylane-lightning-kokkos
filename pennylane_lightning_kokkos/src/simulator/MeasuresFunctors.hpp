@@ -34,12 +34,13 @@ template <class Precision> struct getLocalCDFFunctor {
 
         for (size_t i = 0; i < Nsqrt; i++) {
             size_t idx = i + k * Nsqrt;
+	    Precision REAL = arr[idx].real();
+	    Precision IMAG = arr[idx].imag();
+	    Precision NORM = REAL*REAL + IMAG*IMAG;
             if (i == 0)
-                cdf[idx] = imag(arr[idx]) * imag(arr[idx]) +
-                           real(arr[idx]) * real(arr[idx]);
+                cdf[idx] = NORM;
             else if (i < N)
-                cdf[idx] = imag(arr[idx]) * imag(arr[idx]) +
-                           real(arr[idx]) * real(arr[idx]) + cdf[idx - 1];
+                cdf[idx] = NORM + cdf[idx - 1];
         }
     }
 };
