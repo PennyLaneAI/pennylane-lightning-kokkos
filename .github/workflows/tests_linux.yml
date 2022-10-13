@@ -18,7 +18,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-20.04]
+        os: [ubuntu-22.04]
     steps:
       - name: Cancel previous runs
         uses: styfle/cancel-workflow-action@0.4.1
@@ -28,7 +28,7 @@ jobs:
       - uses: actions/setup-python@v2
         name: Install Python
         with:
-          python-version: '3.10'
+          python-version: '3.7'
 
       - uses: actions/checkout@v2
         with:
@@ -50,7 +50,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-20.04]
+        os: [ubuntu-22.04]
 
     steps:
       - name: Checkout PennyLane-Lightning-Kokkos
@@ -62,7 +62,7 @@ jobs:
       - uses: actions/setup-python@v2
         name: Install Python
         with:
-          python-version: '3.10'
+          python-version: '3.7'
 
       - name: Install dependencies
         run: sudo apt-get update && sudo apt-get -y -q install cmake gcc-11 g++-11
@@ -93,7 +93,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-20.04]
+        os: [ubuntu-22.04]
     steps:
       - name: Cancel previous runs
         uses: styfle/cancel-workflow-action@0.4.1
@@ -103,7 +103,7 @@ jobs:
       - uses: actions/setup-python@v2
         name: Install Python
         with:
-          python-version: '3.10'
+          python-version: '3.7'
 
       - uses: actions/checkout@v2
         with:
@@ -123,7 +123,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-20.04]
+        os: [ubuntu-22.04]
 
     steps:
       - name: Checkout PennyLane-Lightning-Kokkos
@@ -135,7 +135,7 @@ jobs:
       - uses: actions/setup-python@v2
         name: Install Python
         with:
-          python-version: '3.10'
+          python-version: '3.7'
 
       - name: Install dependencies
         run: sudo apt-get update && sudo apt-get -y -q install cmake gcc-11 g++-11
@@ -166,7 +166,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-20.04]
+        os: [ubuntu-22.04]
     steps:
       - name: Cancel previous runs
         uses: styfle/cancel-workflow-action@0.4.1
@@ -176,7 +176,7 @@ jobs:
       - uses: actions/setup-python@v2
         name: Install Python
         with:
-          python-version: '3.10'
+          python-version: '3.7'
 
       - uses: actions/checkout@v2
         with:
@@ -196,7 +196,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-20.04]
+        os: [ubuntu-22.04]
 
     steps:
       - name: Checkout PennyLane-Lightning-Kokkos
@@ -208,7 +208,7 @@ jobs:
       - uses: actions/setup-python@v2
         name: Install Python
         with:
-          python-version: '3.10'
+          python-version: '3.7'
 
       - name: Install dependencies
         run: sudo apt-get update && sudo apt-get -y -q install cmake gcc-11 g++-11

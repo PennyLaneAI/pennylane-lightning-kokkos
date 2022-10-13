@@ -13,17 +13,37 @@ namespace KE = Kokkos::Experimental;
 namespace Pennylane {
 namespace Functors {
 
-template <class Precision> struct getLocalCDFFunctor {
+template <class Precision> struct getProbFunctor {
 
     Kokkos::View<Kokkos::complex<Precision> *> arr;
+    Kokkos::View<Precision *> probilities;
+
+    getProbFunctor(Kokkos::View<Kokkos::complex<Precision> *> arr_,
+                   Kokkos::View<Precision *> probilities_) {
+        arr = arr_;
+        probilities = probilities_;
+    }
+
+    KOKKOS_INLINE_FUNCTION
+    void operator()(const size_t k) const {
+        Precision REAL = arr[k].real();
+        Precision IMAG = arr[k].imag();
+        Precision NORM = REAL * REAL + IMAG * IMAG;
+        probilities[k] = NORM;
+    }
+};
+
+template <class Precision> struct getLocalCDFFunctor {
+
+    Kokkos::View<Precision *> probilities;
     Kokkos::View<Precision *> cdf;
     size_t Nsqrt;
     size_t N;
 
-    getLocalCDFFunctor(Kokkos::View<Kokkos::complex<Precision> *> arr_,
+    getLocalCDFFunctor(Kokkos::View<Precision *> probilities_,
                        Kokkos::View<Precision *> cdf_, const size_t Nsqrt_,
                        const size_t N_) {
-        arr = arr_;
+        probilities = probilities_;
         cdf = cdf_;
         Nsqrt = Nsqrt_;
         N = N_;
@@ -34,13 +54,10 @@ template <class Precision> struct getLocalCDFFunctor {
 
         for (size_t i = 0; i < Nsqrt; i++) {
             size_t idx = i + k * Nsqrt;
-	    Precision REAL = arr[idx].real();
-	    Precision IMAG = arr[idx].imag();
-	    Precision NORM = REAL*REAL + IMAG*IMAG;
             if (i == 0)
-                cdf[idx] = NORM;
+                cdf[idx] = probilities[idx];
             else if (i < N)
-                cdf[idx] = NORM + cdf[idx - 1];
+                cdf[idx] = probilities[idx] + cdf[idx - 1];
         }
     }
 };
