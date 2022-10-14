@@ -721,6 +721,33 @@ template <class Precision> class StateVectorKokkos {
         return indices;
     }
 
+    template <class Precision> struct generateBitPatterns {
+
+        Kokkos::View<Precision *> probilities;
+        Kokkos::View<Precision *> cdf;
+        size_t Nsqrt;
+        size_t N;
+
+        generateBitPatterns(Kokkos::View<Precision *> _,
+                            Kokkos::View<Precision *> cdf_, const size_t Nsqrt_,
+                            const size_t N_)
+            : probilities(probilities_), cdf(cdf_), Nsqrt(Nsqrt_), N(N_) {
+        }
+
+        KOKKOS_INLINE_FUNCTION
+        void operator()(const size_t k) const {
+
+            for (size_t i = 0; i < Nsqrt; i++) {
+                size_t idx = i + k * Nsqrt;
+                if (i == 0)
+                    cdf[idx] = probilities[idx];
+                else if (i < N)
+                    cdf[idx] = probilities[idx] + cdf[idx - 1];
+            }
+        }
+    };
+
+    /*
     auto generateBitPatterns(const std::vector<size_t> &qubitIndices,
                              size_t num_qubits) -> std::vector<size_t> {
 
@@ -741,6 +768,7 @@ template <class Precision> class StateVectorKokkos {
         }
         return indices;
     }
+    */
 
     /**
      * @brief Probabilities for a subset of the full system.
@@ -766,13 +794,16 @@ template <class Precision> class StateVectorKokkos {
 
         const size_t num_qubits = getNumQubits();
 
-        const Kokkos::vector<size_t> all_indices =
+        const Kokkos::vector<size_t *> all_indices =
             generateBitPatterns(sorted_wires, num_qubits);
 
-        const Kokkos::vector<size_t> all_offsets = generateBitPatterns(
-            getIndicesAfterExclusion(sorted_wires, num_qubits), num_qubits);
+        const Kokkos::vector<size_t *> IndicesAfterExclusion =
+            getIndicesAfterExclusion(sorted_wires, num_qubits);
 
-        std::vector<Precision> probabilities(all_indices.size(), 0);
+        const Kokkos::vector<size_t *> all_offsets =
+            generateBitPatterns(IndicesAfterExclusion, num_qubits);
+
+        Kokkos::vector<Precision *> probabilities(all_indices.size(), 0);
 
         size_t ind_probs = 0;
         for (size_t i0 = 0; i0 < all_indices.size(); i0++) {
@@ -787,10 +818,8 @@ template <class Precision> class StateVectorKokkos {
         // Transposing the probabilities tensor with the indices determined at
         // the beginning.
         if (wires != sorted_wires) {
-            // probabilities =
-            //     Util::transpose_state_tensor(probabilities,
-            //     sorted_ind_wires);
-            std::vector<fp_t> transposed_tensor(probabilities.size(), 0);
+            Kokkos::vector<Precision *> transposed_tensor(probabilities.size(),
+                                                          0);
             for (size_t ind = 0; ind < transposed_tensor.size(); ind++) {
                 size_t new_index = 0;
                 size_t index = ind;
