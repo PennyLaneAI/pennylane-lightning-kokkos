@@ -22,6 +22,7 @@ import pytest
 from pennylane import DeviceError
 from pennylane_lightning_kokkos import LightningKokkos
 
+
 class TestHamiltonianExpval:
     def test_hamiltionan_expectation(self, qubit_device_3_wires, tol):
 
@@ -73,6 +74,7 @@ class TestSparseExpval:
     def test_sparse_Pauli_words(self, cases, tol):
         """Test expval of some simple sparse Hamiltonian"""
         dev = LightningKokkos(wires=2, c_dtype=np.complex128)
+
         @qml.qnode(dev, diff_method="parameter-shift")
         def circuit():
             qml.RX(0.4, wires=[0])
@@ -104,6 +106,7 @@ class TestSparseExpval:
     def test_sparse_arbitrary(self, cases, tol):
         """Test expval of some simple sparse Hamiltonian"""
         dev = LightningKokkos(wires=2, c_dtype=np.complex128)
+
         @qml.qnode(dev, diff_method="parameter-shift")
         def circuit():
             qml.RX(0.4, wires=[0])
