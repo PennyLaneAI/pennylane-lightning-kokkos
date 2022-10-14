@@ -200,3 +200,91 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::getExpectationValueTwoQubitOp",
         }
     }
 }
+
+
+
+TEMPLATE_TEST_CASE("StateVectorKokkos::Hamiltonian_expval",
+                   "[StateVectorKokkos_Nonparam]", double) {
+  using cp_t = Kokkos::complex<TestType>;
+    const std::size_t num_qubits = 3;
+    SECTION("GetExpectionIdentity") {
+	StateVectorKokkos<TestType> kokkos_sv{num_qubits};
+        std::vector<size_t> wires{0, 1, 2};
+
+        kokkos_sv.applyHadamard({0}, false);
+        kokkos_sv.applyCNOT({0, 1}, false);
+        kokkos_sv.applyCNOT({1, 2}, false);
+
+        size_t matrix_dim = static_cast<size_t>(1U) << num_qubits;
+        std::vector<cp_t> matrix(matrix_dim * matrix_dim);
+
+        for (size_t i = 0; i < matrix.size(); i++) {
+            if (i % matrix_dim == i / matrix_dim)
+                matrix[i] = std::complex<TestType>(1, 0);
+            else
+                matrix[i] = std::complex<TestType>(0, 0);
+        }
+
+        auto results = kokkos_sv.getExpectationValue(wires, matrix);
+        cp_t expected(1, 0);
+        CHECK(real(expected) == Approx(results).epsilon(1e-7));
+    }
+
+    SECTION("GetExpectionRandomMatrix") {
+        using cp_t = Kokkos::complex<TestType>;
+        std::vector<cp_t> init_state{{0.0, 0.0}, {0.0, 0.1}, {0.1, 0.1},
+                                     {0.1, 0.2}, {0.2, 0.2}, {0.3, 0.3},
+                                     {0.3, 0.4}, {0.4, 0.5}};
+	StateVectorKokkos<TestType> kokkos_sv{init_state.data(), init_state.size()};
+        std::vector<size_t> wires{0, 1, 2};
+        std::vector<cp_t> matrix{
+            {0.5, 0.0},  {0.2, 0.5},  {0.2, -0.5}, {0.3, 0.0},  {0.2, -0.5},
+            {0.3, 0.0},  {0.2, -0.5}, {0.3, 0.0},  {0.2, -0.5}, {0.3, 0.0},
+            {0.2, -0.5}, {0.3, 0.0},  {0.2, -0.5}, {0.3, 0.0},  {0.2, -0.5},
+            {0.3, 0.0},  {0.5, 0.0},  {0.2, 0.5},  {0.2, -0.5}, {0.3, 0.0},
+            {0.2, -0.5}, {0.3, 0.0},  {0.2, -0.5}, {0.3, 0.0},  {0.2, -0.5},
+            {0.3, 0.0},  {0.2, -0.5}, {0.3, 0.0},  {0.2, -0.5}, {0.3, 0.0},
+            {0.2, -0.5}, {0.3, 0.0},  {0.5, 0.0},  {0.2, 0.5},  {0.2, -0.5},
+            {0.3, 0.0},  {0.2, -0.5}, {0.3, 0.0},  {0.2, -0.5}, {0.3, 0.0},
+            {0.2, -0.5}, {0.3, 0.0},  {0.2, -0.5}, {0.3, 0.0},  {0.2, -0.5},
+            {0.3, 0.0},  {0.2, -0.5}, {0.3, 0.0},  {0.5, 0.0},  {0.2, 0.5},
+            {0.2, -0.5}, {0.3, 0.0},  {0.2, -0.5}, {0.3, 0.0},  {0.2, -0.5},
+            {0.3, 0.0},  {0.2, -0.5}, {0.3, 0.0},  {0.2, -0.5}, {0.3, 0.0},
+            {0.2, -0.5}, {0.3, 0.0},  {0.2, -0.5}, {0.3, 0.0}};
+
+        auto results = kokkos_sv.getExpectationValue(wires, matrix);
+        cp_t expected(1.263000, -1.011000);
+
+        CHECK(real(expected) == Approx(results).epsilon(1e-7));
+        // CHECK(expected.imag() == Approx(results.y).epsilon(1e-7));
+    }
+}
+
+TEMPLATE_TEST_CASE("StateVectorKokkos::Hamiltonian_expval_Sparse",
+                   "[StateVectorKokkos_Nonparam]", float, double) {
+  using cp_t = Kokkos::complex<TestType>;
+    SECTION("GetExpectionCuSparse") {
+        std::vector<cp_t> init_state{{0.0, 0.0}, {0.0, 0.1}, {0.1, 0.1},
+                                     {0.1, 0.2}, {0.2, 0.2}, {0.3, 0.3},
+                                     {0.3, 0.4}, {0.4, 0.5}};
+	StateVectorKokkos<TestType> kokkos_sv{init_state.data(), init_state.size()};
+	
+	std::vector<size_t> index_ptr = {0, 2, 4, 6, 8, 10, 12, 14, 16};
+	std::vector<size_t> indices = {0, 3, 1, 2, 1, 2, 0, 3, 4, 7, 5, 6, 5, 6, 4, 7};
+	std::vector<Kokkos::complex<TestType>> values  = {
+            {1.0, 0.0},  {0.0, -1.0}, {1.0, 0.0}, {0.0, 1.0},
+            {0.0, -1.0}, {1.0, 0.0},  {0.0, 1.0}, {1.0, 0.0},
+            {1.0, 0.0},  {0.0, -1.0}, {1.0, 0.0}, {0.0, 1.0},
+            {0.0, -1.0}, {1.0, 0.0},  {0.0, 1.0}, {1.0, 0.0}};
+
+	auto result = kokkos_sv.getExpectationValue(
+						    values,
+						    indices,
+						    index_ptr
+						    );
+
+        TestType expected = 1;
+
+        CHECK(expected == Approx(result).epsilon(1e-7));
+    }
+}

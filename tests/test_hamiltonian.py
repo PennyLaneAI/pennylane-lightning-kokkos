@@ -25,7 +25,7 @@ from pennylane_lightning_kokkos import LightningKokkos
 class TestHamiltonianExpval:
     @pytest.fixture(params=[np.complex128])
     def gpu_dev(self, request):
-        return LightningGPU(wires=2, c_dtype=request.param)
+        return LightningKokkos(wires=2, c_dtype=request.param)
 
     @pytest.mark.parametrize(
         "obs, coeffs, res",

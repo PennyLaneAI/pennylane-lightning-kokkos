@@ -314,7 +314,7 @@ struct getExpectationValueMultiQubitOpFunctor {
 
 
 
-template <class Precision, bool inverse = false>
+template <class Precision>
 struct getExpectationValueSparseFunctor {
 
     using KokkosComplexVector = Kokkos::View<Kokkos::complex<Precision> *>;
@@ -340,7 +340,7 @@ struct getExpectationValueSparseFunctor {
 
     KOKKOS_INLINE_FUNCTION
     void operator()(const std::size_t row, Precision &expval) const {
-      for (size_tx j = indptr[row]; j < indptr[row+1]){
+      for (size_t j = indptr[row]; j < indptr[row+1]; j++){
 	expval += real(conj(arr[row])*data[j]*arr[indices[j]]);
       }
     }

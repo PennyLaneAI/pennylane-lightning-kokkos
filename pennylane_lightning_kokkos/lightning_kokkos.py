@@ -83,6 +83,8 @@ class LightningKokkos(LightningQubit):
         "PauliY",
         "PauliZ",
         "Hadamard",
+        "SparseHamiltonian",
+        "Hamiltonian",
         "Identity",
     }
 
@@ -216,7 +218,7 @@ class LightningKokkos(LightningQubit):
 
         if observable.name in ["SparseHamiltonian"]:
             CSR_SparseHamiltonian = observable.sparse_matrix().tocsr()
-            return self._gpu_state.ExpectationValue(
+            return self._kokkos_state.ExpectationValue(
                 CSR_SparseHamiltonian.indptr,
                 CSR_SparseHamiltonian.indices,
                 CSR_SparseHamiltonian.data,
@@ -225,7 +227,7 @@ class LightningKokkos(LightningQubit):
         if observable.name in ["Hamiltonian"]:
             device_wires = self.map_wires(observable.wires)
             # Since we currently offload hermitian observables to default.qubit, we can assume the matrix exists
-            return self._gpu_state.ExpectationValue(
+            return self._kokkos_state.ExpectationValue(
                 device_wires, qml.matrix(observable).ravel(order="C")
             )
         
