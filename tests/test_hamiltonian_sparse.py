@@ -22,11 +22,10 @@ import pytest
 from pennylane import DeviceError
 from pennylane_lightning_kokkos import LightningKokkos
 
-
 class TestHamiltonianExpval:
     def test_hamiltionan_expectation(self, qubit_device_3_wires, tol):
 
-        dev = qubit_device_3_wires
+        dev = LightningKokkos(wires=3, c_dtype=np.complex128)
         obs = qml.Identity(0) @ qml.PauliX(1) @ qml.PauliY(2)
 
         obs1 = qml.Identity(1)
@@ -60,11 +59,6 @@ class TestHamiltonianExpval:
 class TestSparseExpval:
     """Tests for the expval function"""
 
-    @pytest.fixture(params=[np.complex64, np.complex128])
-    def dev(self, request):
-        return LightningKokkos(wires=2, c_dtype=request.param)
-        # return qml.device("lightning.qubit", wires=2, c_dtype=request.param)
-
     @pytest.mark.parametrize(
         "cases",
         [
@@ -76,9 +70,9 @@ class TestSparseExpval:
             [qml.Identity(0) @ qml.PauliZ(1), 0.98006657784124170],
         ],
     )
-    def test_sparse_Pauli_words(self, cases, tol, dev):
+    def test_sparse_Pauli_words(self, cases, tol):
         """Test expval of some simple sparse Hamiltonian"""
-
+        dev = LightningKokkos(wires=2, c_dtype=np.complex128)
         @qml.qnode(dev, diff_method="parameter-shift")
         def circuit():
             qml.RX(0.4, wires=[0])
@@ -107,9 +101,9 @@ class TestSparseExpval:
             ],
         ],
     )
-    def test_sparse_arbitrary(self, cases, tol, dev):
+    def test_sparse_arbitrary(self, cases, tol):
         """Test expval of some simple sparse Hamiltonian"""
-
+        dev = LightningKokkos(wires=2, c_dtype=np.complex128)
         @qml.qnode(dev, diff_method="parameter-shift")
         def circuit():
             qml.RX(0.4, wires=[0])
