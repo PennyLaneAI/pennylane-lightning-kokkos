@@ -71,10 +71,9 @@ template <class Precision> class StateVectorKokkos {
         Kokkos::View<const Kokkos::complex<Precision> *, Kokkos::HostSpace,
                      Kokkos::MemoryTraits<Kokkos::Unmanaged>>;
     using UnmanagedConstSizeTHostView =
-        Kokkos::View<const size_t*, Kokkos::HostSpace,
+        Kokkos::View<const size_t *, Kokkos::HostSpace,
                      Kokkos::MemoryTraits<Kokkos::Unmanaged>>;
 
-  
     StateVectorKokkos() = delete;
     StateVectorKokkos(size_t num_qubits)
         : gates_{
@@ -816,10 +815,9 @@ template <class Precision> class StateVectorKokkos {
         }
     }
 
-
-   /**
+    /**
      * @brief Calculate the expectation value of a matrix. Typically this
-     * this function will be used for dense hamiltonians. 
+     * this function will be used for dense hamiltonians.
      *
      * @param obsName observable name
      * @param wires wires the observable acts on
@@ -830,63 +828,49 @@ template <class Precision> class StateVectorKokkos {
         const std::vector<size_t> &wires,
         const std::vector<Kokkos::complex<Precision>> &gate_matrix) {
 
-      auto && par =  std::vector<Precision>{0.0};
-      KokkosVector matrix("gate_matrix", gate_matrix.size());
-      Kokkos::deep_copy(
-			matrix, UnmanagedConstComplexHostView(gate_matrix.data(),
-							      gate_matrix.size()));
-      return getExpectationValueMultiQubitOp(matrix, wires, par);
+        auto &&par = std::vector<Precision>{0.0};
+        KokkosVector matrix("gate_matrix", gate_matrix.size());
+        Kokkos::deep_copy(matrix, UnmanagedConstComplexHostView(
+                                      gate_matrix.data(), gate_matrix.size()));
+        return getExpectationValueMultiQubitOp(matrix, wires, par);
     }
 
-
-
-   /**
-     * @brief Calculate the expectation value of a sparse hamiltonian in CSR format. Typically this
-     * this function will be used for dense hamiltonians. 
+    /**
+     * @brief Calculate the expectation value of a sparse hamiltonian in CSR
+     * format. Typically this this function will be used for dense hamiltonians.
      *
      * @param obsName observable name
      * @param wires wires the observable acts on
      * @param params parameters for the observable
      * @param gate_matrix optional matrix
      */
-    auto getExpectationValue(
-			     const std::vector<Kokkos::complex<Precision>> &data,
-			     const std::vector<size_t> &indices,
-			     const std::vector<size_t> &index_ptr
-			     ) {
+    auto
+    getExpectationValue(const std::vector<Kokkos::complex<Precision>> &data,
+                        const std::vector<size_t> &indices,
+                        const std::vector<size_t> &index_ptr) {
 
-      Precision expval = 0;
-      {
-      KokkosSizeTVector kok_indices("indices",indices.size());
-      KokkosSizeTVector kok_index_ptr("index_ptr",index_ptr.size());
-      KokkosVector kok_data("data", data.size());      
+        Precision expval = 0;
+        {
+            KokkosSizeTVector kok_indices("indices", indices.size());
+            KokkosSizeTVector kok_index_ptr("index_ptr", index_ptr.size());
+            KokkosVector kok_data("data", data.size());
 
-      Kokkos::deep_copy(
-			kok_data, UnmanagedConstComplexHostView(data.data(),
-								data.size()));
-      Kokkos::deep_copy(
-			kok_indices, UnmanagedConstSizeTHostView(indices.data(),
-								 indices.size()));
-      Kokkos::deep_copy(
-			kok_index_ptr, UnmanagedConstSizeTHostView(index_ptr.data(),
-								index_ptr.size()));
+            Kokkos::deep_copy(kok_data, UnmanagedConstComplexHostView(
+                                            data.data(), data.size()));
+            Kokkos::deep_copy(kok_indices, UnmanagedConstSizeTHostView(
+                                               indices.data(), indices.size()));
+            Kokkos::deep_copy(kok_index_ptr,
+                              UnmanagedConstSizeTHostView(index_ptr.data(),
+                                                          index_ptr.size()));
 
-
-           
-       Kokkos::parallel_reduce(
-			       index_ptr.size()-1,
-			       getExpectationValueSparseFunctor<Precision>(*data_,
-									   kok_data,
-									   kok_indices,
-									   kok_index_ptr
-									   ),
-			       expval
-			       );
-      }
-      return expval;
+            Kokkos::parallel_reduce(
+                index_ptr.size() - 1,
+                getExpectationValueSparseFunctor<Precision>(
+                    *data_, kok_data, kok_indices, kok_index_ptr),
+                expval);
+        }
+        return expval;
     }
-
-  
 
     /**
      * @brief Calculate expectation value with respect to identity observable on

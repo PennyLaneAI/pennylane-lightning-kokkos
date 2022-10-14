@@ -22,6 +22,7 @@ import pytest
 from pennylane import DeviceError
 from pennylane_lightning_kokkos import LightningKokkos
 
+
 class TestHamiltonianExpval:
     def test_hamiltionan_expectation(self, qubit_device_3_wires, tol):
 

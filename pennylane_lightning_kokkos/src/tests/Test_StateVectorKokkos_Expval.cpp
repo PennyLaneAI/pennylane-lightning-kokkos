@@ -201,14 +201,12 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::getExpectationValueTwoQubitOp",
     }
 }
 
-
-
 TEMPLATE_TEST_CASE("StateVectorKokkos::Hamiltonian_expval",
                    "[StateVectorKokkos_Nonparam]", double) {
-  using cp_t = Kokkos::complex<TestType>;
+    using cp_t = Kokkos::complex<TestType>;
     const std::size_t num_qubits = 3;
     SECTION("GetExpectionIdentity") {
-	StateVectorKokkos<TestType> kokkos_sv{num_qubits};
+        StateVectorKokkos<TestType> kokkos_sv{num_qubits};
         std::vector<size_t> wires{0, 1, 2};
 
         kokkos_sv.applyHadamard({0}, false);
@@ -235,7 +233,8 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::Hamiltonian_expval",
         std::vector<cp_t> init_state{{0.0, 0.0}, {0.0, 0.1}, {0.1, 0.1},
                                      {0.1, 0.2}, {0.2, 0.2}, {0.3, 0.3},
                                      {0.3, 0.4}, {0.4, 0.5}};
-	StateVectorKokkos<TestType> kokkos_sv{init_state.data(), init_state.size()};
+        StateVectorKokkos<TestType> kokkos_sv{init_state.data(),
+                                              init_state.size()};
         std::vector<size_t> wires{0, 1, 2};
         std::vector<cp_t> matrix{
             {0.5, 0.0},  {0.2, 0.5},  {0.2, -0.5}, {0.3, 0.0},  {0.2, -0.5},
@@ -262,26 +261,24 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::Hamiltonian_expval",
 
 TEMPLATE_TEST_CASE("StateVectorKokkos::Hamiltonian_expval_Sparse",
                    "[StateVectorKokkos_Nonparam]", float, double) {
-  using cp_t = Kokkos::complex<TestType>;
+    using cp_t = Kokkos::complex<TestType>;
     SECTION("GetExpectionCuSparse") {
         std::vector<cp_t> init_state{{0.0, 0.0}, {0.0, 0.1}, {0.1, 0.1},
                                      {0.1, 0.2}, {0.2, 0.2}, {0.3, 0.3},
                                      {0.3, 0.4}, {0.4, 0.5}};
-	StateVectorKokkos<TestType> kokkos_sv{init_state.data(), init_state.size()};
-	
-	std::vector<size_t> index_ptr = {0, 2, 4, 6, 8, 10, 12, 14, 16};
-	std::vector<size_t> indices = {0, 3, 1, 2, 1, 2, 0, 3, 4, 7, 5, 6, 5, 6, 4, 7};
-	std::vector<Kokkos::complex<TestType>> values  = {
+        StateVectorKokkos<TestType> kokkos_sv{init_state.data(),
+                                              init_state.size()};
+
+        std::vector<size_t> index_ptr = {0, 2, 4, 6, 8, 10, 12, 14, 16};
+        std::vector<size_t> indices = {0, 3, 1, 2, 1, 2, 0, 3,
+                                       4, 7, 5, 6, 5, 6, 4, 7};
+        std::vector<Kokkos::complex<TestType>> values = {
             {1.0, 0.0},  {0.0, -1.0}, {1.0, 0.0}, {0.0, 1.0},
             {0.0, -1.0}, {1.0, 0.0},  {0.0, 1.0}, {1.0, 0.0},
             {1.0, 0.0},  {0.0, -1.0}, {1.0, 0.0}, {0.0, 1.0},
             {0.0, -1.0}, {1.0, 0.0},  {0.0, 1.0}, {1.0, 0.0}};
 
-	auto result = kokkos_sv.getExpectationValue(
-						    values,
-						    indices,
-						    index_ptr
-						    );
+        auto result = kokkos_sv.getExpectationValue(values, indices, index_ptr);
 
         TestType expected = 1;
 

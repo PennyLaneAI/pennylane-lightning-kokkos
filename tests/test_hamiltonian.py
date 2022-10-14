@@ -22,6 +22,7 @@ import pytest
 from pennylane import DeviceError
 from pennylane_lightning_kokkos import LightningKokkos
 
+
 class TestHamiltonianExpval:
     @pytest.fixture(params=[np.complex128])
     def gpu_dev(self, request):

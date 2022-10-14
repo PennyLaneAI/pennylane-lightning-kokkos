@@ -223,14 +223,14 @@ class LightningKokkos(LightningQubit):
                 CSR_SparseHamiltonian.indices,
                 CSR_SparseHamiltonian.data,
             )
-        
+
         if observable.name in ["Hamiltonian"]:
             device_wires = self.map_wires(observable.wires)
             # Since we currently offload hermitian observables to default.qubit, we can assume the matrix exists
             return self._kokkos_state.ExpectationValue(
                 device_wires, qml.matrix(observable).ravel(order="C")
             )
-        
+
         if self.shots is not None:
             # estimate the expectation value
             samples = self.sample(observable, shot_range=shot_range, bin_size=bin_size)
