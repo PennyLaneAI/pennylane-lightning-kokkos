@@ -458,7 +458,7 @@ template <class Precision> class StateVectorKokkos {
      * number between 0 and num_samples-1.
      */
 
-    auto generate_samples(size_t num_samples) -> Kokkos::View<size_t *> {
+    auto generate_samples(size_t num_samples) -> std::vector<size_t> {
 
         const size_t num_qubits = getNumQubits();
 
@@ -561,7 +561,6 @@ template <class Precision> class StateVectorKokkos {
             Kokkos::RangePolicy<KokkosExecSpace>(0, Nsqrt),
             getLocalCDFFunctor<Precision>(probabilities, cdf, Nsqrt, N));
 
-        Kokkos::fence();
         // Convert local CDF to global CDF: each thread compute one element
         // of a chunk
         for (size_t i = 1; i < Nsqrt; i++) {
@@ -570,8 +569,7 @@ template <class Precision> class StateVectorKokkos {
                 getGlobalCDFFunctor<Precision>(cdf, i, Nsqrt, N));
         }
 
-        Kokkos::fence();
-        // Sampling process
+        //  Sampling process
         Kokkos::Random_XorShift64_Pool<> rand_pool(5374857);
 
         Kokkos::parallel_for(
@@ -579,13 +577,15 @@ template <class Precision> class StateVectorKokkos {
             Sampler<Precision, Kokkos::Random_XorShift64_Pool>(
                 samples, cdf, rand_pool, num_qubits, N));
 
-        // Kokkos::fence();
-        auto samples_h =
-            Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, samples);
+        std::vector<size_t> samples_h(num_samples * num_qubits);
 
-        Kokkos::deep_copy(samples_h, samples);
+        using UnmanagedSize_tHostView =
+            Kokkos::View<size_t *, Kokkos::HostSpace,
+                         Kokkos::MemoryTraits<Kokkos::Unmanaged>>;
 
-        data_.reset(); // fix data_ deallocation issue
+        Kokkos::deep_copy(
+            UnmanagedSize_tHostView(samples_h.data(), samples_h.size()),
+            samples);
 
         return samples_h;
     }

@@ -441,9 +441,7 @@ void StateVectorKokkos_class_bindings(py::module &m) {
         .def("GenerateSamples",
              [](StateVectorKokkos<PrecisionT> &sv, size_t num_wires,
                 size_t num_shots) {
-                 auto result_h = sv.generate_samples(num_shots);
-
-                 size_t *result = static_cast<size_t *>(result_h.data());
+                 auto &&result = sv.generate_samples(num_shots);
 
                  const size_t ndim = 2;
                  const std::vector<size_t> shape{num_shots, num_wires};
@@ -451,8 +449,8 @@ void StateVectorKokkos_class_bindings(py::module &m) {
                  const std::vector<size_t> strides{sz * num_wires, sz};
                  // return 2-D NumPy array
                  return py::array(py::buffer_info(
-                     result, /* data as contiguous array  */
-                     sz,     /* size of one scalar        */
+                     result.data(), /* data as contiguous array  */
+                     sz,            /* size of one scalar        */
                      py::format_descriptor<size_t>::format(), /* data type */
                      ndim,   /* number of dimensions      */
                      shape,  /* shape of the matrix       */

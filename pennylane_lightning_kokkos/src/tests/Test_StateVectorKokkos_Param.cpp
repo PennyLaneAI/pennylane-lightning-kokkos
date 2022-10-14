@@ -1363,9 +1363,7 @@ TEMPLATE_TEST_CASE("Sample", "[StateVectorKokkosManaged_Param]", float,
     size_t N = std::pow(2, num_qubits);
     size_t num_samples = 100000;
 
-    auto samples_h = measure_sv.generate_samples(num_samples);
-
-    size_t *samples = static_cast<size_t *>(samples_h.data());
+    auto samples = measure_sv.generate_samples(num_samples);
 
     std::vector<size_t> counts(N, 0);
     std::vector<size_t> samples_decimal(num_samples, 0);

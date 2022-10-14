@@ -19,9 +19,8 @@ template <class Precision> struct getProbFunctor {
     Kokkos::View<Precision *> probilities;
 
     getProbFunctor(Kokkos::View<Kokkos::complex<Precision> *> arr_,
-                   Kokkos::View<Precision *> probilities_) {
-        arr = arr_;
-        probilities = probilities_;
+                   Kokkos::View<Precision *> probilities_)
+        : arr(arr_), probilities(probilities_) {
     }
 
     KOKKOS_INLINE_FUNCTION
@@ -42,11 +41,8 @@ template <class Precision> struct getLocalCDFFunctor {
 
     getLocalCDFFunctor(Kokkos::View<Precision *> probilities_,
                        Kokkos::View<Precision *> cdf_, const size_t Nsqrt_,
-                       const size_t N_) {
-        probilities = probilities_;
-        cdf = cdf_;
-        Nsqrt = Nsqrt_;
-        N = N_;
+                       const size_t N_)
+        : probilities(probilities_), cdf(cdf_), Nsqrt(Nsqrt_), N(N_) {
     }
 
     KOKKOS_INLINE_FUNCTION
@@ -70,11 +66,8 @@ template <class Precision> struct getGlobalCDFFunctor {
     size_t N;
 
     getGlobalCDFFunctor(Kokkos::View<Precision *> cdf_, size_t i_,
-                        const size_t Nsqrt_, const size_t N_) {
-        cdf = cdf_;
-        i = i_;
-        Nsqrt = Nsqrt_;
-        N = N_;
+                        const size_t Nsqrt_, const size_t N_)
+        : cdf(cdf_), i(i_), Nsqrt(Nsqrt_), N(N_) {
     }
 
     KOKKOS_INLINE_FUNCTION
@@ -104,12 +97,9 @@ struct Sampler {
 
     Sampler(Kokkos::View<size_t *> samples_, Kokkos::View<Precision *> cdf_,
             GeneratorPool<ExecutionSpace> rand_pool_, const size_t num_qubits_,
-            const size_t N_) {
-        samples = samples_;
-        cdf = cdf_;
-        rand_pool = rand_pool_;
-        num_qubits = num_qubits_;
-        N = N_;
+            const size_t N_)
+        : samples(samples_), cdf(cdf_), rand_pool(rand_pool_),
+          num_qubits(num_qubits_), N(N_) {
     }
 
     KOKKOS_INLINE_FUNCTION
