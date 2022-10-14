@@ -850,25 +850,23 @@ template <class Precision> class StateVectorKokkos {
                         const std::vector<size_t> &index_ptr) {
 
         Precision expval = 0;
-        {
-            KokkosSizeTVector kok_indices("indices", indices.size());
-            KokkosSizeTVector kok_index_ptr("index_ptr", index_ptr.size());
-            KokkosVector kok_data("data", data.size());
+        KokkosSizeTVector kok_indices("indices", indices.size());
+        KokkosSizeTVector kok_index_ptr("index_ptr", index_ptr.size());
+        KokkosVector kok_data("data", data.size());
 
-            Kokkos::deep_copy(kok_data, UnmanagedConstComplexHostView(
-                                            data.data(), data.size()));
-            Kokkos::deep_copy(kok_indices, UnmanagedConstSizeTHostView(
-                                               indices.data(), indices.size()));
-            Kokkos::deep_copy(kok_index_ptr,
-                              UnmanagedConstSizeTHostView(index_ptr.data(),
-                                                          index_ptr.size()));
+        Kokkos::deep_copy(
+            kok_data, UnmanagedConstComplexHostView(data.data(), data.size()));
+        Kokkos::deep_copy(kok_indices, UnmanagedConstSizeTHostView(
+                                           indices.data(), indices.size()));
+        Kokkos::deep_copy(
+            kok_index_ptr,
+            UnmanagedConstSizeTHostView(index_ptr.data(), index_ptr.size()));
 
-            Kokkos::parallel_reduce(
-                index_ptr.size() - 1,
-                getExpectationValueSparseFunctor<Precision>(
-                    *data_, kok_data, kok_indices, kok_index_ptr),
-                expval);
-        }
+        Kokkos::parallel_reduce(
+            index_ptr.size() - 1,
+            getExpectationValueSparseFunctor<Precision>(
+                *data_, kok_data, kok_indices, kok_index_ptr),
+            expval);
         return expval;
     }
 
