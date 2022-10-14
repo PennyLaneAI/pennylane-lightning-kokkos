@@ -702,6 +702,111 @@ template <class Precision> class StateVectorKokkos {
         }
     }
 
+    auto getIndicesAfterExclusion(const std::vector<size_t> &indicesToExclude,
+                                  size_t num_qubits) -> std::vector<size_t> {
+        std::vector<size_t> indices;
+        for (size_t i = 0; i < num_qubits; i++) {
+            indices.emplace_back(i);
+        }
+
+        for (size_t j = 0; j < indicesToExclude.size(); j++) {
+
+            const size_t excludedIndex = indicesToExclude[j];
+
+            for (size_t i = 0; i < indices.size(); i++) {
+                if (excludedIndex == indices[i])
+                    indices.erase(indices.begin() + i);
+            }
+        }
+        return indices;
+    }
+
+    auto generateBitPatterns(const std::vector<size_t> &qubitIndices,
+                             size_t num_qubits) -> std::vector<size_t> {
+
+        std::vector<size_t> indices;
+        indices.reserve(Util::exp2(qubitIndices.size()));
+        indices.emplace_back(0);
+
+        for (size_t index_it0 = 0; index_it0 < qubitIndices.size();
+             index_it0++) {
+            size_t index_it = qubitIndices.size() - 1 - index_it0;
+            const size_t value =
+                Util::maxDecimalForQubit(qubitIndices[index_it], num_qubits);
+
+            const size_t currentSize = indices.size();
+            for (size_t j = 0; j < currentSize; j++) {
+                indices.emplace_back(indices[j] + value);
+            }
+        }
+        return indices;
+    }
+
+    /**
+     * @brief Probabilities for a subset of the full system.
+     *
+     * @param wires Wires will restrict probabilities to a subset
+     * of the full system.
+     * @return Floating point std::vector with probabilities.
+     * The basis columns are rearranged according to wires.
+     */
+    std::vector<Precision> probs(const std::vector<size_t> &wires) {
+        // Determining index that would sort the vector.
+        // This information is needed later.
+        const auto sorted_ind_wires = Util::sorting_indices(wires);
+        // Sorting wires.
+        std::vector<size_t> sorted_wires(wires.size());
+
+        for (size_t pos = 0; pos < wires.size(); pos++) {
+            sorted_wires[pos] = wires[sorted_ind_wires[pos]];
+        }
+
+        // Determining probabilities for the sorted wires.
+        const Kokkos::View<Kokkos::complex<Precision> *> arr_data = getData();
+
+        const size_t num_qubits = getNumQubits();
+
+        const Kokkos::vector<size_t> all_indices =
+            generateBitPatterns(sorted_wires, num_qubits);
+
+        const Kokkos::vector<size_t> all_offsets = generateBitPatterns(
+            getIndicesAfterExclusion(sorted_wires, num_qubits), num_qubits);
+
+        std::vector<Precision> probabilities(all_indices.size(), 0);
+
+        size_t ind_probs = 0;
+        for (size_t i0 = 0; i0 < all_indices.size(); i0++) {
+            for (size_t j0 = 0; j0 < all_offsets.size(); j0++) {
+                size_t index = all_indices[i0];
+                size_t offset = all_offsets[j0];
+                probabilities[ind_probs] += std::norm(arr_data[index + offset]);
+            }
+            ind_probs++;
+        }
+
+        // Transposing the probabilities tensor with the indices determined at
+        // the beginning.
+        if (wires != sorted_wires) {
+            // probabilities =
+            //     Util::transpose_state_tensor(probabilities,
+            //     sorted_ind_wires);
+            std::vector<fp_t> transposed_tensor(probabilities.size(), 0);
+            for (size_t ind = 0; ind < transposed_tensor.size(); ind++) {
+                size_t new_index = 0;
+                size_t index = ind;
+
+                for (size_t i0 = 0; i0 < sorted_ind_wires.size(); i0++) {
+                    size_t axis = sorted_ind_wires[i0];
+                    new_index += (index % 2) << axis;
+                    index /= 2;
+                }
+                transposed_tensor[new_index] = probabilities[ind];
+            }
+            probabilities = transposed_tensor;
+        }
+        return probabilities;
+    }
+
     /**
      * @brief Apply a PauliX operator to the state vector using a matrix
      *
