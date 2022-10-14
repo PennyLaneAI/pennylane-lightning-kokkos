@@ -20,8 +20,7 @@ template <class Precision> struct getProbFunctor {
 
     getProbFunctor(Kokkos::View<Kokkos::complex<Precision> *> arr_,
                    Kokkos::View<Precision *> probilities_)
-        : arr(arr_), probilities(probilities_) {
-    }
+        : arr(arr_), probilities(probilities_) {}
 
     KOKKOS_INLINE_FUNCTION
     void operator()(const size_t k) const {
@@ -36,14 +35,13 @@ template <class Precision> struct getLocalCDFFunctor {
 
     Kokkos::View<Precision *> probilities;
     Kokkos::View<Precision *> cdf;
-    size_t Nsqrt;
-    size_t N;
+    const size_t Nsqrt;
+    const size_t N;
 
     getLocalCDFFunctor(Kokkos::View<Precision *> probilities_,
                        Kokkos::View<Precision *> cdf_, const size_t Nsqrt_,
                        const size_t N_)
-        : probilities(probilities_), cdf(cdf_), Nsqrt(Nsqrt_), N(N_) {
-    }
+        : probilities(probilities_), cdf(cdf_), Nsqrt(Nsqrt_), N(N_) {}
 
     KOKKOS_INLINE_FUNCTION
     void operator()(const size_t k) const {
@@ -61,14 +59,13 @@ template <class Precision> struct getLocalCDFFunctor {
 template <class Precision> struct getGlobalCDFFunctor {
 
     Kokkos::View<Precision *> cdf;
-    size_t i;
-    size_t Nsqrt;
-    size_t N;
+    const size_t i;
+    const size_t Nsqrt;
+    const size_t N;
 
     getGlobalCDFFunctor(Kokkos::View<Precision *> cdf_, size_t i_,
                         const size_t Nsqrt_, const size_t N_)
-        : cdf(cdf_), i(i_), Nsqrt(Nsqrt_), N(N_) {
-    }
+        : cdf(cdf_), i(i_), Nsqrt(Nsqrt_), N(N_) {}
 
     KOKKOS_INLINE_FUNCTION
     void operator()(const size_t k) const {
@@ -91,16 +88,15 @@ struct Sampler {
 
     GeneratorPool<ExecutionSpace> rand_pool;
 
-    size_t num_qubits;
+    const size_t num_qubits;
 
-    size_t N;
+    const size_t N;
 
     Sampler(Kokkos::View<size_t *> samples_, Kokkos::View<Precision *> cdf_,
             GeneratorPool<ExecutionSpace> rand_pool_, const size_t num_qubits_,
             const size_t N_)
         : samples(samples_), cdf(cdf_), rand_pool(rand_pool_),
-          num_qubits(num_qubits_), N(N_) {
-    }
+          num_qubits(num_qubits_), N(N_) {}
 
     KOKKOS_INLINE_FUNCTION
     void operator()(const size_t k) const {
