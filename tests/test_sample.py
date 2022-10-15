@@ -42,14 +42,48 @@ class TestSample:
     def dev(self, request):
         return qml.device("lightning.kokkos", wires=2, shots=1000, c_dtype=request.param)
 
-    def test_sample_values(self, dev, tol):
+    def test_sample_dimensions(self):
         """Tests if the samples returned by sample have
-        the correct values
+        the correct dimensions
         """
+        dev = qml.device("lightning.kokkos", wires=2, shots=1000, c_dtype=np.complex128)
 
         # Explicitly resetting is necessary as the internal
         # state is set to None in __init__ and only properly
         # initialized during reset
+        dev.apply([qml.RX(1.5708, wires=[0]), qml.RX(1.5708, wires=[1])])
+
+        dev.shots = 10
+        dev._wires_measured = {0}
+        dev._samples = dev.generate_samples()
+        s1 = dev.sample(qml.PauliZ(wires=[0]))
+        assert np.array_equal(s1.shape, (10,))
+
+        dev.reset()
+        dev.shots = 12
+        dev._wires_measured = {1}
+        dev._samples = dev.generate_samples()
+        s2 = dev.sample(qml.PauliZ(wires=[1]))
+        assert np.array_equal(s2.shape, (12,))
+
+        dev.reset()
+        dev.shots = 17
+        dev._wires_measured = {0, 1}
+        dev._samples = dev.generate_samples()
+        s3 = dev.sample(qml.PauliX(0) @ qml.PauliZ(1))
+        assert np.array_equal(s3.shape, (17,))
+
+    def test_sample_values(self, tol):
+        """Tests if the samples returned by sample have
+        the correct values
+        """
+
+        dev = qml.device("lightning.kokkos", wires=2, shots=1000, c_dtype=np.complex128)
+
+        # Explicitly resetting is necessary as the internal
+        # state is set to None in __init__ and only properly
+        # initialized during reset
+
         dev._state = dev._asarray(dev._state)
 
         dev.apply([qml.RX(1.5708, wires=[0])])
