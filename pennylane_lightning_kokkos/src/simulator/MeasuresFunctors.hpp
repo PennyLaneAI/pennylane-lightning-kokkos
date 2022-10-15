@@ -26,55 +26,26 @@ template <class Precision> struct getProbFunctor {
     void operator()(const size_t k) const {
         Precision REAL = arr[k].real();
         Precision IMAG = arr[k].imag();
-        Precision NORM = REAL * REAL + IMAG * IMAG;
-        probilities[k] = NORM;
+        probilities[k] = REAL * REAL + IMAG * IMAG;
     }
 };
 
-template <class Precision> struct getLocalCDFFunctor {
+template <class Precision> struct getCDFFunctor {
 
     Kokkos::View<Precision *> probilities;
-    Kokkos::View<Precision *> cdf;
-    const size_t Nsqrt;
-    const size_t N;
 
-    getLocalCDFFunctor(Kokkos::View<Precision *> probilities_,
-                       Kokkos::View<Precision *> cdf_, const size_t Nsqrt_,
-                       const size_t N_)
-        : probilities(probilities_), cdf(cdf_), Nsqrt(Nsqrt_), N(N_) {}
+    getCDFFunctor(Kokkos::View<Precision *> probilities_)
+        : probilities(probilities_) {}
 
     KOKKOS_INLINE_FUNCTION
-    void operator()(const size_t k) const {
+    void operator()(const size_t &k, Precision &update_value,
+                    const bool final) const {
+        const Precision val_k = probilities[k];
 
-        for (size_t i = 0; i < Nsqrt; i++) {
-            size_t idx = i + k * Nsqrt;
-            if (i == 0)
-                cdf[idx] = probilities[idx];
-            else if (i < N)
-                cdf[idx] = probilities[idx] + cdf[idx - 1];
-        }
-    }
-};
+        if (final)
+            probilities[k] = update_value;
 
-template <class Precision> struct getGlobalCDFFunctor {
-
-    Kokkos::View<Precision *> cdf;
-    const size_t i;
-    const size_t Nsqrt;
-    const size_t N;
-
-    getGlobalCDFFunctor(Kokkos::View<Precision *> cdf_, size_t i_,
-                        const size_t Nsqrt_, const size_t N_)
-        : cdf(cdf_), i(i_), Nsqrt(Nsqrt_), N(N_) {}
-
-    KOKKOS_INLINE_FUNCTION
-    void operator()(const size_t k) const {
-
-        size_t idx = i * Nsqrt + k;
-        size_t idx0 = i * Nsqrt - 1;
-
-        if (idx < N)
-            cdf[idx] += cdf[idx0];
+        update_value += val_k;
     }
 };
 
@@ -108,19 +79,24 @@ struct Sampler {
 
         size_t idx;
 
-        if (U <= cdf[0]) {
+        if (U <= cdf[1]) {
             idx = 0;
         } else {
-            size_t lo = 0, hi = N - 1;
+            size_t lo = 1, hi = N;
             size_t mid;
+            Precision cdf_t;
             while (hi - lo > 1) {
                 mid = (hi + lo) / 2;
-                if (cdf[mid] < U)
+                if (mid == N)
+                    cdf_t = 1;
+                else
+                    cdf_t = cdf[mid];
+                if (cdf_t < U)
                     lo = mid;
                 else
                     hi = mid;
             }
-            idx = hi;
+            idx = hi - 1;
         }
         for (size_t j = 0; j < num_qubits; j++) {
             samples[k * num_qubits + (num_qubits - 1 - j)] = (idx >> j) & 1U;
