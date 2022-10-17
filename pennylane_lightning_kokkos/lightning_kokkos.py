@@ -155,8 +155,6 @@ class LightningKokkos(LightningQubit):
                 method(wires, inv, param)
 
     def apply(self, operations, **kwargs):
-        # if self._shots:
-        #    raise NotImplementedError("lightning.kokkos does not currently support finite shots")
 
         # State preparation is currently done in Python
         if operations:  # make sure operations[0] exists
