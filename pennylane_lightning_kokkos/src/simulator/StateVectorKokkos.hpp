@@ -796,16 +796,6 @@ template <class Precision> class StateVectorKokkos {
                           UnmanagedSize_tHostView(sorted_ind_wires.data(),
                                                   sorted_ind_wires.size()));
 
-        /*
-        for (size_t i0 = 0; i0 < all_indices.size(); i0++) {
-            for (size_t j0 = 0; j0 < all_offsets.size(); j0++) {
-                size_t index = all_indices[i0];
-                size_t offset = all_offsets[j0];
-                probabilities[i0] += std::norm(arr_data[index + offset]);
-            }
-        }
-        */
-
         const size_t N_Ai = all_indices.size();
         const size_t N_Ao = all_offsets.size();
 
@@ -854,18 +844,36 @@ template <class Precision> class StateVectorKokkos {
                 });
 
             /*
-            for (size_t ind = 0; ind < transposed_tensor.size(); ind++) {
-                size_t new_index = 0;
-                size_t index = ind;
-
-                for (size_t i0 = 0; i0 < sorted_ind_wires.size(); i0++) {
-                    size_t axis = sorted_ind_wires[i0];
-                    new_index += (index % 2) << axis;
-                    index /= 2;
+            for (size_t i0 = 0; i0 < all_indices.size(); i0++) {
+                for (size_t j0 = 0; j0 < all_offsets.size(); j0++) {
+                    size_t index = all_indices[i0];
+                    size_t offset = all_offsets[j0];
+                    probabilities[i0] += std::norm(arr_data[index + offset]);
                 }
-                transposed_tensor[new_index] = probabilities[ind];
             }
-            */
+
+            for (size_t j0 = 0; j0 < all_offsets.size(); j0++) {
+                     Precision sum = 0;
+                    Kokkos::parallel_reduce(
+                    Kokkos::RangePolicy<KokkosExecSpace>(0, N_Ai),
+                    KOKKOS_LAMBDA(const size_t &i) {
+                    }
+                                    ,sum);
+
+            }
+
+            for (size_t ind = 0; ind < transposed_tensor.size(); ind++) {
+                    size_t new_index = 0;
+                    size_t index = ind;
+
+                    for (size_t i0 = 0; i0 < sorted_ind_wires.size(); i0++) {
+                        size_t axis = sorted_ind_wires[i0];
+                        new_index += (index % 2) << axis;
+                        index /= 2;
+                    }
+                    transposed_tensor[new_index] = probabilities[ind];
+                }
+                */
             Kokkos::deep_copy(d_probabilities, transposed_tensor);
         }
 
