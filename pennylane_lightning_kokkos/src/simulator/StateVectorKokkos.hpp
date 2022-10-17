@@ -461,13 +461,10 @@ template <class Precision> class StateVectorKokkos {
     auto generate_samples(size_t num_samples) -> std::vector<size_t> {
 
         const size_t num_qubits = getNumQubits();
-
         const size_t N = getLength();
 
         Kokkos::View<Kokkos::complex<Precision> *> arr_data = getData();
-
         Kokkos::View<Precision *> probabilities("probabilities", N);
-
         Kokkos::View<size_t *> samples("num_samples", num_samples * num_qubits);
 
         // Compute prob
