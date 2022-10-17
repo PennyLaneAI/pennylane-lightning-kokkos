@@ -89,20 +89,6 @@ class TestAdjointJacobian:
         with pytest.raises(qml.QuantumFunctionError, match="Adjoint differentiation method does"):
             dev_kokkos.adjoint_jacobian(tape)
 
-    # def test_finite_shots_fail(self):
-    #    """Tests exception raised when finite shots specified"""
-    #
-    #    dev = qml.device("lightning.kokkos", wires=1, shots=1)
-    #
-    #    with qml.tape.QuantumTape() as tape:
-    #        qml.PauliX(0)
-    #        qml.expval(qml.PauliZ(0))
-    #
-    #    with pytest.raises(
-    #        NotImplementedError,
-    #        match="lightning.kokkos does not currently support finite shots",
-    #    ):
-    #        dev.apply(tape)
 
     @pytest.mark.skip(reason="Warning not currently raised in favour of NotImplementedError")
     def test_finite_shots_warns(self):
