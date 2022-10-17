@@ -20,7 +20,6 @@ import numpy as np
 import pennylane as qml
 
 
-# """
 try:
     from pennylane_lightning_kokkos import LightningKokkos
 
