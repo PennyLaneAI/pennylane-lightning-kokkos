@@ -149,7 +149,7 @@ endif()
 
 if(PLKOKKOS_ENABLE_WARNINGS)
     target_compile_options(pennylane_lightning_kokkos INTERFACE
-	    $<$<COMPILE_LANGUAGE:CXX>:-Wall;-Wextra;-Werror;>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wall;-Wextra;-Werror;>
     )
     if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
         target_compile_options(pennylane_lightning_kokkos INTERFACE
