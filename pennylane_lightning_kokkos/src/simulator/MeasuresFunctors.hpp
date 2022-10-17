@@ -54,9 +54,7 @@ template <class Precision, template <class ExecutionSpace> class GeneratorPool,
 struct Sampler {
 
     Kokkos::View<size_t *> samples;
-
     Kokkos::View<Precision *> cdf;
-
     GeneratorPool<ExecutionSpace> rand_pool;
 
     const size_t num_qubits;
