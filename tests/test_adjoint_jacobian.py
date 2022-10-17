@@ -89,7 +89,6 @@ class TestAdjointJacobian:
         with pytest.raises(qml.QuantumFunctionError, match="Adjoint differentiation method does"):
             dev_kokkos.adjoint_jacobian(tape)
 
-
     @pytest.mark.skip(reason="Warning not currently raised in favour of NotImplementedError")
     def test_finite_shots_warns(self):
         """Tests warning raised when finite shots specified"""
@@ -369,7 +368,6 @@ class TestAdjointJacobianQNode:
     @pytest.fixture
     def dev_kokkos(self):
         return qml.device("lightning.kokkos", wires=2)
-
 
     def test_qnode(self, mocker, tol, dev_kokkos):
         """Test that specifying diff_method allows the adjoint method to be selected"""
