@@ -37,14 +37,11 @@ class TestSample:
     """Tests that samples are properly calculated."""
 
     @pytest.fixture(params=[np.complex64, np.complex128])
-    def dev(self, request):
-        return qml.device("lightning.kokkos", wires=2, shots=1000, c_dtype=request.param)
-
     def test_sample_dimensions(self):
         """Tests if the samples returned by sample have
         the correct dimensions
         """
-        dev = qml.device("lightning.kokkos", wires=2, shots=1000, c_dtype=np.complex128)
+        dev = qml.device("lightning.kokkos", wires=2, shots=1000, c_dtype=request.param)
 
         # Explicitly resetting is necessary as the internal
         # state is set to None in __init__ and only properly
@@ -71,12 +68,13 @@ class TestSample:
         s3 = dev.sample(qml.PauliX(0) @ qml.PauliZ(1))
         assert np.array_equal(s3.shape, (17,))
 
+    @pytest.fixture(params=[np.complex64, np.complex128])
     def test_sample_values(self, tol):
         """Tests if the samples returned by sample have
         the correct values
         """
 
-        dev = qml.device("lightning.kokkos", wires=2, shots=1000, c_dtype=np.complex128)
+        dev = qml.device("lightning.kokkos", wires=2, shots=1000, c_dtype=request.param)
 
         # Explicitly resetting is necessary as the internal
         # state is set to None in __init__ and only properly

@@ -448,11 +448,12 @@ template <class Precision> class StateVectorKokkos {
     };
 
     /**
-     * @brief Utility method for samples.
+     * @brief  Inverse transform sampling method for samples.
+     * Reference https://en.wikipedia.org/wiki/Inverse_transform_sampling
      *
      * @param num_samples Number of Samples
      *
-     * @return Kokkos::View<size_t *> to the samples.
+     * @return std::vector<size_t> to the samples.
      * Each sample has a length equal to the number of qubits. Each sample can
      * be accessed using the stride sample_id*num_qubits, where sample_id is a
      * number between 0 and num_samples-1.
@@ -464,24 +465,26 @@ template <class Precision> class StateVectorKokkos {
         const size_t N = getLength();
 
         Kokkos::View<Kokkos::complex<Precision> *> arr_data = getData();
-        Kokkos::View<Precision *> probabilities("probabilities", N);
+        Kokkos::View<Precision *> probability("probability", N);
         Kokkos::View<size_t *> samples("num_samples", num_samples * num_qubits);
 
-        // Compute prob
-        Kokkos::parallel_for(
-            Kokkos::RangePolicy<KokkosExecSpace>(0, N),
-            getProbFunctor<Precision>(arr_data, probabilities));
+        // Compute probability distribution from StateVector using
+        // Kokkos::parallel_for
+        Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(0, N),
+                             getProbFunctor<Precision>(arr_data, probability));
 
+        // Convert probalitiy distriution to cumultative distribution using
+        // Kokkos:: parallel_scan
         Kokkos::parallel_scan(Kokkos::RangePolicy<KokkosExecSpace>(0, N),
-                              getCDFFunctor<Precision>(probabilities));
+                              getCDFFunctor<Precision>(probability));
 
-        //  Sampling process
+        // Sampling using Random_XorShift64_Pool
         Kokkos::Random_XorShift64_Pool<> rand_pool(5374857);
 
         Kokkos::parallel_for(
             Kokkos::RangePolicy<KokkosExecSpace>(0, num_samples),
             Sampler<Precision, Kokkos::Random_XorShift64_Pool>(
-                samples, probabilities, rand_pool, num_qubits, N));
+                samples, probability, rand_pool, num_qubits, N));
 
         std::vector<size_t> samples_h(num_samples * num_qubits);
 
