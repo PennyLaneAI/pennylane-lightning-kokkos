@@ -437,7 +437,6 @@ void StateVectorKokkos_class_bindings(py::module &m) {
                     obs_concat, wires, std::vector<ParamT>{}, conv_matrix);
             },
             "Calculate the expectation value of the given observable.")
-
         .def("GenerateSamples",
              [](StateVectorKokkos<PrecisionT> &sv, size_t num_wires,
                 size_t num_shots) {
