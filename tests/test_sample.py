@@ -31,7 +31,6 @@ except (ImportError, ModuleNotFoundError):
         "PennyLane-Lightning-Kokkos is unsupported on this platform. Skipping.",
         allow_module_level=True,
     )
-# """
 np.random.seed(42)
 
 
