@@ -60,7 +60,6 @@ struct Sampler {
     GeneratorPool<ExecutionSpace> rand_pool;
 
     const size_t num_qubits;
-
     const size_t N;
 
     Sampler(Kokkos::View<size_t *> samples_, Kokkos::View<Precision *> cdf_,
