@@ -798,50 +798,45 @@ template <class Precision> class StateVectorKokkos {
         const int N_Ai = all_indices.size();
         const int N_Ao = all_offsets.size();
 
-	using MDPolicyType_2D = Kokkos::MDRangePolicy<Kokkos::Rank<2, Kokkos::Iterate::Left>>;
-	MDPolicyType_2D mdpolicy_2d({{0, 0}}, {{N_Ai, N_Ao}});
+        using MDPolicyType_2D =
+            Kokkos::MDRangePolicy<Kokkos::Rank<2, Kokkos::Iterate::Left>>;
+        MDPolicyType_2D mdpolicy_2d({{0, 0}}, {{N_Ai, N_Ao}});
 
         Kokkos::parallel_for(
-            "Set_Prob",
-	    mdpolicy_2d,
-            getSubProbFunctor<Precision>(arr_data, d_probabilities, d_all_indices,
-                              d_all_offsets));
-        
-	std::vector<Precision> probabilities(all_indices.size(), 0);
+            "Set_Prob", mdpolicy_2d,
+            getSubProbFunctor<Precision>(arr_data, d_probabilities,
+                                         d_all_indices, d_all_offsets));
+
+        std::vector<Precision> probabilities(all_indices.size(), 0);
 
         using UnmanagedPrecisionHostView =
             Kokkos::View<Precision *, Kokkos::HostSpace,
                          Kokkos::MemoryTraits<Kokkos::Unmanaged>>;
-        
-	// Transposing the probabilities tensor with the indices determined at
+
+        // Transposing the probabilities tensor with the indices determined at
         // the beginning.
         if (wires != sorted_wires) {
             Kokkos::View<Precision *> transposed_tensor("transposed_tensor",
                                                         all_indices.size());
-            
-	    Kokkos::View<size_t *> d_trans_index("d_trans_index",
-                                                        all_indices.size());
+
+            Kokkos::View<size_t *> d_trans_index("d_trans_index",
+                                                 all_indices.size());
 
             const int TTS = transposed_tensor.size();
             const int SIW = sorted_ind_wires.size();
 
+            MDPolicyType_2D mdpolicy_2d({{0, 0}}, {{TTS, SIW}});
 
-	    
-	    MDPolicyType_2D mdpolicy_2d({{0, 0}}, {{TTS, SIW}});
+            Kokkos::parallel_for("TransProb", mdpolicy_2d,
+                                 getTransposedIndexFunctor<Precision>(
+                                     d_sorted_ind_wires, d_trans_index));
 
-            Kokkos::parallel_for(
-            "TransProb",
-            mdpolicy_2d,
-            getTransposedIndexFunctor<Precision>(d_sorted_ind_wires, d_trans_index));
-	    
-	
-	    Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(0, TTS),
-		getTransposedFunctor(transposed_tensor,d_probabilities,d_trans_index)
-		);
+            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(0, TTS),
+                                 getTransposedFunctor(transposed_tensor,
+                                                      d_probabilities,
+                                                      d_trans_index));
 
-		
-	    /*	
+            /*
             Kokkos::parallel_for(
                 Kokkos::RangePolicy<KokkosExecSpace>(0, TTS),
                 KOKKOS_LAMBDA(const size_t &ind) {
@@ -849,13 +844,13 @@ template <class Precision> class StateVectorKokkos {
                     size_t index = ind;
                     for (size_t i0 = 0; i0 < SIW; i0++) {
                         size_t axis = d_sorted_ind_wires[i0];
-			index = ind/(1L << i0);
+                        index = ind/(1L << i0);
                         new_index += (index % 2) << axis;
                         //index /= 2;
                     }
                     transposed_tensor[new_index] = d_probabilities[ind];
                 });
-	     */
+             */
 
             Kokkos::deep_copy(UnmanagedPrecisionHostView(probabilities.data(),
                                                          probabilities.size()),
