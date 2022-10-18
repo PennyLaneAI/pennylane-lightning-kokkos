@@ -219,9 +219,9 @@ class LightningKokkos(LightningQubit):
         if observable.name in ["SparseHamiltonian"]:
             CSR_SparseHamiltonian = observable.sparse_matrix().tocsr()
             return self._kokkos_state.ExpectationValue(
-                CSR_SparseHamiltonian.indptr,
-                CSR_SparseHamiltonian.indices,
                 CSR_SparseHamiltonian.data,
+                CSR_SparseHamiltonian.indices,
+                CSR_SparseHamiltonian.indptr,
             )
 
         if observable.name in ["Hamiltonian"]:
