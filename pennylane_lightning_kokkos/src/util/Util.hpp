@@ -495,4 +495,63 @@ template <class T, class U, class Func> void for_each_enum(Func &&func) {
         }
     }
 }
+
+/**
+ * @brief Get indices of statevector data not participating in application
+ * operation.
+ *
+ * @param indicesToExclude Indices to exclude from this call.
+ * @param num_qubits Total number of qubits for statevector.
+ * @return std::vector<size_t>
+ */
+auto getIndicesAfterExclusion(const std::vector<size_t> &indicesToExclude,
+                              size_t num_qubits) -> std::vector<size_t> {
+    std::vector<size_t> indices;
+    for (size_t i = 0; i < num_qubits; i++) {
+        indices.emplace_back(i);
+    }
+
+    for (size_t j = 0; j < indicesToExclude.size(); j++) {
+
+        const size_t excludedIndex = indicesToExclude[j];
+
+        for (size_t i = 0; i < indices.size(); i++) {
+            if (excludedIndex == indices[i])
+                indices.erase(indices.begin() + i);
+        }
+    }
+    return indices;
+}
+/**
+ * @brief Generate indices for applying operations.
+ *
+ * This method will return the statevector indices participating in the
+ * application of a gate to a given set of qubits.
+ *
+ * @param qubitIndices Indices of the qubits to apply operations.
+ * @param num_qubits Number of qubits in register.
+ * @return std::vector<size_t>
+ */
+auto generateBitPatterns(const std::vector<size_t> &qubitIndices,
+                         size_t num_qubits) -> std::vector<size_t> {
+
+    std::vector<size_t> indices;
+    indices.reserve(exp2(qubitIndices.size()));
+    // indices.reserve(Util::exp2(qubitIndices.size()));
+    indices.emplace_back(0);
+
+    for (size_t index_it0 = 0; index_it0 < qubitIndices.size(); index_it0++) {
+        size_t index_it = qubitIndices.size() - 1 - index_it0;
+        const size_t value =
+            maxDecimalForQubit(qubitIndices[index_it], num_qubits);
+            //Util::maxDecimalForQubit(qubitIndices[index_it], num_qubits);
+
+        const size_t currentSize = indices.size();
+        for (size_t j = 0; j < currentSize; j++) {
+            indices.emplace_back(indices[j] + value);
+        }
+    }
+    return indices;
+}
+
 } // namespace Pennylane::Util

@@ -440,9 +440,9 @@ void StateVectorKokkos_class_bindings(py::module &m) {
         .def("probs",
              [](StateVectorKokkos<PrecisionT> &sv,
                 const std::vector<size_t> &wires) {
-                 // if (wires.empty()) {
-                 //     return py::array_t<ParamT>(py::cast(sv.probs()));
-                 // }
+                 if (wires.empty()) {
+                     return py::array_t<ParamT>(py::cast(sv.probs()));
+                 }
                  return py::array_t<ParamT>(py::cast(sv.probs(wires)));
              })
         .def(

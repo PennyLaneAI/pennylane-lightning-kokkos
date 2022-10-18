@@ -12,6 +12,30 @@ namespace KE = Kokkos::Experimental;
 
 namespace Pennylane {
 namespace Functors {
+
+/**
+ * @brief Compute probability distribution from StateVector.
+ *
+ * @param arr_ StateVector data.
+ * @param probabilities_ Discrete probability distribution.
+ */
+template <class Precision> struct getProbFunctor {
+
+    Kokkos::View<Kokkos::complex<Precision> *> arr;
+    Kokkos::View<Precision *> probability;
+
+    getProbFunctor(Kokkos::View<Kokkos::complex<Precision> *> arr_,
+                   Kokkos::View<Precision *> probability_)
+        : arr(arr_), probability(probability_) {}
+
+    KOKKOS_INLINE_FUNCTION
+    void operator()(const size_t k) const {
+        Precision REAL = arr[k].real();
+        Precision IMAG = arr[k].imag();
+        probability[k] = REAL * REAL + IMAG * IMAG;
+    }
+};
+
 /**
  * @brief Compute sub-probability distribution from StateVector.
  *
