@@ -740,6 +740,7 @@ template <class Precision> class StateVectorKokkos {
      * @param num_qubits Total number of qubits for statevector.
      * @return std::vector<size_t>
      */
+
     auto getIndicesAfterExclusion(const std::vector<size_t> &indicesToExclude,
                                   size_t num_qubits) -> std::vector<size_t> {
         std::vector<size_t> indices;
@@ -769,6 +770,7 @@ template <class Precision> class StateVectorKokkos {
      * @param num_qubits Number of qubits in register.
      * @return std::vector<size_t>
      */
+
     auto generateBitPatterns(const std::vector<size_t> &qubitIndices,
                              size_t num_qubits) -> std::vector<size_t> {
 
@@ -798,6 +800,7 @@ template <class Precision> class StateVectorKokkos {
      * @return Floating point std::vector with probabilities.
      * The basis columns are rearranged according to wires.
      */
+
     auto probs(const std::vector<size_t> &wires) {
         // Determining index that would sort the vector.
         // This information is needed later.
@@ -814,11 +817,10 @@ template <class Precision> class StateVectorKokkos {
         const size_t num_qubits = getNumQubits();
 
         std::vector<size_t> all_indices =
-            Util::generateBitPatterns(sorted_wires, num_qubits);
+            generateBitPatterns(sorted_wires, num_qubits);
 
-        std::vector<size_t> all_offsets = Util::generateBitPatterns(
-            Util::getIndicesAfterExclusion(sorted_wires, num_qubits),
-            num_qubits);
+        std::vector<size_t> all_offsets = generateBitPatterns(
+            getIndicesAfterExclusion(sorted_wires, num_qubits), num_qubits);
 
         Kokkos::View<Precision *> d_probabilities("d_probabilities",
                                                   all_indices.size());
