@@ -506,9 +506,10 @@ template <class T, class U, class Func> void for_each_enum(Func &&func) {
  * @param num_qubits Number of qubits in register.
  * @return std::vector<size_t>
  */
-/*
-auto getIndicesAfterExclusion(const std::vector<size_t> &indicesToExclude,
-                              size_t num_qubits) -> std::vector<size_t> {
+
+inline auto
+getIndicesAfterExclusion(const std::vector<size_t> &indicesToExclude,
+                         size_t num_qubits) -> std::vector<size_t> {
     std::vector<size_t> indices;
     for (size_t i = 0; i < num_qubits; i++) {
         indices.emplace_back(i);
@@ -525,7 +526,7 @@ auto getIndicesAfterExclusion(const std::vector<size_t> &indicesToExclude,
     }
     return indices;
 }
-*/
+
 /**
  * @brief Generate indices for applying operations.
  *
@@ -536,18 +537,18 @@ auto getIndicesAfterExclusion(const std::vector<size_t> &indicesToExclude,
  * @param num_qubits Number of qubits in register.
  * @return std::vector<size_t>
  */
-/*
-auto generateBitPatterns(const std::vector<size_t> &qubitIndices,
-                         size_t num_qubits) -> std::vector<size_t> {
+
+inline auto generateBitsPatterns(const std::vector<size_t> &qubitIndices,
+                                 size_t num_qubits) -> std::vector<size_t> {
 
     std::vector<size_t> indices;
-    indices.reserve(Util::exp2(qubitIndices.size()));
+    indices.reserve(exp2(qubitIndices.size()));
     indices.emplace_back(0);
 
     for (size_t index_it0 = 0; index_it0 < qubitIndices.size(); index_it0++) {
         size_t index_it = qubitIndices.size() - 1 - index_it0;
         const size_t value =
-            Util::maxDecimalForQubit(qubitIndices[index_it], num_qubits);
+            maxDecimalForQubit(qubitIndices[index_it], num_qubits);
 
         const size_t currentSize = indices.size();
         for (size_t j = 0; j < currentSize; j++) {
@@ -556,5 +557,5 @@ auto generateBitPatterns(const std::vector<size_t> &qubitIndices,
     }
     return indices;
 }
-*/
+
 } // namespace Pennylane::Util

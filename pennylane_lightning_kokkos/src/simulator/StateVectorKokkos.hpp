@@ -344,7 +344,7 @@ template <class Precision> class StateVectorKokkos {
                               std::forward<decltype(adjoint)>(adjoint),
                               std::forward<decltype(params)>(params));
                   }},
-                 {"SingleExcitation",
+                  {"SingleExcitation",
                   [&](auto &&wires, auto &&adjoint, auto &&params){
                       return applyGeneratorSingleExcitation(std::forward<decltype(wires)>(wires),
                               std::forward<decltype(adjoint)>(adjoint),
@@ -393,10 +393,7 @@ template <class Precision> class StateVectorKokkos {
                               std::forward<decltype(params)>(params));
                   }},
             }
-                
-
     {
-
         expval_funcs_["Identity"] = [&](auto &&wires, auto &&params) {
             return getExpectationValueIdentity(
                 std::forward<decltype(wires)>(wires),
@@ -733,66 +730,6 @@ template <class Precision> class StateVectorKokkos {
     }
 
     /**
-     * @brief Get indices of statevector data not participating in application
-     * operation.
-     *
-     * @param indicesToExclude Indices to exclude from this call.
-     * @param num_qubits Total number of qubits for statevector.
-     * @return std::vector<size_t>
-     */
-
-    auto getIndicesAfterExclusion(const std::vector<size_t> &indicesToExclude,
-                                  size_t num_qubits) -> std::vector<size_t> {
-        std::vector<size_t> indices;
-        for (size_t i = 0; i < num_qubits; i++) {
-            indices.emplace_back(i);
-        }
-
-        for (size_t j = 0; j < indicesToExclude.size(); j++) {
-
-            const size_t excludedIndex = indicesToExclude[j];
-
-            for (size_t i = 0; i < indices.size(); i++) {
-                if (excludedIndex == indices[i])
-                    indices.erase(indices.begin() + i);
-            }
-        }
-        return indices;
-    }
-
-    /**
-     * @brief Generate indices for applying operations.
-     *
-     * This method will return the statevector indices participating in the
-     * application of a gate to a given set of qubits.
-     *
-     * @param qubitIndices Indices of the qubits to apply operations.
-     * @param num_qubits Number of qubits in register.
-     * @return std::vector<size_t>
-     */
-
-    auto generateBitPatterns(const std::vector<size_t> &qubitIndices,
-                             size_t num_qubits) -> std::vector<size_t> {
-
-        std::vector<size_t> indices;
-        indices.reserve(Util::exp2(qubitIndices.size()));
-        indices.emplace_back(0);
-
-        for (size_t index_it0 = 0; index_it0 < qubitIndices.size();
-             index_it0++) {
-            size_t index_it = qubitIndices.size() - 1 - index_it0;
-            const size_t value =
-                Util::maxDecimalForQubit(qubitIndices[index_it], num_qubits);
-
-            const size_t currentSize = indices.size();
-            for (size_t j = 0; j < currentSize; j++) {
-                indices.emplace_back(indices[j] + value);
-            }
-        }
-        return indices;
-    }
-
-    /**
      * @brief Probabilities for a subset of the full system.
      *
      * @param wires Wires will restrict probabilities to a subset
@@ -817,10 +754,11 @@ template <class Precision> class StateVectorKokkos {
         const size_t num_qubits = getNumQubits();
 
         std::vector<size_t> all_indices =
-            generateBitPatterns(sorted_wires, num_qubits);
+            Util::generateBitsPatterns(sorted_wires, num_qubits);
 
-        std::vector<size_t> all_offsets = generateBitPatterns(
-            getIndicesAfterExclusion(sorted_wires, num_qubits), num_qubits);
+        std::vector<size_t> all_offsets = Util::generateBitsPatterns(
+            Util::getIndicesAfterExclusion(sorted_wires, num_qubits),
+            num_qubits);
 
         Kokkos::View<Precision *> d_probabilities("d_probabilities",
                                                   all_indices.size());
@@ -846,12 +784,14 @@ template <class Precision> class StateVectorKokkos {
                           UnmanagedSizeTHostView(sorted_ind_wires.data(),
                                                  sorted_ind_wires.size()));
 
-        const int N_Ai = all_indices.size();
-        const int N_Ao = all_offsets.size();
+        const int num_all_indices =
+            all_indices.size(); // int is required by Kokkos::MDRangePolicy
+        const int num_all_offsets = all_offsets.size();
 
         using MDPolicyType_2D =
             Kokkos::MDRangePolicy<Kokkos::Rank<2, Kokkos::Iterate::Left>>;
-        MDPolicyType_2D mdpolicy_2d({{0, 0}}, {{N_Ai, N_Ao}});
+        MDPolicyType_2D mdpolicy_2d({{0, 0}},
+                                    {{num_all_indices, num_all_offsets}});
 
         Kokkos::parallel_for(
             "Set_Prob", mdpolicy_2d,
@@ -873,19 +813,20 @@ template <class Precision> class StateVectorKokkos {
             Kokkos::View<size_t *> d_trans_index("d_trans_index",
                                                  all_indices.size());
 
-            const int TTS = transposed_tensor.size();
-            const int SIW = sorted_ind_wires.size();
+            const int num_trans_tensor = transposed_tensor.size();
+            const int num_sorted_ind_wires = sorted_ind_wires.size();
 
-            MDPolicyType_2D mdpolicy_2d({{0, 0}}, {{TTS, SIW}});
+            MDPolicyType_2D mdpolicy_2d(
+                {{0, 0}}, {{num_trans_tensor, num_sorted_ind_wires}});
 
             Kokkos::parallel_for("TransProb", mdpolicy_2d,
                                  getTransposedIndexFunctor<Precision>(
                                      d_sorted_ind_wires, d_trans_index));
 
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(0, TTS),
-                                 getTransposedFunctor(transposed_tensor,
-                                                      d_probabilities,
-                                                      d_trans_index));
+            Kokkos::parallel_for(
+                Kokkos::RangePolicy<KokkosExecSpace>(0, num_trans_tensor),
+                getTransposedFunctor(transposed_tensor, d_probabilities,
+                                     d_trans_index));
 
             Kokkos::deep_copy(UnmanagedPrecisionHostView(probabilities.data(),
                                                          probabilities.size()),
