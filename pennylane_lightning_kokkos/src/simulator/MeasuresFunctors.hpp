@@ -55,8 +55,9 @@ template <class Precision> struct getTransposedIndexFunctor {
 
         size_t axis = sorted_ind_wires[j];
         size_t index = i / (1L << j);
+        size_t sub_index = (index % 2) << axis;
 
-        Kokkos::atomic_add(&trans_index[i], (index % 2) << axis);
+        Kokkos::atomic_add(&trans_index[i], sub_index);
     }
 };
 
