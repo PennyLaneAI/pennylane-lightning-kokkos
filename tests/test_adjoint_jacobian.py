@@ -369,6 +369,27 @@ class TestAdjointJacobianQNode:
     def dev_kokkos(self):
         return qml.device("lightning.kokkos", wires=2)
 
+    def test_finite_shots_warning(self):
+        """Tests that a warning is raised when computing the adjoint diff on a device with finite shots"""
+
+        dev = qml.device("lightning.kokkos", wires=1, shots=1)
+
+        with pytest.warns(
+            UserWarning,
+            match="Requested adjoint differentiation to be computed with finite shots.",
+        ):
+
+            @qml.qnode(dev, diff_method="adjoint")
+            def circ(x):
+                qml.RX(x, wires=0)
+                return qml.expval(qml.PauliZ(0))
+
+        with pytest.warns(
+            UserWarning,
+            match="Requested adjoint differentiation to be computed with finite shots.",
+        ):
+            qml.grad(circ)(0.1)
+
     def test_qnode(self, mocker, tol, dev_kokkos):
         """Test that specifying diff_method allows the adjoint method to be selected"""
         args = np.array([0.54, 0.1, 0.5], requires_grad=True)
