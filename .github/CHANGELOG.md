@@ -1,7 +1,8 @@
 # Release 0.27.0-dev
 
 ### New features since last release
-
+ * Add probability support.
+ [(#11)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/11)
 ### Breaking changes
 
 ### Improvements
@@ -16,7 +17,7 @@
 
 This release contains contributions from (in alphabetical order):
 
-Amintor Dusko
+Amintor Dusko, Shuli Shu
 
 ---
 # Release 0.26.0

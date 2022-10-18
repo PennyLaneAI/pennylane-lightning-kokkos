@@ -34,11 +34,7 @@ np.random.seed(42)
 
 
 class TestProbs:
-    """Test Probs in Lightning"""
-
-    # @pytest.fixture(params=[np.complex64, np.complex128])
-    # def dev(self, request):
-    #    return qml.device("lightning.qubit", wires=2, c_dtype=request.param)
+    """Test Probs in lightning.kokkos"""
 
     @pytest.fixture(params=[np.complex64, np.complex128])
     def test_probs_dtype64(self, request):
