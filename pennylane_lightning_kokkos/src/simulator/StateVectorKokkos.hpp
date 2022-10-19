@@ -816,8 +816,8 @@ template <class Precision> class StateVectorKokkos {
     }
 
     /**
-     * @brief Calculate the expectation value of a matrix. Typically this
-     * this function will be used for dense hamiltonians.
+     * @brief Calculate the expectation value of a matrix. Typically,
+     * this function will be used for dense Hamiltonians.
      *
      * @param obsName observable name
      * @param wires wires the observable acts on
