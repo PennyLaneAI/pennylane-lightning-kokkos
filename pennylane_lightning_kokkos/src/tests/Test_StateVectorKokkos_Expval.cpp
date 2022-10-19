@@ -228,7 +228,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::Hamiltonian_expval",
         CHECK(real(expected) == Approx(results).epsilon(1e-7));
     }
 
-    SECTION("GetExpectionRandomMatrix") {
+    SECTION("GetExpectionHermitianMatrix") {
         using cp_t = Kokkos::complex<TestType>;
         std::vector<cp_t> init_state{{0.0, 0.0}, {0.0, 0.1}, {0.1, 0.1},
                                      {0.1, 0.2}, {0.2, 0.2}, {0.3, 0.3},
