@@ -3,6 +3,7 @@
 ### New features since last release
  * Add probability support.
  [(#11)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/11)
+ 
 ### Breaking changes
 
 ### Improvements
