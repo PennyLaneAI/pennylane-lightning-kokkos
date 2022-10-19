@@ -40,7 +40,7 @@ template <class Precision> struct getProbFunctor {
  * @brief Compute sub-probability distribution from StateVector.
  *
  * @param arr_ StateVector data.
- * @param probabilities_ Sub discrete probability distribution.
+ * @param probability_ Sub discrete probability distribution.
  */
 template <class Precision> struct getSubProbFunctor {
 
