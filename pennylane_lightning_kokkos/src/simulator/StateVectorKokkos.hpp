@@ -473,7 +473,7 @@ template <class Precision> class StateVectorKokkos {
         Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(0, N),
                              getProbFunctor<Precision>(arr_data, probability));
 
-        // Convert probalitiy distriution to cumultative distribution using
+        // Convert probability distribution to cumulative distribution using
         // Kokkos:: parallel_scan
         Kokkos::parallel_scan(Kokkos::RangePolicy<KokkosExecSpace>(0, N),
                               getCDFFunctor<Precision>(probability));
