@@ -262,7 +262,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::Hamiltonian_expval",
 TEMPLATE_TEST_CASE("StateVectorKokkos::Hamiltonian_expval_Sparse",
                    "[StateVectorKokkos_Nonparam]", float, double) {
     using cp_t = Kokkos::complex<TestType>;
-    SECTION("GetExpectionCuSparse") {
+    SECTION("GetExpectionSparse") {
         std::vector<cp_t> init_state{{0.0, 0.0}, {0.0, 0.1}, {0.1, 0.1},
                                      {0.1, 0.2}, {0.2, 0.2}, {0.3, 0.3},
                                      {0.3, 0.4}, {0.4, 0.5}};
