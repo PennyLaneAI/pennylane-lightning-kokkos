@@ -19,7 +19,6 @@ import math
 import numpy as np
 import pennylane as qml
 import pytest
-from pennylane import DeviceError
 from pennylane_lightning_kokkos import LightningKokkos
 
 
