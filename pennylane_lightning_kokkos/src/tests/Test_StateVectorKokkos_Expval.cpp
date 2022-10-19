@@ -235,7 +235,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::Hamiltonian_expval",
                                      {0.3, 0.4}, {0.4, 0.5}};
         StateVectorKokkos<TestType> kokkos_sv{init_state.data(),
                                               init_state.size()};
-        std::vector<size_t> wires{0, 1, 2};	
+        std::vector<size_t> wires{0, 1, 2};
         std::vector<cp_t> matrix{
             {0.5, 0.0},  {0.2, 0.5},  {0.2, -0.5}, {0.3, 0.0},  {0.2, -0.5},
             {0.3, 0.0},  {0.2, -0.5}, {0.3, 0.0},  {0.2, -0.5}, {0.3, 0.0},
