@@ -836,8 +836,8 @@ template <class Precision> class StateVectorKokkos {
     }
 
     /**
-     * @brief Calculate the expectation value of a sparse hamiltonian in CSR
-     * format. Typically this this function will be used for dense hamiltonians.
+     * @brief Calculate the expectation value of a sparse Hamiltonian in CSR
+     * format. Typically, this function will be used for dense hamiltonians.
      *
      * @param obsName observable name
      * @param wires wires the observable acts on
