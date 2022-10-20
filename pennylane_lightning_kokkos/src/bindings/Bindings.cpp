@@ -443,7 +443,17 @@ void StateVectorKokkos_class_bindings(py::module &m) {
                  if (wires.empty()) {
                      return py::array_t<ParamT>(py::cast(sv.probs()));
                  }
-                 return py::array_t<ParamT>(py::cast(sv.probs(wires)));
+
+                 const bool sorted_or_not =
+                     std::is_sorted(wires.begin(), wires.end());
+
+                 if (wires.size() == sv.getNumQubits()) {
+                     // if(std::is_sorted(wires.begin(), wires.end()))
+                     if (sorted_or_not)
+                         return py::array_t<ParamT>(py::cast(sv.probs()));
+                 }
+                 return py::array_t<ParamT>(
+                     py::cast(sv.probs(wires, sorted_or_not)));
              })
         .def(
             "DeviceToHost",
