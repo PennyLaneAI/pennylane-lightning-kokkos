@@ -448,7 +448,6 @@ void StateVectorKokkos_class_bindings(py::module &m) {
                      std::is_sorted(wires.begin(), wires.end());
 
                  if (wires.size() == sv.getNumQubits()) {
-                     // if(std::is_sorted(wires.begin(), wires.end()))
                      if (sorted_or_not)
                          return py::array_t<ParamT>(py::cast(sv.probs()));
                  }
