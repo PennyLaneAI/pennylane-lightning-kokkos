@@ -874,14 +874,15 @@ template <class Precision> class StateVectorKokkos {
                 {{0, 0}}, {{num_trans_tensor, num_sorted_ind_wires}});
 
             Kokkos::parallel_for(
-                "TransProb", mdpolicy_2d1,
+                "TransIndex", mdpolicy_2d1,
                 getTransposedIndexFunctor(d_sorted_ind_wires, d_trans_index,
                                           num_sorted_ind_wires));
 
             Kokkos::parallel_for(
+                "Transpose",
                 Kokkos::RangePolicy<KokkosExecSpace>(0, num_trans_tensor),
-                getTransposedFunctor(transposed_tensor, d_probabilities,
-                                     d_trans_index));
+                getTransposedFunctor<Precision>(
+                    transposed_tensor, d_probabilities, d_trans_index));
 
             Kokkos::deep_copy(UnmanagedPrecisionHostView(probabilities.data(),
                                                          probabilities.size()),
