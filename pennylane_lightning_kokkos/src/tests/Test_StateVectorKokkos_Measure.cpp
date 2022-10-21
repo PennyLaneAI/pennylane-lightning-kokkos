@@ -50,9 +50,7 @@ TEMPLATE_TEST_CASE("Probabilities", "[Measures]", float, double) {
 
     SECTION("Looping over different wire configurations:") {
         for (const auto &term : input) {
-            const bool sorted_or_not =
-                std::is_sorted(term.first.begin(), term.first.end());
-            auto probabilities = measure_sv.probs(term.first, sorted_or_not);
+            auto probabilities = measure_sv.probs(term.first);
             REQUIRE_THAT(term.second,
                          Catch::Approx(probabilities).margin(1e-6));
         }

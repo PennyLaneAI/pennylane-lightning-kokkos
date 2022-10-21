@@ -444,15 +444,14 @@ void StateVectorKokkos_class_bindings(py::module &m) {
                      return py::array_t<ParamT>(py::cast(sv.probs()));
                  }
 
-                 const bool sorted_or_not =
+                 const bool is_sorted_wires =
                      std::is_sorted(wires.begin(), wires.end());
 
                  if (wires.size() == sv.getNumQubits()) {
-                     if (sorted_or_not)
+                     if (is_sorted_wires)
                          return py::array_t<ParamT>(py::cast(sv.probs()));
                  }
-                 return py::array_t<ParamT>(
-                     py::cast(sv.probs(wires, sorted_or_not)));
+                 return py::array_t<ParamT>(py::cast(sv.probs(wires)));
              })
         .def("GenerateSamples",
              [](StateVectorKokkos<PrecisionT> &sv, size_t num_wires,
