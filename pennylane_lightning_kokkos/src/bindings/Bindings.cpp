@@ -454,6 +454,25 @@ void StateVectorKokkos_class_bindings(py::module &m) {
                  return py::array_t<ParamT>(
                      py::cast(sv.probs(wires, sorted_or_not)));
              })
+        .def("GenerateSamples",
+             [](StateVectorKokkos<PrecisionT> &sv, size_t num_wires,
+                size_t num_shots) {
+                 auto &&result = sv.generate_samples(num_shots);
+
+                 const size_t ndim = 2;
+                 const std::vector<size_t> shape{num_shots, num_wires};
+                 constexpr auto sz = sizeof(size_t);
+                 const std::vector<size_t> strides{sz * num_wires, sz};
+                 // return 2-D NumPy array
+                 return py::array(py::buffer_info(
+                     result.data(), /* data as contiguous array  */
+                     sz,            /* size of one scalar        */
+                     py::format_descriptor<size_t>::format(), /* data type */
+                     ndim,   /* number of dimensions      */
+                     shape,  /* shape of the matrix       */
+                     strides /* strides for each axis     */
+                     ));
+             })
         .def(
             "DeviceToHost",
             [](StateVectorKokkos<PrecisionT> &gpu_sv, np_arr_c &cpu_sv) {
@@ -662,7 +681,6 @@ void StateVectorKokkos_class_bindings(py::module &m) {
 // Necessary to avoid mangled names when manually building module
 // due to CUDA & LTO incompatibility issues.
 extern "C" {
-
 /**
  * @brief Add C++ classes, methods and functions to Python module.
  */
