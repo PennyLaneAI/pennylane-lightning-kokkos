@@ -1320,3 +1320,73 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyDoubleExcitationPlus",
         }
     }
 }
+
+TEMPLATE_TEST_CASE("Sample", "[StateVectorKokkosManaged_Param]", float,
+                   double) {
+
+    constexpr uint32_t twos[] = {
+        1U << 0U,  1U << 1U,  1U << 2U,  1U << 3U,  1U << 4U,  1U << 5U,
+        1U << 6U,  1U << 7U,  1U << 8U,  1U << 9U,  1U << 10U, 1U << 11U,
+        1U << 12U, 1U << 13U, 1U << 14U, 1U << 15U, 1U << 16U, 1U << 17U,
+        1U << 18U, 1U << 19U, 1U << 20U, 1U << 21U, 1U << 22U, 1U << 23U,
+        1U << 24U, 1U << 25U, 1U << 26U, 1U << 27U, 1U << 28U, 1U << 29U,
+        1U << 30U, 1U << 31U};
+
+    // Defining the State Vector that will be measured.
+    const std::size_t num_qubits = 3;
+    StateVectorKokkos<TestType> measure_sv{num_qubits};
+
+    std::vector<std::string> gates;
+    std::vector<std::vector<size_t>> wires;
+    std::vector<bool> inv_op(num_qubits * 2, false);
+    std::vector<std::vector<TestType>> phase;
+
+    TestType initial_phase = 0.7;
+    for (size_t n_qubit = 0; n_qubit < num_qubits; n_qubit++) {
+        gates.emplace_back("RX");
+        gates.emplace_back("RY");
+
+        wires.push_back({n_qubit});
+        wires.push_back({n_qubit});
+
+        phase.push_back({initial_phase});
+        phase.push_back({initial_phase});
+        initial_phase -= 0.2;
+    }
+
+    measure_sv.applyOperation(gates, wires, inv_op, phase);
+
+    std::vector<TestType> expected_probabilities = {
+        0.67078706, 0.03062806, 0.0870997,  0.00397696,
+        0.17564072, 0.00801973, 0.02280642, 0.00104134};
+
+    size_t N = std::pow(2, num_qubits);
+    size_t num_samples = 100000;
+
+    auto samples = measure_sv.generate_samples(num_samples);
+
+    std::vector<size_t> counts(N, 0);
+    std::vector<size_t> samples_decimal(num_samples, 0);
+
+    // convert samples to decimal and then bin them in counts
+    for (size_t i = 0; i < num_samples; i++) {
+        for (size_t j = 0; j < num_qubits; j++) {
+            if (samples[i * num_qubits + j] != 0) {
+                samples_decimal[i] += twos[(num_qubits - 1 - j)];
+            }
+        }
+        counts[samples_decimal[i]] += 1;
+    }
+
+    // compute estimated probabilities from histogram
+    std::vector<TestType> probabilities(counts.size());
+    for (size_t i = 0; i < counts.size(); i++) {
+        probabilities[i] = counts[i] / (TestType)num_samples;
+    }
+
+    // compare estimated probabilities to real probabilities
+    SECTION("No wires provided:") {
+        REQUIRE_THAT(probabilities,
+                     Catch::Approx(expected_probabilities).margin(.05));
+    }
+}

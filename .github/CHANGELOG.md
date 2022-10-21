@@ -1,6 +1,8 @@
 # Release 0.27.0-dev
 
 ### New features since last release
+ * Add sample generation support.
+  [(#9)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/9)
 
 ### Breaking changes
 
@@ -16,7 +18,7 @@
 
 This release contains contributions from (in alphabetical order):
 
-Amintor Dusko
+Amintor Dusko, Shuli Shu
 
 ---
 # Release 0.26.0
