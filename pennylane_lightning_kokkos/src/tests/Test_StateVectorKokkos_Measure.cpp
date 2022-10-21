@@ -46,27 +46,7 @@ TEMPLATE_TEST_CASE("Probabilities", "[Measures]", float, double) {
 
     // Defining the State Vector that will be measured.
     const std::size_t num_qubits = 3;
-    StateVectorKokkos<TestType> measure_sv{num_qubits};
-
-    std::vector<std::string> gates;
-    std::vector<std::vector<size_t>> wires;
-    std::vector<bool> inv_op(num_qubits * 2, false);
-    std::vector<std::vector<TestType>> phase;
-
-    TestType initial_phase = 0.7;
-    for (size_t n_qubit = 0; n_qubit < num_qubits; n_qubit++) {
-        gates.emplace_back("RX");
-        gates.emplace_back("RY");
-
-        wires.push_back({n_qubit});
-        wires.push_back({n_qubit});
-
-        phase.push_back({initial_phase});
-        phase.push_back({initial_phase});
-        initial_phase -= 0.2;
-    }
-
-    measure_sv.applyOperation(gates, wires, inv_op, phase);
+    auto measure_sv = Initializing_StateVector<TestType>(num_qubits);
 
     SECTION("Looping over different wire configurations:") {
         for (const auto &term : input) {
