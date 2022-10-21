@@ -814,8 +814,7 @@ template <class Precision> class StateVectorKokkos {
 
         std::vector<size_t> sorted_wires(wires);
 
-	if(!is_sorted_wires)
-	{
+        if (!is_sorted_wires) {
             sorted_ind_wires = Util::sorting_indices(wires);
             for (size_t pos = 0; pos < wires.size(); pos++)
                 sorted_wires[pos] = wires[sorted_ind_wires[pos]];
