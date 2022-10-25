@@ -56,7 +56,6 @@ class TestHamiltonianExpval:
         dev = qubit_device_3_wires
 
         obs = qml.PauliX(1) @ qml.PauliY(2)
-
         obs1 = qml.Identity(1)
 
         H = qml.Hamiltonian([1.0, 1.0], [obs1, obs])
