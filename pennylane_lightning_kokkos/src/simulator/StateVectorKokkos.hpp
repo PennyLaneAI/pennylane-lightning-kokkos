@@ -811,7 +811,6 @@ template <class Precision> class StateVectorKokkos {
         const bool is_sorted_wires = std::is_sorted(wires.begin(), wires.end());
 
         std::vector<size_t> sorted_ind_wires(wires);
-
         std::vector<size_t> sorted_wires(wires);
 
         if (!is_sorted_wires) {
