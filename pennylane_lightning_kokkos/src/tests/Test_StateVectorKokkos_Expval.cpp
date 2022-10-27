@@ -202,7 +202,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::getExpectationValueTwoQubitOp",
 }
 
 TEMPLATE_TEST_CASE("StateVectorKokkos::Hamiltonian_expval",
-                   "[StateVectorKokkos_Nonparam]", double) {
+                   "[StateVectorKokkos_Nonparam]", float, double) {
     using cp_t = Kokkos::complex<TestType>;
     const std::size_t num_qubits = 3;
     SECTION("GetExpectionIdentity") {
