@@ -216,7 +216,7 @@ class LightningKokkos(LightningQubit):
             self.syncD2H()
             return super().expval(observable, shot_range=shot_range, bin_size=bin_size)
 
-        if observable.name in ["SparseHamiltonian"]:
+        if observable.name in ["SparseHamiltonian"] and len(self.wires) >= 13:
             CSR_SparseHamiltonian = observable.sparse_matrix().tocsr()
             return self._kokkos_state.ExpectationValue(
                 CSR_SparseHamiltonian.data,
@@ -224,9 +224,8 @@ class LightningKokkos(LightningQubit):
                 CSR_SparseHamiltonian.indptr,
             )
 
-        if observable.name in ["Hamiltonian"]:
+        if observable.name in ["Hamiltonian"] or (observable.name in ["SparseHamiltonian"] and len(self.wires) < 13):
             device_wires = self.map_wires(observable.wires)
-            # Since we currently offload hermitian observables to default.qubit, we can assume the matrix exists
             return self._kokkos_state.ExpectationValue(
                 device_wires, qml.matrix(observable).ravel(order="C")
             )
