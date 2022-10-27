@@ -791,7 +791,7 @@ template <class Precision> class StateVectorKokkos {
      * The basis columns are rearranged according to wires.
      */
 
-    auto probs(const std::vector<size_t> wires) {
+    auto probs(std::vector<size_t> wires) {
         // Determining probabilities for the sorted wires.
         const Kokkos::View<Kokkos::complex<Precision> *> arr_data = getData();
         const size_t num_qubits = getNumQubits();
