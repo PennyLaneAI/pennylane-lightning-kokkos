@@ -157,8 +157,6 @@ class LightningKokkos(LightningQubit):
                 method(wires, inv, param)
 
     def apply(self, operations, **kwargs):
-        if self._shots:
-            raise NotImplementedError("lightning.kokkos does not currently support finite shots")
 
         # State preparation is currently done in Python
         if operations:  # make sure operations[0] exists
@@ -182,6 +180,14 @@ class LightningKokkos(LightningQubit):
 
         if self._sync:
             self.syncD2H()
+
+    def generate_samples(self):
+        """Generate samples
+
+        Returns:
+            array[int]: array of samples in binary representation with shape ``(dev.shots, dev.num_wires)``
+        """
+        return self._kokkos_state.GenerateSamples(len(self.wires), self.shots).astype(int)
 
     def var(self, observable, shot_range=None, bin_size=None):
         if self.shots is not None:

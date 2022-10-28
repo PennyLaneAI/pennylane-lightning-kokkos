@@ -23,10 +23,12 @@
 #include <vector>
 
 #include <Kokkos_Core.hpp>
+#include <Kokkos_Random.hpp>
 
 #include "Error.hpp"
 #include "ExpValFunctors.hpp"
 #include "GateFunctors.hpp"
+#include "MeasuresFunctors.hpp"
 
 /// @cond DEV
 namespace {
@@ -448,6 +450,58 @@ template <class Precision> class StateVectorKokkos {
             Kokkos::parallel_for(length_, InitView(*data_));
         }
     };
+
+    /**
+     * @brief  Inverse transform sampling method for samples.
+     * Reference https://en.wikipedia.org/wiki/Inverse_transform_sampling
+     *
+     * @param num_samples Number of Samples
+     *
+     * @return std::vector<size_t> to the samples.
+     * Each sample has a length equal to the number of qubits. Each sample can
+     * be accessed using the stride sample_id*num_qubits, where sample_id is a
+     * number between 0 and num_samples-1.
+     */
+
+    auto generate_samples(size_t num_samples) -> std::vector<size_t> {
+
+        const size_t num_qubits = getNumQubits();
+        const size_t N = getLength();
+
+        Kokkos::View<Kokkos::complex<Precision> *> arr_data = getData();
+        Kokkos::View<Precision *> probability("probability", N);
+        Kokkos::View<size_t *> samples("num_samples", num_samples * num_qubits);
+
+        // Compute probability distribution from StateVector using
+        // Kokkos::parallel_for
+        Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(0, N),
+                             getProbFunctor<Precision>(arr_data, probability));
+
+        // Convert probability distribution to cumulative distribution using
+        // Kokkos:: parallel_scan
+        Kokkos::parallel_scan(Kokkos::RangePolicy<KokkosExecSpace>(0, N),
+                              getCDFFunctor<Precision>(probability));
+
+        // Sampling using Random_XorShift64_Pool
+        Kokkos::Random_XorShift64_Pool<> rand_pool(5374857);
+
+        Kokkos::parallel_for(
+            Kokkos::RangePolicy<KokkosExecSpace>(0, num_samples),
+            Sampler<Precision, Kokkos::Random_XorShift64_Pool>(
+                samples, probability, rand_pool, num_qubits, N));
+
+        std::vector<size_t> samples_h(num_samples * num_qubits);
+
+        using UnmanagedSize_tHostView =
+            Kokkos::View<size_t *, Kokkos::HostSpace,
+                         Kokkos::MemoryTraits<Kokkos::Unmanaged>>;
+
+        Kokkos::deep_copy(
+            UnmanagedSize_tHostView(samples_h.data(), samples_h.size()),
+            samples);
+
+        return samples_h;
+    }
 
     /**
      * @brief Reset the data back to the \f$\ket{0}\f$ state
