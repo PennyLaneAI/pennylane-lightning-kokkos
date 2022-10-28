@@ -215,6 +215,35 @@ class LightningKokkos(LightningQubit):
 
         return squared_mean - (mean**2)
 
+    def probability(self, wires=None, shot_range=None, bin_size=None):
+        """Return the probability of each computational basis state.
+
+        Devices that require a finite number of shots always return the
+        estimated probability.
+
+        Args:
+            wires (Iterable[Number, str], Number, str, Wires): wires to return
+                marginal probabilities for. Wires not provided are traced out of the system.
+            shot_range (tuple[int]): 2-tuple of integers specifying the range of samples
+                to use. If not specified, all samples are used.
+            bin_size (int): Divides the shot range into bins of size ``bin_size``, and
+                returns the measurement statistic separately over each bin. If not
+                provided, the entire shot range is treated as a single bin.
+
+        Returns:
+            array[float]: list of the probabilities
+        """
+        if self.shots is not None:
+            return self.estimate_probability(wires=wires, shot_range=shot_range, bin_size=bin_size)
+
+        wires = wires or self.wires
+        wires = Wires(wires)
+
+        # translate to wire labels used by device
+        device_wires = self.map_wires(wires)
+
+        return self._kokkos_state.probs(device_wires)
+
     def expval(self, observable, shot_range=None, bin_size=None):
         if observable.name in [
             "Projector",

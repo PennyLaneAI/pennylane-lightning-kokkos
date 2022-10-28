@@ -474,6 +474,22 @@ void StateVectorKokkos_class_bindings(py::module &m) {
                 return sv.getExpectationValue(conv_data, indices, index_ptr);
             },
             "Calculate the expectation value of the given observable.")
+        .def("probs",
+             [](StateVectorKokkos<PrecisionT> &sv,
+                const std::vector<size_t> &wires) {
+                 if (wires.empty()) {
+                     return py::array_t<ParamT>(py::cast(sv.probs()));
+                 }
+
+                 const bool is_sorted_wires =
+                     std::is_sorted(wires.begin(), wires.end());
+
+                 if (wires.size() == sv.getNumQubits()) {
+                     if (is_sorted_wires)
+                         return py::array_t<ParamT>(py::cast(sv.probs()));
+                 }
+                 return py::array_t<ParamT>(py::cast(sv.probs(wires)));
+             })
         .def("GenerateSamples",
              [](StateVectorKokkos<PrecisionT> &sv, size_t num_wires,
                 size_t num_shots) {
@@ -701,7 +717,6 @@ void StateVectorKokkos_class_bindings(py::module &m) {
 // Necessary to avoid mangled names when manually building module
 // due to CUDA & LTO incompatibility issues.
 extern "C" {
-
 /**
  * @brief Add C++ classes, methods and functions to Python module.
  */
