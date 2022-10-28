@@ -791,8 +791,8 @@ template <class Precision> class StateVectorKokkos {
      * The basis columns are rearranged according to wires.
      */
 
-    auto probs(std::vector<size_t> wires) {
-        // Determining probabilities for the sorted wires.
+    auto probs(const std::vector<size_t> &wires) {
+        //  Determining probabilities for the sorted wires.
         const Kokkos::View<Kokkos::complex<Precision> *> arr_data = getData();
         const size_t num_qubits = getNumQubits();
 
@@ -807,13 +807,13 @@ template <class Precision> class StateVectorKokkos {
         using MDPolicyType_2D =
             Kokkos::MDRangePolicy<Kokkos::Rank<2, Kokkos::Iterate::Left>>;
 
-        std::vector<size_t> sorted_ind_wires(std::move(wires));
+        std::vector<size_t> sorted_ind_wires(wires);
         const bool is_sorted_wires =
             std::is_sorted(sorted_ind_wires.begin(), sorted_ind_wires.end());
-        std::vector<size_t> sorted_wires(sorted_ind_wires);
+        std::vector<size_t> sorted_wires(wires);
 
         if (!is_sorted_wires) {
-            sorted_ind_wires = Util::sorting_indices(sorted_ind_wires);
+            sorted_ind_wires = Util::sorting_indices(wires);
             for (size_t pos = 0; pos < wires.size(); pos++)
                 sorted_wires[pos] = wires[sorted_ind_wires[pos]];
         }
