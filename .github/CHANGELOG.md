@@ -1,6 +1,9 @@
 # Release 0.27.0-dev
 
 ### New features since last release
+ * Add probability support.
+ [(#11)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/11)
+ 
  * Add sample generation support.
   [(#9)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/9)
 
