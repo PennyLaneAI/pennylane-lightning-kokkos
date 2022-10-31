@@ -259,9 +259,7 @@ class LightningKokkos(LightningQubit):
                 CSR_SparseHamiltonian.indptr,
             )
 
-        if observable.name in ["Hamiltonian"] or (
-            observable.name in ["SparseHamiltonian"] and len(self.wires) < 13
-        ):
+        if observable.name in ["Hamiltonian"] and len(observable.wires) < 13:
             device_wires = self.map_wires(observable.wires)
             return self._kokkos_state.ExpectationValue(
                 device_wires, qml.matrix(observable).ravel(order="C")
