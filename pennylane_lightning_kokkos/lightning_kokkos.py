@@ -251,7 +251,7 @@ class LightningKokkos(LightningQubit):
             self.syncD2H()
             return super().expval(observable, shot_range=shot_range, bin_size=bin_size)
 
-        if observable.name in ["SparseHamiltonian"] and len(self.wires) >= 13:
+        if observable.name in ["SparseHamiltonian"]:
             CSR_SparseHamiltonian = observable.sparse_matrix().tocsr()
             return self._kokkos_state.ExpectationValue(
                 CSR_SparseHamiltonian.data,
