@@ -22,8 +22,10 @@ import pytest
 from pennylane_lightning_kokkos import LightningKokkos
 
 
-class TestHamiltonianExpval:
-    def test_hamiltionan_expectation(self, qubit_device_3_wires, tol):
+class TestSparseHamiltonianExpval:
+    """Tests for the expval function"""
+
+    def test_sparse_hamiltionan_expval(self, qubit_device_3_wires, tol):
 
         dev = LightningKokkos(wires=3, c_dtype=np.complex128)
         obs = qml.Identity(0) @ qml.PauliX(1) @ qml.PauliY(2)
@@ -55,10 +57,7 @@ class TestHamiltonianExpval:
 
         assert np.allclose(res, expected)
 
-
-class TestSparseExpval:
-    """Tests for the expval function"""
-
+    
     @pytest.mark.parametrize(
         "cases",
         [
