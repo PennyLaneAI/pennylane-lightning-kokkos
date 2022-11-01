@@ -24,6 +24,8 @@ from pennylane import (
     QubitStateVector,
     DeviceError,
     Projector,
+    Hamiltonian,
+    SparseHamiltonian,
     Hermitian,
     Rot,
     CRot,
@@ -313,10 +315,31 @@ class LightningKokkos(LightningQubit):
                     raise QuantumFunctionError(
                         "Lightning adjoint differentiation method does not currently support the Hermitian observable"
                     )
+                if isinstance(m.obs, Hamiltonian):
+                    raise QuantumFunctionError(
+                        "Adjoint differentiation method does not currently support the Hamiltonian observable"
+                    )
+                if isinstance(m.obs, SparseHamiltonian):
+                    raise QuantumFunctionError(
+                        "Adjoint differentiation method does not currently support the SparseHamiltonian observable"
+                    )
+                if isinstance(m.obs, Hermitian):
+                    raise QuantumFunctionError(
+                        "Lightning adjoint differentiation method does not currently support the SparseHamiltonian observable"
+                    )
+
             else:
                 if any([isinstance(o, Projector) for o in m.obs.non_identity_obs]):
                     raise QuantumFunctionError(
                         "Adjoint differentiation method does not support the Projector observable"
+                    )
+                if any([isinstance(o, Hamiltonian) for o in m.obs.non_identity_obs]):
+                    raise QuantumFunctionError(
+                        "Adjoint differentiation method does not currently support the Hamiltonian observable"
+                    )
+                if any([isinstance(o, SparseHamiltonian) for o in m.obs.non_identity_obs]):
+                    raise QuantumFunctionError(
+                        "Adjoint differentiation method does not currently support the SparseHamiltonian observable"
                     )
                 if any([isinstance(o, Hermitian) for o in m.obs.non_identity_obs]):
                     raise QuantumFunctionError(

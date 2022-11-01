@@ -57,7 +57,6 @@ class TestSparseHamiltonianExpval:
 
         assert np.allclose(res, expected)
 
-    
     @pytest.mark.parametrize(
         "cases",
         [
