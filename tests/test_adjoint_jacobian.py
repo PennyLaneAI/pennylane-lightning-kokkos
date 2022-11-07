@@ -756,7 +756,10 @@ def test_fail_adjoint_Hermitian(returns):
 
     qnode_kokkos = qml.QNode(circuit, dev_kokkos, diff_method="adjoint")
 
-    with pytest.raises(Exception):
+    with pytest.raises(
+        qml._device.DeviceError,
+        match="Observable Hermitian not supported on device",
+    ):
         j_kokkos = qml.jacobian(qnode_kokkos)(params)
 
 
