@@ -272,14 +272,14 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::Hamiltonian_expval_Sparse",
         std::vector<size_t> indices = {0, 3, 1, 2, 1, 2, 0, 3,
                                        4, 7, 5, 6, 5, 6, 4, 7};
         std::vector<Kokkos::complex<TestType>> values = {
-            {1.0, 0.0},  {0.0, -1.0}, {1.0, 0.0}, {0.0, 1.0},
-            {0.0, -1.0}, {1.0, 0.0},  {0.0, 1.0}, {1.0, 0.0},
-            {1.0, 0.0},  {0.0, -1.0}, {1.0, 0.0}, {0.0, 1.0},
-            {0.0, -1.0}, {1.0, 0.0},  {0.0, 1.0}, {1.0, 0.0}};
+            {3.1415, 0.0},  {0.0, -3.1415}, {3.1415, 0.0}, {0.0, 3.1415},
+            {0.0, -3.1415}, {3.1415, 0.0},  {0.0, 3.1415}, {3.1415, 0.0},
+            {3.1415, 0.0},  {0.0, -3.1415}, {3.1415, 0.0}, {0.0, 3.1415},
+            {0.0, -3.1415}, {3.1415, 0.0},  {0.0, 3.1415}, {3.1415, 0.0}};
 
         auto result = kokkos_sv.getExpectationValue(values, indices, index_ptr);
 
-        TestType expected = 1;
+        TestType expected = 3.1415;
 
         CHECK(expected == Approx(result).epsilon(1e-7));
     }
