@@ -268,7 +268,7 @@ class LightningKokkos(LightningQubit):
                     device_wires, qml.matrix(observable).ravel(order="C")
                 )
             else:
-                Hmat = qml.utils.sparse_hamiltonian(observable, wires=self.wires)            
+                Hmat = qml.utils.sparse_hamiltonian(observable, wires=self.wires)
                 CSR_SparseHamiltonian = observable.sparse_matrix().tocsr()
                 return self._kokkos_state.ExpectationValue(
                     CSR_SparseHamiltonian.data,
@@ -334,7 +334,9 @@ class LightningKokkos(LightningQubit):
                         "Adjoint differentiation method does not currently support the SparseHamiltonian observable"
                     )
                 if any([isinstance(o, Hermitian) for o in m.obs.non_identity_obs]):
-                    raise QuantumFunctionError("Lightning adjoint differentiation method does not currently support the Hermitian observable")
+                    raise QuantumFunctionError(
+                        "Lightning adjoint differentiation method does not currently support the Hermitian observable"
+                    )
 
         for op in tape.operations:
             if op.num_params > 1 and not isinstance(op, Rot):
