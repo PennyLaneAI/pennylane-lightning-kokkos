@@ -77,7 +77,6 @@ class TestHamiltonianExpval:
         dev.syncH2D()
 
         res = dev.expval(H)
-        print(res)
         expected = 3.1415
 
         assert np.allclose(res, expected)

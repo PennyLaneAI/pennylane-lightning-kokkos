@@ -309,6 +309,7 @@ class LightningKokkos(LightningQubit):
         Args:
             tape (.QuantumTape): quantum tape to differentiate
         """
+        unsupported = [Projector, Hamiltonian, SparseHamiltonian, Hermitian]
         for m in tape.measurements:
             if m.return_type is not Expectation:
                 raise QuantumFunctionError(
