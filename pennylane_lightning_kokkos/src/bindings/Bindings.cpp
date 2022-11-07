@@ -437,6 +437,43 @@ void StateVectorKokkos_class_bindings(py::module &m) {
                     obs_concat, wires, std::vector<ParamT>{}, conv_matrix);
             },
             "Calculate the expectation value of the given observable.")
+        .def(
+            "ExpectationValue",
+            [](StateVectorKokkos<PrecisionT> &sv,
+               const std::vector<std::size_t> &wires,
+               const np_arr_c &gate_matrix) {
+                const auto m_buffer = gate_matrix.request();
+                std::vector<Kokkos::complex<ParamT>> conv_matrix;
+                if (m_buffer.size) {
+                    const auto m_ptr =
+                        static_cast<const Kokkos::complex<ParamT> *>(
+                            m_buffer.ptr);
+                    conv_matrix = std::vector<Kokkos::complex<ParamT>>{
+                        m_ptr, m_ptr + m_buffer.size};
+                }
+                // Return the real component only & ignore params
+                return sv.getExpectationValue(wires, conv_matrix);
+            },
+            "Calculate the expectation value of the given observable.")
+
+        .def(
+            "ExpectationValue",
+            [](StateVectorKokkos<PrecisionT> &sv, const np_arr_c &gate_data,
+               const std::vector<std::size_t> &indices,
+               const std::vector<std::size_t> &index_ptr) {
+                const auto m_buffer = gate_data.request();
+                std::vector<Kokkos::complex<ParamT>> conv_data;
+                if (m_buffer.size) {
+                    const auto m_ptr =
+                        static_cast<const Kokkos::complex<ParamT> *>(
+                            m_buffer.ptr);
+                    conv_data = std::vector<Kokkos::complex<ParamT>>{
+                        m_ptr, m_ptr + m_buffer.size};
+                }
+                // Return the real component only & ignore params
+                return sv.getExpectationValue(conv_data, indices, index_ptr);
+            },
+            "Calculate the expectation value of the given observable.")
         .def("probs",
              [](StateVectorKokkos<PrecisionT> &sv,
                 const std::vector<size_t> &wires) {

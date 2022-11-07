@@ -312,5 +312,35 @@ struct getExpectationValueMultiQubitOpFunctor {
     }
 };
 
+template <class Precision> struct getExpectationValueSparseFunctor {
+
+    using KokkosComplexVector = Kokkos::View<Kokkos::complex<Precision> *>;
+    using KokkosSizeTVector = Kokkos::View<std::size_t *>;
+
+    KokkosComplexVector arr;
+    KokkosComplexVector data;
+    KokkosSizeTVector indices;
+    KokkosSizeTVector indptr;
+    std::size_t length;
+
+    getExpectationValueSparseFunctor(KokkosComplexVector arr_,
+                                     const KokkosComplexVector data_,
+                                     const KokkosSizeTVector indices_,
+                                     const KokkosSizeTVector indptr_) {
+        length = indices_.size();
+        indices = indices_;
+        indptr = indptr_;
+        data = data_;
+        arr = arr_;
+    }
+
+    KOKKOS_INLINE_FUNCTION
+    void operator()(const std::size_t row, Precision &expval) const {
+        for (size_t j = indptr[row]; j < indptr[row + 1]; j++) {
+            expval += real(conj(arr[row]) * data[j] * arr[indices[j]]);
+        }
+    }
+};
+
 } // namespace Functors
 } // namespace Pennylane

@@ -24,6 +24,8 @@ from pennylane import (
     QubitStateVector,
     DeviceError,
     Projector,
+    Hamiltonian,
+    SparseHamiltonian,
     Hermitian,
     Rot,
     CRot,
@@ -83,6 +85,8 @@ class LightningKokkos(LightningQubit):
         "PauliY",
         "PauliZ",
         "Hadamard",
+        "SparseHamiltonian",
+        "Hamiltonian",
         "Identity",
     }
 
@@ -245,11 +249,32 @@ class LightningKokkos(LightningQubit):
     def expval(self, observable, shot_range=None, bin_size=None):
         if observable.name in [
             "Projector",
-            "Hamiltonian",
-            "SparseHamiltonian",
         ]:
             self.syncD2H()
             return super().expval(observable, shot_range=shot_range, bin_size=bin_size)
+
+        if observable.name in ["SparseHamiltonian"]:
+            CSR_SparseHamiltonian = observable.sparse_matrix().tocsr()
+            return self._kokkos_state.ExpectationValue(
+                CSR_SparseHamiltonian.data,
+                CSR_SparseHamiltonian.indices,
+                CSR_SparseHamiltonian.indptr,
+            )
+
+        if observable.name in ["Hamiltonian"]:
+            if len(observable.wires) < 13:
+                device_wires = self.map_wires(observable.wires)
+                return self._kokkos_state.ExpectationValue(
+                    device_wires, qml.matrix(observable).ravel(order="C")
+                )
+            else:
+                Hmat = qml.utils.sparse_hamiltonian(observable, wires=self.wires)
+                CSR_SparseHamiltonian = observable.sparse_matrix().tocsr()
+                return self._kokkos_state.ExpectationValue(
+                    CSR_SparseHamiltonian.data,
+                    CSR_SparseHamiltonian.indices,
+                    CSR_SparseHamiltonian.indptr,
+                )
 
         if self.shots is not None:
             # estimate the expectation value
@@ -284,6 +309,7 @@ class LightningKokkos(LightningQubit):
         Args:
             tape (.QuantumTape): quantum tape to differentiate
         """
+        unsupported = [Projector, Hamiltonian, SparseHamiltonian, Hermitian]
         for m in tape.measurements:
             if m.return_type is not Expectation:
                 raise QuantumFunctionError(
@@ -291,18 +317,22 @@ class LightningKokkos(LightningQubit):
                     f" measurement {m.return_type.value}"
                 )
             if not isinstance(m.obs, Tensor):
-                if isinstance(m.obs, Projector):
+                if any([isinstance(m.obs, k) for k in unsupported]):
                     raise QuantumFunctionError(
-                        "Adjoint differentiation method does not support the Projector observable"
-                    )
-                if isinstance(m.obs, Hermitian):
-                    raise QuantumFunctionError(
-                        "Lightning adjoint differentiation method does not currently support the Hermitian observable"
+                        f"Adjoint differentiation method does not support the {m.obs.name} observable"
                     )
             else:
                 if any([isinstance(o, Projector) for o in m.obs.non_identity_obs]):
                     raise QuantumFunctionError(
                         "Adjoint differentiation method does not support the Projector observable"
+                    )
+                if any([isinstance(o, Hamiltonian) for o in m.obs.non_identity_obs]):
+                    raise QuantumFunctionError(
+                        "Adjoint differentiation method does not currently support the Hamiltonian observable"
+                    )
+                if any([isinstance(o, SparseHamiltonian) for o in m.obs.non_identity_obs]):
+                    raise QuantumFunctionError(
+                        "Adjoint differentiation method does not currently support the SparseHamiltonian observable"
                     )
                 if any([isinstance(o, Hermitian) for o in m.obs.non_identity_obs]):
                     raise QuantumFunctionError(
