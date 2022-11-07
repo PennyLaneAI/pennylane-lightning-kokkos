@@ -261,11 +261,20 @@ class LightningKokkos(LightningQubit):
                 CSR_SparseHamiltonian.indptr,
             )
 
-        if observable.name in ["Hamiltonian"] and len(observable.wires) < 13:
-            device_wires = self.map_wires(observable.wires)
-            return self._kokkos_state.ExpectationValue(
-                device_wires, qml.matrix(observable).ravel(order="C")
-            )
+        if observable.name in ["Hamiltonian"]:
+            if len(observable.wires) < 13:
+                device_wires = self.map_wires(observable.wires)
+                return self._kokkos_state.ExpectationValue(
+                    device_wires, qml.matrix(observable).ravel(order="C")
+                )
+            else:
+                Hmat = qml.utils.sparse_hamiltonian(observable, wires=self.wires)            
+                CSR_SparseHamiltonian = observable.sparse_matrix().tocsr()
+                return self._kokkos_state.ExpectationValue(
+                    CSR_SparseHamiltonian.data,
+                    CSR_SparseHamiltonian.indices,
+                    CSR_SparseHamiltonian.indptr,
+                )
 
         if self.shots is not None:
             # estimate the expectation value
@@ -307,27 +316,10 @@ class LightningKokkos(LightningQubit):
                     f" measurement {m.return_type.value}"
                 )
             if not isinstance(m.obs, Tensor):
-                if isinstance(m.obs, Projector):
+                if any([isinstance(m.obs, k) for k in unsupported]):
                     raise QuantumFunctionError(
-                        "Adjoint differentiation method does not support the Projector observable"
+                        f"Adjoint differentiation method does not support the {m.obs.name} observable"
                     )
-                if isinstance(m.obs, Hermitian):
-                    raise QuantumFunctionError(
-                        "Lightning adjoint differentiation method does not currently support the Hermitian observable"
-                    )
-                if isinstance(m.obs, Hamiltonian):
-                    raise QuantumFunctionError(
-                        "Adjoint differentiation method does not currently support the Hamiltonian observable"
-                    )
-                if isinstance(m.obs, SparseHamiltonian):
-                    raise QuantumFunctionError(
-                        "Adjoint differentiation method does not currently support the SparseHamiltonian observable"
-                    )
-                if isinstance(m.obs, Hermitian):
-                    raise QuantumFunctionError(
-                        "Lightning adjoint differentiation method does not currently support the SparseHamiltonian observable"
-                    )
-
             else:
                 if any([isinstance(o, Projector) for o in m.obs.non_identity_obs]):
                     raise QuantumFunctionError(
@@ -342,9 +334,7 @@ class LightningKokkos(LightningQubit):
                         "Adjoint differentiation method does not currently support the SparseHamiltonian observable"
                     )
                 if any([isinstance(o, Hermitian) for o in m.obs.non_identity_obs]):
-                    raise QuantumFunctionError(
-                        "Lightning adjoint differentiation method does not currently support the Hermitian observable"
-                    )
+                    raise QuantumFunctionError("Lightning adjoint differentiation method does not currently support the Hermitian observable")
 
         for op in tape.operations:
             if op.num_params > 1 and not isinstance(op, Rot):
