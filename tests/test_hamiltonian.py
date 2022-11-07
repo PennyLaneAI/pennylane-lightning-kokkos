@@ -24,7 +24,7 @@ from pennylane_lightning_kokkos import LightningKokkos
 
 class TestHamiltonianExpval:
     @pytest.fixture(params=[np.complex128])
-    def gpu_dev(self, request):
+    def kokkos_dev(self, request):
         return LightningKokkos(wires=2, c_dtype=request.param)
 
     @pytest.mark.parametrize(
@@ -39,11 +39,11 @@ class TestHamiltonianExpval:
             ),
         ],
     )
-    def test_expval_hamiltonian(self, obs, coeffs, res, tol, gpu_dev):
+    def test_expval_hamiltonian(self, obs, coeffs, res, tol, kokkos_dev):
         """Test expval with Hamiltonian"""
         ham = qml.Hamiltonian(coeffs, obs)
 
-        @qml.qnode(gpu_dev)
+        @qml.qnode(kokkos_dev)
         def circuit():
             qml.RX(0.4, wires=[0])
             qml.RY(-0.2, wires=[1])
@@ -58,7 +58,7 @@ class TestHamiltonianExpval:
         obs = qml.PauliX(1) @ qml.PauliY(2)
         obs1 = qml.Identity(1)
 
-        H = qml.Hamiltonian([1.0, 1.0], [obs1, obs])
+        H = qml.Hamiltonian([3.1415, 9.6], [obs1, obs])
 
         dev._state = np.array(
             [
@@ -77,6 +77,7 @@ class TestHamiltonianExpval:
         dev.syncH2D()
 
         res = dev.expval(H)
-        expected = 1
+        print(res)
+        expected = 3.1415
 
         assert np.allclose(res, expected)

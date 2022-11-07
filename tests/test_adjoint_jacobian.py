@@ -159,7 +159,6 @@ class TestAdjointJacobian:
 
         with pytest.raises(
             qml.QuantumFunctionError,
-            match="Lightning adjoint differentiation method does not",
         ):
             dev_kokkos.adjoint_jacobian(tape)
 
@@ -169,7 +168,6 @@ class TestAdjointJacobian:
 
         with pytest.raises(
             qml.QuantumFunctionError,
-            match="Lightning adjoint differentiation method does not",
         ):
             dev_kokkos.adjoint_jacobian(tape)
 
