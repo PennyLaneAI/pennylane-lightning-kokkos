@@ -1,6 +1,6 @@
 # Release 0.27.0-dev
 
-### New features since last release
+### New features since last release 
  * Add probability support.
  [(#11)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/11)
  
@@ -16,6 +16,8 @@
 ### Documentation
 
 ### Bug fixes
+ * Fix for errors caused by new lightning inheirtance implementation(DefaultQubit->QubitDevice).
+ [(#16)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/16)
 
 ### Contributors
 
