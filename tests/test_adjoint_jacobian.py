@@ -821,7 +821,7 @@ def test_fail_adjoint_Hamiltonian():
         qml.SparseHamiltonian(
             qml.utils.sparse_hamiltonian(
                 0.1 * qml.PauliX(wires=custom_wires[0]) @ qml.PauliZ(wires=custom_wires[1]),
-                wires=custom_wires
+                wires=custom_wires,
             ),
             wires=custom_wires,
         ),
