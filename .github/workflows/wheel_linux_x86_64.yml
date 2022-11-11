@@ -2,7 +2,7 @@ name: Wheel::Linux::x86_64
 
 # **What it does**: Builds python wheels for Linux (ubuntu-latest) architecture x86_64 and store it as artifacts.
 #                   Python versions: 3.7, 3.8, 3.9, 3.10, 3.11.
-# **Why we have it**: To build wheels for pennylane-lightning installation.
+# **Why we have it**: To build wheels for pennylane-lightning-kokkos installation.
 # **Who does it impact**: Wheels to be uploaded to PyPI.
 
 env:
@@ -114,7 +114,6 @@ jobs:
         os: [ubuntu-latest]
         arch: [x86_64]
         cibw_build: ${{ fromJson(needs.set_wheel_build_matrix.outputs.python_version) }}
-       #cibw_build: ${{ fromJson(needs.set_wheel_build_matrix.outputs.python_version) }}
         exec_model: ${{ fromJson(needs.set_wheel_build_matrix.outputs.exec_model) }}
         kokkos_version: ${{ fromJson(needs.set_wheel_build_matrix.outputs.kokkos_version) }}
         container_img: ["quay.io/pypa/manylinux2014_x86_64"]
@@ -199,19 +198,19 @@ jobs:
           name: ${{ runner.os }}-wheels-${{ matrix.arch }}.zip
           path: ./wheelhouse/*.whl
 
-#upload-pypi:
-#    needs: linux-wheels-x86-64
-#    runs-on: ubuntu-latest
-#    if: ${{ github.event_name == 'release' || github.ref == 'refs/heads/master'}}
-#    steps:
-#      - uses: actions/download-artifact@v2
-#        with:
-#          name: Linux-wheels-x86_64.zip
-#          path: dist
-#
-#      - name: Upload wheels to PyPI
-#        uses: pypa/gh-action-pypi-publish@release/v1
-#        with:
-#          user: __token__
-#          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
-#          repository_url: https://test.pypi.org/legacy/
+            #upload-pypi:
+            #needs: linux-wheels-x86-64
+            #runs-on: ubuntu-latest
+            #if: ${{ github.event_name == 'release' || github.ref == 'refs/heads/master'}}
+            #steps:
+            #- uses: actions/download-artifact@v2
+            #with:
+            #name: Linux-wheels-x86_64.zip
+            #path: dist
+            #
+            #- name: Upload wheels to PyPI
+            #uses: pypa/gh-action-pypi-publish@release/v1
+            #with:
+            #user: __token__
+            #password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+            #repository_url: https://test.pypi.org/legacy/

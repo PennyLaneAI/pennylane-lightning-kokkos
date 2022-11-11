@@ -60,4 +60,3 @@ jobs:
       python_version: ${{ steps.pyver.outputs.python_version }}
       exec_model: ${{ steps.exec_model.outputs.exec_model }}
       kokkos_version: ${{ steps.kokkos_version.outputs.kokkos_version }}
-
