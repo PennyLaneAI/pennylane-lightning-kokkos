@@ -15,3 +15,4 @@
 
 from ._version import __version__
 from .lightning_kokkos import LightningKokkos
+from .lightning_kokkos_qubit_ops import InitArguments
