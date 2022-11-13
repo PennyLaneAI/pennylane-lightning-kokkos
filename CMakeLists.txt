@@ -153,7 +153,8 @@ if(PLKOKKOS_ENABLE_WARNINGS)
     )
     if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
         target_compile_options(pennylane_lightning_kokkos INTERFACE
-            $<$<COMPILE_LANGUAGE:CXX>:-Wno-error=volatile;-Wno-error=deprecated-declarations>
+            $<$<COMPILE_LANGUAGE:CXX>:-Wno-error=deprecated-declarations>
+            # $<$<COMPILE_LANGUAGE:CXX>:-Wno-error=volatile;-Wno-error=deprecated-declarations>
         )
     endif()
     # Explicitly disable warnings for Kokkos-specific library issues.
