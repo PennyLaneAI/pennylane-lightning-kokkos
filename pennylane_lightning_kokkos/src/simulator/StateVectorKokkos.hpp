@@ -30,6 +30,9 @@
 #include "GateFunctors.hpp"
 #include "MeasuresFunctors.hpp"
 
+std::string repr_InitArguments(const Kokkos::InitArguments &a);
+void print_InitArguments(const Kokkos::InitArguments &a);
+
 /// @cond DEV
 namespace {
 using namespace Pennylane::Util;
@@ -77,7 +80,7 @@ template <class Precision> class StateVectorKokkos {
                      Kokkos::MemoryTraits<Kokkos::Unmanaged>>;
 
     StateVectorKokkos() = delete;
-    StateVectorKokkos(size_t num_qubits)
+    StateVectorKokkos(size_t num_qubits, Kokkos::InitArguments kokkos_args = (Kokkos::InitArguments){})
         : gates_{
                 //Identity
                  {"PauliX", 
@@ -436,7 +439,8 @@ template <class Precision> class StateVectorKokkos {
         {
             const std::lock_guard<std::mutex> lock(counts_mutex_);
             if (counts_ == 0 and !Kokkos::is_initialized()) {
-                Kokkos::initialize();
+                // print_InitArguments(kokkos_args);
+                Kokkos::initialize(kokkos_args);
             }
             counts_++;
         }
@@ -516,8 +520,8 @@ template <class Precision> class StateVectorKokkos {
      *
      * @param num_qubits Number of qubits
      */
-    StateVectorKokkos(Kokkos::complex<Precision> *hostdata_, size_t length)
-        : StateVectorKokkos(Util::log2(length)) {
+    StateVectorKokkos(Kokkos::complex<Precision> *hostdata_, size_t length, Kokkos::InitArguments kokkos_args = (Kokkos::InitArguments){})
+        : StateVectorKokkos(Util::log2(length), kokkos_args) {
         HostToDevice(hostdata_, length);
     }
 
@@ -526,8 +530,8 @@ template <class Precision> class StateVectorKokkos {
      *
      * @param other Another state vector
      */
-    StateVectorKokkos(const StateVectorKokkos &other)
-        : StateVectorKokkos(other.getNumQubits()) {
+    StateVectorKokkos(const StateVectorKokkos &other, Kokkos::InitArguments kokkos_args = (Kokkos::InitArguments){})
+        : StateVectorKokkos(other.getNumQubits(), kokkos_args) {
         this->DeviceToDevice(other.getData());
     }
 

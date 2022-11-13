@@ -68,6 +68,13 @@ void StateVectorKokkos_class_bindings(py::module &m) {
             return new StateVectorKokkos<PrecisionT>(
                 data_ptr, static_cast<std::size_t>(arr.size()));
         }))
+        .def(py::init([](const np_arr_c &arr, const Kokkos::InitArguments &kokkos_args) {
+            py::buffer_info numpyArrayInfo = arr.request();
+            auto *data_ptr =
+                static_cast<Kokkos::complex<PrecisionT> *>(numpyArrayInfo.ptr);
+            return new StateVectorKokkos<PrecisionT>(
+                data_ptr, static_cast<std::size_t>(arr.size()), kokkos_args);
+        }))
         .def(
             "Identity",
             []([[maybe_unused]] StateVectorKokkos<PrecisionT> &sv,
@@ -734,6 +741,19 @@ PYBIND11_MODULE(lightning_kokkos_qubit_ops, // NOLINT: No control over
 
     m.def("kokkos_start", []() { Kokkos::initialize(); });
     m.def("kokkos_end", []() { Kokkos::finalize(); });
+
+    py::class_<Kokkos::InitArguments>(m, "InitArguments")
+        .def(py::init<>())
+        .def(py::init<const int &>())
+        .def_readwrite("num_threads", &Kokkos::InitArguments::num_threads)
+        .def_readwrite("num_numa", &Kokkos::InitArguments::num_numa)
+        .def_readwrite("device_id", &Kokkos::InitArguments::device_id)
+        .def_readwrite("ndevices", &Kokkos::InitArguments::ndevices)
+        .def_readwrite("skip_device", &Kokkos::InitArguments::skip_device)
+        .def_readwrite("disable_warnings", &Kokkos::InitArguments::disable_warnings)
+        .def("__repr__", [](const Kokkos::InitArguments &a) {
+            return repr_InitArguments(a);
+        });
 }
 }
 

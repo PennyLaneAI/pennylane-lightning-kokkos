@@ -17,3 +17,19 @@
 // explicit instantiation
 template class Pennylane::StateVectorKokkos<float>;
 template class Pennylane::StateVectorKokkos<double>;
+
+std::string repr_InitArguments(const Kokkos::InitArguments &a){
+    std::string str;
+    str = "<example.InitArguments with";
+    str += "\n num_threads = " + std::to_string(a.num_threads);
+    str += "\n num_numa = " + std::to_string(a.num_numa);
+    str += "\n device_id = " + std::to_string(a.device_id);
+    str += "\n ndevices = " + std::to_string(a.ndevices);
+    str += "\n skip_device = " + std::to_string(a.skip_device);
+    str += "\n disable_warnings = " + std::to_string(a.disable_warnings) += ">";
+    return str;
+}
+
+void print_InitArguments(const Kokkos::InitArguments &a){
+    std::cout << repr_InitArguments(a) << '\n';
+}
