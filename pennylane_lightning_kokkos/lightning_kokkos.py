@@ -93,7 +93,16 @@ class LightningKokkos(LightningQubit):
         "Identity",
     }
 
-    def __init__(self, wires, *, sync=True, c_dtype=np.complex128, shots=None, batch_obs=False, kokkos_args=None):
+    def __init__(
+        self,
+        wires,
+        *,
+        sync=True,
+        c_dtype=np.complex128,
+        shots=None,
+        batch_obs=False,
+        kokkos_args=None,
+    ):
         super().__init__(wires, c_dtype=c_dtype, shots=shots)
         if kokkos_args is None:
             self._kokkos_state = _kokkos_dtype(self._state.dtype)(self._state)

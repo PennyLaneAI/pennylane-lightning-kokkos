@@ -13,9 +13,7 @@ n_samples = 5
 
 def get_time(qnode, params):
     globals_dict = {"grad": qml.grad, "circuit": qnode, "params": params}
-    return timeit.timeit(
-        "grad(circuit)(params)", globals=globals_dict, number=n_samples
-    )
+    return timeit.timeit("grad(circuit)(params)", globals=globals_dict, number=n_samples)
 
 
 def wires_scaling(n_wires, n_layers, num_threads=None):
@@ -38,18 +36,14 @@ def wires_scaling(n_wires, n_layers, num_threads=None):
         dev = qml.device(engine, wires=i_wires, kokkos_args=kokkos_args, batch_obs=True)
         dev_python = qml.device("default.qubit", wires=i_wires)
 
-        circuit_adjoint = qml.QNode(
-            lambda x: circuit(x, wires=i_wires), dev, diff_method="adjoint"
-        )
+        circuit_adjoint = qml.QNode(lambda x: circuit(x, wires=i_wires), dev, diff_method="adjoint")
         circuit_ps = qml.QNode(
             lambda x: circuit(x, wires=i_wires), dev, diff_method="parameter-shift"
         )
         # circuit_backprop = qml.QNode(lambda x: circuit(x, wires=i_wires), dev_python, diff_method="backprop")
 
         # set up the parameters
-        param_shape = qml.StronglyEntanglingLayers.shape(
-            n_wires=i_wires, n_layers=n_layers
-        )
+        param_shape = qml.StronglyEntanglingLayers.shape(n_wires=i_wires, n_layers=n_layers)
         params = rng.standard_normal(param_shape, requires_grad=True)
 
         t_adjoint.append(get_time(circuit_adjoint, params))

@@ -18,7 +18,7 @@
 template class Pennylane::StateVectorKokkos<float>;
 template class Pennylane::StateVectorKokkos<double>;
 
-std::string repr_InitArguments(const Kokkos::InitArguments &a){
+std::string repr_InitArguments(const Kokkos::InitArguments &a) {
     std::string str;
     str = "<example.InitArguments with";
     str += "\n num_threads = " + std::to_string(a.num_threads);
@@ -30,6 +30,6 @@ std::string repr_InitArguments(const Kokkos::InitArguments &a){
     return str;
 }
 
-void print_InitArguments(const Kokkos::InitArguments &a){
+void print_InitArguments(const Kokkos::InitArguments &a) {
     std::cout << repr_InitArguments(a) << '\n';
 }

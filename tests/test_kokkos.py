@@ -18,6 +18,7 @@ import pytest
 
 from pennylane_lightning_kokkos import InitArguments
 
+
 class TestKokkos:
     """Tests that Kokkos bindings work."""
 
@@ -29,7 +30,6 @@ class TestKokkos:
         assert args.num_threads == 2
         args = InitArguments(5)
         assert args.num_threads == 5
-
 
     def test_InitArguments_init(self):
         """Tests that InitArguments fields are properly accessed."""
@@ -71,4 +71,3 @@ class TestKokkos:
  skip_device = 9999
  disable_warnings = 0>"""
         assert r0.strip() == r1.strip()
-

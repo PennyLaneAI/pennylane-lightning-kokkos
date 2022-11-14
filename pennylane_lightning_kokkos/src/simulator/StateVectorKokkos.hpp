@@ -520,7 +520,9 @@ template <class Precision> class StateVectorKokkos {
      *
      * @param num_qubits Number of qubits
      */
-    StateVectorKokkos(Kokkos::complex<Precision> *hostdata_, size_t length, Kokkos::InitArguments kokkos_args = (Kokkos::InitArguments){})
+    StateVectorKokkos(
+        Kokkos::complex<Precision> *hostdata_, size_t length,
+        Kokkos::InitArguments kokkos_args = (Kokkos::InitArguments){})
         : StateVectorKokkos(Util::log2(length), kokkos_args) {
         HostToDevice(hostdata_, length);
     }
@@ -530,7 +532,9 @@ template <class Precision> class StateVectorKokkos {
      *
      * @param other Another state vector
      */
-    StateVectorKokkos(const StateVectorKokkos &other, Kokkos::InitArguments kokkos_args = (Kokkos::InitArguments){})
+    StateVectorKokkos(
+        const StateVectorKokkos &other,
+        Kokkos::InitArguments kokkos_args = (Kokkos::InitArguments){})
         : StateVectorKokkos(other.getNumQubits(), kokkos_args) {
         this->DeviceToDevice(other.getData());
     }
