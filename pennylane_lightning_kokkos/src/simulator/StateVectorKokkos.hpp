@@ -16,6 +16,7 @@
  * @file StateVectorKokkos.hpp
  */
 
+
 #pragma once
 #include <memory>
 #include <unordered_map>
@@ -80,7 +81,7 @@ template <class Precision> class StateVectorKokkos {
                      Kokkos::MemoryTraits<Kokkos::Unmanaged>>;
 
     StateVectorKokkos() = delete;
-    StateVectorKokkos(size_t num_qubits, Kokkos::InitArguments kokkos_args = (Kokkos::InitArguments){})
+    StateVectorKokkos(size_t num_qubits, Kokkos::InitArguments kokkos_args = {})
         : gates_{
                 //Identity
                  {"PauliX", 
@@ -522,7 +523,7 @@ template <class Precision> class StateVectorKokkos {
      */
     StateVectorKokkos(
         Kokkos::complex<Precision> *hostdata_, size_t length,
-        Kokkos::InitArguments kokkos_args = (Kokkos::InitArguments){})
+        Kokkos::InitArguments kokkos_args = {})
         : StateVectorKokkos(Util::log2(length), kokkos_args) {
         HostToDevice(hostdata_, length);
     }
@@ -534,7 +535,7 @@ template <class Precision> class StateVectorKokkos {
      */
     StateVectorKokkos(
         const StateVectorKokkos &other,
-        Kokkos::InitArguments kokkos_args = (Kokkos::InitArguments){})
+        Kokkos::InitArguments kokkos_args = {})
         : StateVectorKokkos(other.getNumQubits(), kokkos_args) {
         this->DeviceToDevice(other.getData());
     }

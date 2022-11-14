@@ -60,7 +60,7 @@ if __name__ == "__main__":
     if len(sys.argv) > 0:
         num_threads = int(sys.argv[1])
 
-    wires_list = [22]
+    wires_list = [3]
     n_layers = 3
     adjoint_wires, ps_wires, backprop_wires = wires_scaling(
         wires_list,
