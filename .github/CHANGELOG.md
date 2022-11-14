@@ -1,29 +1,32 @@
 # Release 0.27.0-dev
 
-### New features since last release 
+### New features since last release
+
  * Add probability support.
  [(#11)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/11)
- 
+
  * Add sample generation support.
   [(#9)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/9)
 
 ### Breaking changes
 
 ### Improvements
+
  * Add tests for MacOS.
   [(#3)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/3)
+
+ * Update `LightningKokkos` device following changes in `LightningQubit` inheritance from `DefaultQubit` to `QubitDevice`.
+ [(#16)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/16)
 
 ### Documentation
 
 ### Bug fixes
- * Fix for errors caused by new lightning inheirtance implementation(DefaultQubit->QubitDevice).
- [(#16)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/16)
 
 ### Contributors
 
 This release contains contributions from (in alphabetical order):
 
-Amintor Dusko, Shuli Shu
+Amintor Dusko, Lee J. O'Riordan, Shuli Shu
 
 ---
 # Release 0.26.0
