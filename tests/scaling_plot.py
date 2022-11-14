@@ -19,8 +19,9 @@ for l in tdat:
 
 fig = plt.figure()
 
-plt.plot(nproc, t_adj, ".-", label="time-adjoint")
-plt.plot(nproc, t_ps, ".-", label="time-parameter-shift")
+plt.loglog(nproc, t_adj, ".-", label="time-adjoint")
+# plt.plot(nproc, t_adj, ".-", label="time-adjoint")
+# plt.plot(nproc, t_ps, ".-", label="time-parameter-shift")
 
 plt.legend()
 

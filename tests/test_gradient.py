@@ -53,7 +53,8 @@ def wires_scaling(n_wires, n_layers, num_threads=None):
         params = rng.standard_normal(param_shape, requires_grad=True)
 
         t_adjoint.append(get_time(circuit_adjoint, params))
-        t_ps.append(get_time(circuit_ps, params))
+        t_ps.append(1.0)
+        # t_ps.append(get_time(circuit_ps, params))
         # t_backprop.append(get_time(circuit_backprop, params))
 
     return t_adjoint, t_ps, t_backprop
@@ -65,7 +66,7 @@ if __name__ == "__main__":
     if len(sys.argv) > 0:
         num_threads = int(sys.argv[1])
 
-    wires_list = [3]
+    wires_list = [22]
     n_layers = 3
     adjoint_wires, ps_wires, backprop_wires = wires_scaling(
         wires_list,
