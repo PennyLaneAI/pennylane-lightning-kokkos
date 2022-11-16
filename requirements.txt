@@ -8,5 +8,3 @@ pybind11
 pytest
 pytest-cov
 pytest-mock
-wheel
-matplotlib
