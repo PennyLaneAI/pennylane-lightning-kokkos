@@ -16,58 +16,53 @@ Unit tests for Kokkos bindings.
 """
 import pytest
 
-from pennylane_lightning_kokkos import InitArguments
+from pennylane_lightning_kokkos.lightning_kokkos_qubit_ops import InitArguments
 
 
 class TestKokkos:
     """Tests that Kokkos bindings work."""
 
-    def test_InitArguments_init(self):
+    @pytest.mark.parametrize("num_threads", [None, 1, 2, 5])
+    def test_InitArguments_init(self, num_threads):
         """Tests that InitArguments is properly initialized."""
-        args = InitArguments(1)
-        assert args.num_threads == 1
-        args = InitArguments(2)
-        assert args.num_threads == 2
-        args = InitArguments(5)
-        assert args.num_threads == 5
+        if num_threads is None:
+            args = InitArguments()
+            assert args.num_threads == -1
+        else:
+            args = InitArguments(num_threads)
+            assert args.num_threads == num_threads
 
-    def test_InitArguments_init(self):
+    @pytest.mark.parametrize(
+        "fields",
+        [
+            ("num_threads", -1, 7),
+            ("num_numa", -1, 7),
+            ("device_id", -1, 7),
+            ("ndevices", -1, 7),
+            ("skip_device", 9999, 7),
+            ("disable_warnings", False, True),
+        ],
+    )
+    def test_InitArguments_readwrite_attrs(self, fields):
         """Tests that InitArguments fields are properly accessed."""
         args = InitArguments()
-        # num_threads
-        assert args.num_threads == -1
-        args.num_threads = 7
-        assert args.num_threads == 7
-        # num_numa
-        assert args.num_numa == -1
-        args.num_numa = 7
-        assert args.num_numa == 7
-        # device_id
-        assert args.device_id == -1
-        args.device_id = 7
-        assert args.device_id == 7
-        # ndevices
-        assert args.ndevices == -1
-        args.ndevices = 7
-        assert args.ndevices == 7
-        # skip_device
-        assert args.skip_device == 9999
-        args.skip_device = 7
-        assert args.skip_device == 7
-        # disable_warnings
-        assert args.disable_warnings == False
-        args.disable_warnings = False
-        assert args.disable_warnings == False
+        field, default, value = fields
+        assert getattr(args, field) == default
+        setattr(args, field, value)
+        assert getattr(args, field) == value
 
     def test_InitArguments_repr(self):
         """Tests that InitArguments are properly initialized."""
-        args = InitArguments(3)
-        r0 = args.__repr__()
-        r1 = """<example.InitArguments with
+        r0 = """<example.InitArguments with
  num_threads = 3
  num_numa = -1
  device_id = -1
  ndevices = -1
  skip_device = 9999
  disable_warnings = 0>"""
-        assert r0.strip() == r1.strip()
+        args = InitArguments()
+        r1 = args.__repr__()
+        assert r1.strip() != r0.strip()
+        args = InitArguments(3)
+        r1 = args.__repr__()
+        assert r1.strip() == r0.strip()

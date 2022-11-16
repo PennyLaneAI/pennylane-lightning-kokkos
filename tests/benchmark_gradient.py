@@ -2,7 +2,7 @@ import timeit
 import matplotlib.pyplot as plt
 import pennylane as qml
 from pennylane import numpy as np
-from pennylane_lightning_kokkos import InitArguments
+from pennylane_lightning_kokkos.lightning_kokkos_qubit_ops import InitArguments
 import sys
 
 plt.style.use("bmh")
