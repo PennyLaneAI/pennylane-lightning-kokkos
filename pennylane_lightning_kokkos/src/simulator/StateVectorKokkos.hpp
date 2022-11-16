@@ -16,7 +16,6 @@
  * @file StateVectorKokkos.hpp
  */
 
-
 #pragma once
 #include <memory>
 #include <unordered_map>
@@ -30,9 +29,6 @@
 #include "ExpValFunctors.hpp"
 #include "GateFunctors.hpp"
 #include "MeasuresFunctors.hpp"
-
-std::string repr_InitArguments(const Kokkos::InitArguments &a);
-void print_InitArguments(const Kokkos::InitArguments &a);
 
 /// @cond DEV
 namespace {
@@ -81,7 +77,7 @@ template <class Precision> class StateVectorKokkos {
                      Kokkos::MemoryTraits<Kokkos::Unmanaged>>;
 
     StateVectorKokkos() = delete;
-    StateVectorKokkos(size_t num_qubits, Kokkos::InitArguments kokkos_args = {})
+    StateVectorKokkos(size_t num_qubits, const Kokkos::InitArguments &kokkos_args = {})
         : gates_{
                 //Identity
                  {"PauliX", 
@@ -440,7 +436,6 @@ template <class Precision> class StateVectorKokkos {
         {
             const std::lock_guard<std::mutex> lock(counts_mutex_);
             if (counts_ == 0 and !Kokkos::is_initialized()) {
-                // print_InitArguments(kokkos_args);
                 Kokkos::initialize(kokkos_args);
             }
             counts_++;
@@ -521,9 +516,8 @@ template <class Precision> class StateVectorKokkos {
      *
      * @param num_qubits Number of qubits
      */
-    StateVectorKokkos(
-        Kokkos::complex<Precision> *hostdata_, size_t length,
-        Kokkos::InitArguments kokkos_args = {})
+    StateVectorKokkos(Kokkos::complex<Precision> *hostdata_, size_t length,
+                      const Kokkos::InitArguments &kokkos_args = {})
         : StateVectorKokkos(Util::log2(length), kokkos_args) {
         HostToDevice(hostdata_, length);
     }
@@ -533,9 +527,8 @@ template <class Precision> class StateVectorKokkos {
      *
      * @param other Another state vector
      */
-    StateVectorKokkos(
-        const StateVectorKokkos &other,
-        Kokkos::InitArguments kokkos_args = {})
+    StateVectorKokkos(const StateVectorKokkos &other,
+                      const Kokkos::InitArguments &kokkos_args = {})
         : StateVectorKokkos(other.getNumQubits(), kokkos_args) {
         this->DeviceToDevice(other.getData());
     }

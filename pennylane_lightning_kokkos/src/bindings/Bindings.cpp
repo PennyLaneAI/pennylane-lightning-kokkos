@@ -19,6 +19,7 @@
 
 #include "AdjointDiffKokkos.hpp"
 #include "Error.hpp" // LightningException
+#include "KokkosUtil.hpp"
 #include "StateVectorKokkos.hpp"
 
 #include "pybind11/complex.h"
