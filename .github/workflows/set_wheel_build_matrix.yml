@@ -31,7 +31,7 @@ jobs:
         with:
           access_token: ${{ github.token }}
 
-      - name: Checkout PennyLane-Lightning
+      - name: Checkout PennyLane-Lightning-Kokkos
         uses: actions/checkout@v3
 
       - name: Python version
