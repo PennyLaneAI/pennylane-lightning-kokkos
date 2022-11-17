@@ -53,13 +53,13 @@ class TestKokkos:
 
     def test_InitArguments_repr(self):
         """Tests that InitArguments are properly initialized."""
-        r0 = """<example.InitArguments with
- num_threads = 3
- num_numa = -1
- device_id = -1
- ndevices = -1
- skip_device = 9999
- disable_warnings = 0>"""
+        r0 = """<InitArguments with
+num_threads = 3
+num_numa = -1
+device_id = -1
+ndevices = -1
+skip_device = 9999
+disable_warnings = 0>"""
         args = InitArguments()
         r1 = args.__repr__()
         assert r1.strip() != r0.strip()
