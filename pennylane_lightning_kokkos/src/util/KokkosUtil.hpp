@@ -17,7 +17,6 @@
  */
 
 #include <Kokkos_Core.hpp>
-#include <bits/stdc++.h>
 
 using namespace std;
 /**
