@@ -22,39 +22,35 @@ from pennylane_lightning_kokkos.lightning_kokkos_qubit_ops import InitArguments
 class TestKokkos:
     """Tests that Kokkos bindings work."""
 
-    @pytest.mark.parametrize("num_threads", [None, 1, 2, 5])
-    def test_InitArguments_init(self, num_threads):
-        """Tests that InitArguments is properly initialized."""
-        if num_threads is None:
-            args = InitArguments()
-            assert args.num_threads == -1
-        else:
-            args = InitArguments(num_threads)
-            assert args.num_threads == num_threads
-
+    @pytest.mark.parametrize("init_threads", [None, 1, 2, 5])
     @pytest.mark.parametrize(
         "fields",
         [
-            ("num_threads", -1, 7),
-            ("num_numa", -1, 7),
-            ("device_id", -1, 7),
-            ("ndevices", -1, 7),
-            ("skip_device", 9999, 7),
+            ("num_threads", -1, 2),
+            ("num_numa", -1, 3),
+            ("device_id", -1, 4),
+            ("ndevices", -1, 5),
+            ("skip_device", 9999, 6),
             ("disable_warnings", False, True),
         ],
     )
-    def test_InitArguments_readwrite_attrs(self, fields):
+    def test_InitArguments_readwrite_attrs(self, init_threads, fields):
         """Tests that InitArguments fields are properly accessed."""
-        args = InitArguments()
         field, default, value = fields
+        if init_threads is None:
+            args = InitArguments()
+        else:
+            args = InitArguments(init_threads)
+            default = init_threads if field == "num_threads" else default
         assert getattr(args, field) == default
         setattr(args, field, value)
         assert getattr(args, field) == value
 
-    def test_InitArguments_repr(self):
+    @pytest.mark.parametrize("init_threads", list(range(1,5)))
+    def test_InitArguments_repr(self, init_threads):
         """Tests that InitArguments are properly initialized."""
-        r0 = """<InitArguments with
-num_threads = 3
+        r0 = f"""<InitArguments with
+num_threads = {init_threads}
 num_numa = -1
 device_id = -1
 ndevices = -1
@@ -63,6 +59,6 @@ disable_warnings = 0>"""
         args = InitArguments()
         r1 = args.__repr__()
         assert r1.strip() != r0.strip()
-        args = InitArguments(3)
+        args = InitArguments(init_threads)
         r1 = args.__repr__()
         assert r1.strip() == r0.strip()

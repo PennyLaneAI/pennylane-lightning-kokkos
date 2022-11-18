@@ -108,7 +108,7 @@ class LightningKokkos(LightningQubit):
         elif isinstance(kokkos_args, InitArguments):
             self._kokkos_state = _kokkos_dtype(self._state.dtype)(self._state, kokkos_args)
         else:
-            TypeError("Argument kokkos_args must of of type InitArguments.")
+            raise TypeError("Argument kokkos_args must be of type InitArguments.")
         self._sync = sync
 
     def reset(self):
