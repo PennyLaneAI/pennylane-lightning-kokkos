@@ -46,7 +46,7 @@ class TestKokkos:
         setattr(args, field, value)
         assert getattr(args, field) == value
 
-    @pytest.mark.parametrize("init_threads", list(range(1,5)))
+    @pytest.mark.parametrize("init_threads", list(range(1, 5)))
     def test_InitArguments_repr(self, init_threads):
         """Tests that InitArguments are properly initialized."""
         r0 = f"""<InitArguments with
