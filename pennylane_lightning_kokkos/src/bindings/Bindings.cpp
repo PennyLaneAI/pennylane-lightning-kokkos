@@ -19,7 +19,6 @@
 
 #include "AdjointDiffKokkos.hpp"
 #include "Error.hpp" // LightningException
-#include "KokkosUtil.hpp"
 #include "StateVectorKokkos.hpp"
 
 #include "pybind11/complex.h"
@@ -754,8 +753,11 @@ PYBIND11_MODULE(lightning_kokkos_qubit_ops, // NOLINT: No control over
         .def_readwrite("skip_device", &Kokkos::InitArguments::skip_device)
         .def_readwrite("disable_warnings",
                        &Kokkos::InitArguments::disable_warnings)
-        .def("__repr__", [](const Kokkos::InitArguments &a) {
-            return repr_InitArguments(a);
+        .def("__repr__", [](const Kokkos::InitArguments &args) {
+            using namespace Pennylane::Util;
+            std::ostringstream args_stream;
+            args_stream << args;
+            return args_stream.str();
         });
 }
 }
