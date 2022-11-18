@@ -36,18 +36,23 @@ TEST_CASE("AdjointJacobianKokkos::AdjointJacobianKokkos Op=RX, Obs=Z",
     AdjointJacobianKokkos<double> adj;
     std::vector<double> param{-M_PI / 7, M_PI / 5, 2 * M_PI / 3};
 
+    const Kokkos::InitArguments num_threads_2 = {2};
     const size_t num_qubits = 1;
     const size_t num_params = 3;
     const size_t num_obs = 1;
     auto obs = ObsDatum<double>({"PauliZ"}, {{}}, {{0}});
     std::vector<std::vector<double>> jacobian(
         num_obs, std::vector<double>(num_params, 0));
-    StateVectorKokkos<double> psi(num_qubits);
-    for (const auto &p : param) {
-        auto ops = adj.createOpsData({"RX"}, {{p}}, {{0}}, {false});
-        psi.resetStateVector();
-        adj.adjointJacobian(psi, jacobian, {obs}, ops, {0}, true);
-        CHECK(-sin(p) == Approx(jacobian[0][0]).margin(1e-5));
+    std::vector<StateVectorKokkos<double>> st_vecs = {
+        StateVectorKokkos<double>{num_qubits},
+        StateVectorKokkos<double>{num_qubits, num_threads_2}};
+    for (auto &psi : st_vecs) {
+        for (const auto &p : param) {
+            auto ops = adj.createOpsData({"RX"}, {{p}}, {{0}}, {false});
+            psi.resetStateVector();
+            adj.adjointJacobian(psi, jacobian, {obs}, ops, {0}, true);
+            CHECK(-sin(p) == Approx(jacobian[0][0]).margin(1e-5));
+        }
     }
 }
 

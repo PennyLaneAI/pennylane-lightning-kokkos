@@ -1,3 +1,24 @@
+# Release 0.28.0-dev
+
+### New features since last release
+
+ * Add Kokkos::InitArguments support.
+ [(#13)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/issues/13)
+
+### Breaking changes
+
+### Improvements
+
+### Documentation
+
+### Bug fixes
+
+### Contributors
+
+This release contains contributions from (in alphabetical order):
+
+---
+
 # Release 0.27.0
 
 ### New features since last release
