@@ -104,7 +104,7 @@ struct Sampler {
             size_t mid_idx;
             Precision cdf_t;
             while (high_idx - low_idx > 1) {
-                mid_idx = (high_idx + low_idx) / 2;
+                mid_idx = high_idx - ((high_idx - low_idx) >> 1U);
                 if (mid_idx == length)
                     cdf_t = 1;
                 else
