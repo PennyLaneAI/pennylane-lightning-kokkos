@@ -2,6 +2,27 @@
 
 ### New features since last release
 
+### Breaking changes
+
+### Improvements
+
+### Documentation
+
+### Bug fixes
+
+* Avoid integer overflow in middle value calculation of binary search in `Sampler`.
+[#18] (https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/18)
+
+### Contributors
+
+This release contains contributions from (in alphabetical order):
+
+Shuli Shu
+
+# Release 0.27.0
+
+### New features since last release
+
  * Add probability support.
  [(#11)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/11)
 
