@@ -326,10 +326,10 @@ class LightningKokkos(LightningQubit):
         """
         unsupported = [Projector, Hamiltonian, SparseHamiltonian, Hermitian]
         for m in tape.measurements:
-            if m.return_type is not Expectation:
+            if not isinstance(m, Expectation):
                 raise QuantumFunctionError(
                     "Adjoint differentiation method does not support"
-                    f" measurement {m.return_type.value}"
+                    f" measurement {m.__class__.__name__}"
                 )
             if not isinstance(m.obs, Tensor):
                 if any([isinstance(m.obs, k) for k in unsupported]):
