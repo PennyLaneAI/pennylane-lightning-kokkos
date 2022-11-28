@@ -18,6 +18,10 @@
  * Update `LightningKokkos` device following changes in `LightningQubit` inheritance from `DefaultQubit` to `QubitDevice`.
  [(#16)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/16)
 
+ * With the introduction of custom measurement classes, all the `MeasurementProcess.return_type`
+  checks have been changed by `isinstance` checks.
+  [(#388)](https://github.com/PennyLaneAI/pennylane-lightning/pull/388)
+
 ### Documentation
 
 ### Bug fixes
@@ -26,7 +30,7 @@
 
 This release contains contributions from (in alphabetical order):
 
-Amintor Dusko, Lee J. O'Riordan, Shuli Shu
+Amintor Dusko, Lee J. O'Riordan, Shuli Shu, Albert Mitjans-Coma
 
 ---
 # Release 0.26.0
