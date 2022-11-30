@@ -47,7 +47,7 @@ jobs:
 
       - name: Wheels building strategy
         id: exec_model
-        run: echo "::set-output name=exec_model::[\"SERIAL\",\"OPENMP\"]"
+        run: echo "::set-output name=exec_model::[\"OPENMP\"]"
 
     outputs:
       python_version: ${{ steps.pyver.outputs.python_version }}
