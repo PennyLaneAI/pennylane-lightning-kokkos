@@ -1,7 +1,7 @@
 name: Set wheel build matrix
 
 env:
-  PYTHON3_MIN_VERSION: "7"
+  PYTHON3_MIN_VERSION: "8"
   PYTHON3_MAX_VERSION: "11"
 
 on:
@@ -15,11 +15,8 @@ on:
         description: "Python versions."
         value: ${{ jobs.set-builder-matrix.outputs.python_version }}
       exec_model:
-        description: "The execution model for Kokkos."
+        description: "The wheel building model."
         value: ${{ jobs.set-builder-matrix.outputs.exec_model }}
-      kokkos_version:
-        description: "Kokkos version"
-        value: ${{ jobs.set-builder-matrix.outputs.kokkos_version }}
 
 jobs:
   set-builder-matrix:
@@ -27,7 +24,7 @@ jobs:
 
     steps:
       - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.10.0
+        uses: styfle/cancel-workflow-action@0.11.0
         with:
           access_token: ${{ github.token }}
 
@@ -48,15 +45,10 @@ jobs:
               --range)"
           fi
 
-      - name: Kokkos execution strategy
+      - name: Wheels building strategy
         id: exec_model
-        run: echo "::set-output name=exec_model::[\"SERIAL\"]" # We may also adopt [OPENMP, THREADS] in later iterations
-
-      - name: Kokkos version
-        id: kokkos_version
-        run: echo "::set-output name=kokkos_version::[\"3.7.00\"]"
+        run: echo "::set-output name=exec_model::[\"SERIAL\",\"OPENMP\"]"
 
     outputs:
       python_version: ${{ steps.pyver.outputs.python_version }}
       exec_model: ${{ steps.exec_model.outputs.exec_model }}
-      kokkos_version: ${{ steps.kokkos_version.outputs.kokkos_version }}

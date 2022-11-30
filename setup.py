@@ -24,15 +24,15 @@ if not os.getenv("READTHEDOCS"):
 
     from setuptools import Extension
     from setuptools.command.build_ext import build_ext
-
+    
     class CMakeExtension(Extension):
         def __init__(self, name, sourcedir=""):
             Extension.__init__(self, name, sources=[])
             self.sourcedir = Path(sourcedir).absolute()
-
+    
     class CMakeBuild(build_ext):
         """
-        This class is based upon the build infrastructure of Pennylane-Lightning.
+        This class is based upon the build infrastructure of Pennylane-Lightning-Kokkos.
         """
 
         user_options = build_ext.user_options + [
@@ -113,10 +113,7 @@ if not os.getenv("READTHEDOCS"):
                             f"-DCMAKE_LINKER={llvmpath}/bin/lld",
                     ] # Use clang instead of appleclang
                 # Disable OpenMP in M1 Macs
-                if os.environ.get("USE_OMP"):
-                    configure_args += []
-                else:
-                    configure_args += ["-DKokkos_ENABLE_OPENMP=OFF"]
+                configure_args += ["-DKokkos_ENABLE_OPENMP=OFF"]
             elif platform.system() == "Windows":
                 configure_args += ["-DKokkos_ENABLE_OPENMP=OFF"] # only build with Clang under Windows
             else:
@@ -180,10 +177,10 @@ classifiers = [
     "Operating System :: POSIX :: Linux",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3 :: Only",
     "Topic :: Scientific/Engineering :: Physics",
 ]
