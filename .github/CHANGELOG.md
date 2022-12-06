@@ -48,7 +48,7 @@ Shuli Shu
 ### Documentation
 
 ### Bug fixes
- * Fix for errors caused by new lightning inheirtance implementation(DefaultQubit->QubitDevice).
+ * Update this device following changes in LightningQubit inheritance from DefaultQubit to QubitDevice.
  [(#16)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/16)
 
 ### Contributors
