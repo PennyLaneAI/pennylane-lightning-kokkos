@@ -45,7 +45,7 @@ jobs:
               --range)"
           fi
 
-      - name: Wheels building strategy
+      - name: Kokkos execution strategy
         id: exec_model
         run: echo "::set-output name=exec_model::[\"OPENMP\"]"
 
