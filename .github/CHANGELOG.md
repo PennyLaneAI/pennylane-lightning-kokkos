@@ -8,6 +8,9 @@
 
 ### Breaking changes
 
+ * Remove support for Python 3.7
+ [(#14)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/14)
+ 
  * Deprecate the Python and C++ tests with threading backend in workflows.
  Note this deprecation is based on the fact that Kokkos cannot promise that its Threads back-end will 
  not conflict with the application's direct use of operating system threads. 
