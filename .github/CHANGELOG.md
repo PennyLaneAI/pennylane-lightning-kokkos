@@ -10,6 +10,9 @@
 
 ### Breaking changes
 
+ * Remove support for Python 3.7
+ [(#20)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/20)
+
 ### Improvements
 
  * Add tests for MacOS.
@@ -17,6 +20,9 @@
 
  * Update `LightningKokkos` device following changes in `LightningQubit` inheritance from `DefaultQubit` to `QubitDevice`.
  [(#16)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/16)
+
+ * Remove the unused `supports_reversible_diff` device capability from `LightningKokkos`
+ [(#20)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/20)
 
 ### Documentation
 
@@ -26,7 +32,7 @@
 
 This release contains contributions from (in alphabetical order):
 
-Amintor Dusko, Lee J. O'Riordan, Shuli Shu
+Amintor Dusko, Lee J. O'Riordan, Shuli Shu, Matthew Silverman
 
 ---
 # Release 0.26.0
