@@ -25,7 +25,7 @@
 
 This release contains contributions from (in alphabetical order):
 
-Shuli Shu
+Shuli Shu, Matthew Silverman
 
 ---
 # Release 0.27.0
