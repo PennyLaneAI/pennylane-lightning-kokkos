@@ -515,8 +515,8 @@ void StateVectorKokkos_class_bindings(py::module &m) {
                 py::buffer_info numpyArrayInfo = host_sv.request();
                 auto *data_ptr = static_cast<Kokkos::complex<PrecisionT> *>(
                     numpyArrayInfo.ptr);
-                if (device_sv.size()) {
-                    host_sv.DeviceToHost(data_ptr, host_sv.size());
+                if (host_sv.size()) {
+                    device_sv.DeviceToHost(data_ptr, host_sv.size());
                 }
             },
             "Synchronize data from the GPU device to host.")
