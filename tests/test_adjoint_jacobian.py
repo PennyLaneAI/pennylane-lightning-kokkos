@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """
-Tests for the ``adjoint_jacobian`` method of LightningKOKKOS.
+Tests for the ``adjoint_jacobian`` method of LightningKokkos.
 """
 import math
 import pytest

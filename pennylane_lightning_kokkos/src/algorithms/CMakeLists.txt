@@ -1,4 +1,4 @@
-project(lightning_gpu_algorithms LANGUAGES CXX)
+project(lightning_kokkos_algorithms LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 
 
