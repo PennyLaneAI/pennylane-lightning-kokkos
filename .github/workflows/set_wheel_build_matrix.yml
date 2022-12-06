@@ -15,7 +15,7 @@ on:
         description: "Python versions."
         value: ${{ jobs.set-builder-matrix.outputs.python_version }}
       exec_model:
-        description: "The wheel building model."
+        description: "Kokkos' execution model."
         value: ${{ jobs.set-builder-matrix.outputs.exec_model }}
 
 jobs:
