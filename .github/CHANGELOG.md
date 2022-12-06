@@ -15,6 +15,7 @@
  Note this deprecation is based on the fact that Kokkos cannot promise that its Threads back-end will 
  not conflict with the application's direct use of operating system threads. 
  [(#14)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/14)
+ 
 ### Improvements
 
 ### Documentation
