@@ -74,7 +74,7 @@ class LightningKokkos(LightningQubit):
     """
 
     name = "PennyLane plugin for Kokkos-backed Lightning device using NVIDIA cuQuantum SDK"
-    built_info = "The current lightning.kokkos package is built with default backend." 
+    built_info = "The current lightning.kokkos package is built with [default] backend."
     short_name = "lightning.kokkos"
     pennylane_requires = ">=0.22"
     version = __version__
