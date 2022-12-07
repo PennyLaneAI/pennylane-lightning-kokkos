@@ -74,7 +74,7 @@ jobs:
             yum install centos-release-scl-rh -y
             yum install devtoolset-11-gcc-c++ -y
             source /opt/rh/devtoolset-11/enable -y
-            sed -i "77 s/default/\["${{ matrix.exec_model }}"\]/g" ./pennylane_lightning_kokkos/lightning_kokkos.py
+            sed -i "77 s/default/"${{ matrix.exec_model }}"/g" ./pennylane_lightning_kokkos/lightning_kokkos.py
           CIBW_ENVIRONMENT: |
             PATH=/opt/rh/devtoolset-11/root/usr/bin:$PATH BACKEND=${{ matrix.exec_model }}
           
@@ -99,7 +99,7 @@ jobs:
           regex: '.*[0-9]+.[0-9]+.[0-9]+[-_]?rc[0-9]+'
 
       - uses: actions/upload-artifact@v2
-        #if: ${{ github.event_name == 'release' || github.ref == 'refs/heads/master' || steps.rc_build.outputs.match != ''}}
+        if: ${{ github.event_name == 'release' || github.ref == 'refs/heads/master' || steps.rc_build.outputs.match != ''}}
         with:
           name: ${{ runner.os }}-wheels-${{ matrix.arch }}-${{ matrix.exec_model }}.zip
           path: ./wheelhouse/*.whl

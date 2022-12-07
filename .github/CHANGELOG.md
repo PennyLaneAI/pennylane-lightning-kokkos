@@ -7,6 +7,14 @@
  [(#14)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/14)
 
 ### Breaking changes
+ * Add built information query support with the `_built_backend_info` method.
+ The workflow for `_built_backend_info`is:
+ ```python
+ dev = qml.device('lightning.kokkos', wires=3)
+ dev._built_backend_info()
+ ```
+
+ [(#14)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/14)
 
  * Remove support for Python 3.7
  [(#14)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/14)
