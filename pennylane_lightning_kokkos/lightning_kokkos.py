@@ -74,6 +74,7 @@ class LightningKokkos(LightningQubit):
     """
 
     name = "PennyLane plugin for Kokkos-backed Lightning device using NVIDIA cuQuantum SDK"
+    built_info = "The current lightning.kokkos package is built with default backend." 
     short_name = "lightning.kokkos"
     pennylane_requires = ">=0.22"
     version = __version__
@@ -109,7 +110,7 @@ class LightningKokkos(LightningQubit):
         self._pre_rotated_state = self._state
 
     def _built_backend_info(self):
-        print(self.short_name)
+        print(self.built_info)
 
     @classmethod
     def capabilities(cls):

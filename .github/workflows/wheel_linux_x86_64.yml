@@ -74,7 +74,7 @@ jobs:
             yum install centos-release-scl-rh -y
             yum install devtoolset-11-gcc-c++ -y
             source /opt/rh/devtoolset-11/enable -y
-            sed -i "77 s/lightning.kokkos/lightning.kokkos\["${{ matrix.exec_arch }}"\]/g" ./pennylane_lightning_kokkos/lightning_kokkos.py
+            sed -i "77 s/default/\["${{ matrix.exec_arch }}"\]/g" ./pennylane_lightning_kokkos/lightning_kokkos.py
           CIBW_ENVIRONMENT: |
             PATH=/opt/rh/devtoolset-11/root/usr/bin:$PATH BACKEND=${{ matrix.exec_model }}
           
