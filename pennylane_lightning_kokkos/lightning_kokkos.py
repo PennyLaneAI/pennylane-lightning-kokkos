@@ -108,6 +108,9 @@ class LightningKokkos(LightningQubit):
         self._kokkos_state.DeviceToHost(self._state.ravel(order="C"))
         self._pre_rotated_state = self._state
 
+    def _built_backend_info(self):
+        print(self.short_name)
+
     @classmethod
     def capabilities(cls):
         capabilities = super().capabilities().copy()
