@@ -7,11 +7,14 @@
  [(#14)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/14)
 
 ### Breaking changes
- * Add built information query support with the `_built_backend_info` method.
- The workflow for `_built_backend_info`is:
+ * Add built information query support with the `_package_backend_info` method.
+ The workflow for `_package_backend_info`is:
  ```python
- dev = qml.device('lightning.kokkos', wires=3)
- dev._built_backend_info()
+ >>> import pennylane as qml
+ >>> import pennylane_lightning_kokkos as plk
+ >>> dev = qml.device('lightning.kokkos', wires=3)
+ >>> dev._package_backend_info()
+ "The current lightning.kokkos package was built by the user."
  ```
 
  [(#14)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/14)
