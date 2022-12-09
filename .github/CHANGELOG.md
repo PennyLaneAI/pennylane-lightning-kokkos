@@ -1,20 +1,23 @@
 # Release 0.28.0
 
- 
+
 ### New features since last release
 
 
 ### Breaking changes
 
  * Drop python3.7 and deprecate the Python and C++ tests with threading backend in workflows.
- Note this deprecation is based on the fact that Kokkos cannot promise that its Threads back-end will 
- not conflict with the application's direct use of operating system threads. 
+ Note this deprecation is based on the fact that Kokkos cannot promise that its Threads back-end will
+ not conflict with the application's direct use of operating system threads.
  [(#23)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/23)
 
   * Remove the unused `supports_reversible_diff` device capability from `LightningKokkos`
  [(#20)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/20)
 
 ### Improvements
+
+* Improve the stopping condition method.
+[(#25)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/25)
 
 ### Documentation
 
@@ -27,7 +30,7 @@
 
 This release contains contributions from (in alphabetical order):
 
-Shuli Shu, Matthew Silverman
+Amintor Dusko, Shuli Shu, Matthew Silverman
 
 # Release 0.27.0
 

@@ -1,0 +1,9 @@
+venv/
+PennyLane_Lightning_Kokkos.egg-info/
+build/
+Build/
+*.ipynp
+*.ipynb_checkpoints
+__pycache__
+.pytest_cache/
+*.so
