@@ -1,12 +1,16 @@
 #pragma once
 
-#include <Kokkos_Core.hpp>
+#ifndef _USE_MATH_DEFINES
+#define _USE_MATH_DEFINES // for C++
+#endif
+#include <cmath>
 
 #include "Util.hpp"
+#include <Kokkos_Core.hpp>
 
 namespace {
 using namespace Pennylane::Util;
-}
+} // namespace
 
 namespace Pennylane {
 namespace Functors {

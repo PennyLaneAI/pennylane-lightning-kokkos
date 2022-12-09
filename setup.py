@@ -42,7 +42,7 @@ if not os.getenv("READTHEDOCS"):
             ("arch=", "A", "Define backend targetted architecture"),
         ]
 
-        backends = {"CUDA", "HIP", "OPENMP", "THREADS", "SERIAL"}
+        backends = {"CUDA", "HIP", "OPENMP", "THREADS", "SERIAL", "SYCL"}
 
         def initialize_options(self):
             super().initialize_options()
@@ -68,7 +68,8 @@ if not os.getenv("READTHEDOCS"):
 
             # Set Python_EXECUTABLE instead if you use PYBIND11_FINDPYTHON
             configure_args = [
-                f"-DCMAKE_CXX_FLAGS=-fno-lto",
+                f"-DCMAKE_CXX_STANDARD=17",
+                f"-DCMAKE_CXX_FLAGS=-fno-lto", 
                 f"-DCMAKE_LIBRARY_OUTPUT_DIRECTORY={extdir}",
                 f"-DPYTHON_EXECUTABLE={sys.executable}",
                 f"-DCMAKE_BUILD_TYPE={cfg}",  # not used on MSVC, but no harm
@@ -118,7 +119,7 @@ if not os.getenv("READTHEDOCS"):
                 else:
                     configure_args += ["-DKokkos_ENABLE_OPENMP=OFF"]
             elif platform.system() == "Windows":
-                configure_args += ["-DKokkos_ENABLE_OPENMP=OFF"] # only build with Clang under Windows
+                configure_args += ["-DKokkos_ENABLE_OPENMP=OFF"]
             else:
                 if platform.system() != "Linux":
                     raise RuntimeError(f"Unsupported '{platform.system()}' platform")
@@ -129,7 +130,7 @@ if not os.getenv("READTHEDOCS"):
             subprocess.check_call(
                 ["cmake", str(ext.sourcedir)] + configure_args, cwd=self.build_temp
             )
-            subprocess.check_call(["cmake", "--build", "."] + build_args, cwd=self.build_temp)
+            subprocess.check_call(["cmake", "--build", ".", "--verbose"] + build_args, cwd=self.build_temp)
 
 
 with open("pennylane_lightning_kokkos/_version.py") as f:

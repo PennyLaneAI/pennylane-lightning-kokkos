@@ -1,0 +1,161 @@
+name: Testing (Windows)
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+  release:
+    types: [published]
+
+env:
+  DISTUTILS_USE_SDK: 1
+  MSSdk: 1
+
+jobs:
+  win-set-matrix-x86:
+    name: Set builder matrix
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.10.0
+        with:
+          access_token: ${{ github.token }}
+
+      - uses: actions/checkout@v2
+
+      - name: Kokkos execution strategy
+        id: exec_model
+        run: echo "::set-output name=exec_model::[\"SERIAL\"]" # We may also adopt [OPENMP, THREADS] in later iterations
+
+      - name: Kokkos version
+        id: kokkos_version
+        run: echo "::set-output name=kokkos_version::[\"3.6.00\"]"
+
+    outputs:
+      exec_model: ${{ steps.exec_model.outputs.exec_model }}
+      kokkos_version: ${{ steps.kokkos_version.outputs.kokkos_version }}
+
+  build_dependencies:
+    needs: [win-set-matrix-x86]
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest]
+        exec_model: ${{ fromJson(needs.win-set-matrix-x86.outputs.exec_model) }}
+        kokkos_version: ${{ fromJson(needs.win-set-matrix-x86.outputs.kokkos_version) }}
+
+    name: Kokkos core (${{ matrix.exec_model }})
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Cancel previous runs
+        uses: styfle/cancel-workflow-action@0.10.0
+        with:
+          access_token: ${{ github.token }}
+
+      - name: Configure MSVC for amd64 # Use cl.exe as a default compiler
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: amd64
+
+      - name: Cache installation directories
+        id: kokkos-cache
+        uses: actions/cache@v3
+        with:
+          path: D:\a\install_dir\${{ matrix.exec_model }}
+          key: ${{ matrix.os }}-kokkos${{ matrix.kokkos_version }}-${{ matrix.exec_model }}
+
+      - name: Clone Kokkos libs
+        if: steps.kokkos-cache.outputs.cache-hit != 'true'
+        run: |
+          cd D:\a
+          git clone https://github.com/kokkos/kokkos.git
+          cd D:\a\kokkos
+          git checkout ${{ matrix.kokkos_version }}
+          cd D:\a
+
+      - name: Create installation directory
+        if: steps.kokkos-cache.outputs.cache-hit != 'true'
+        run: mkdir -p D:\a\install_dir\${{ matrix.exec_model }}
+
+      - name: Install dependencies
+        if: steps.kokkos-cache.outputs.cache-hit != 'true'
+        run: |
+          python -m pip install cmake build
+
+      - name: Build Kokkos core library
+        if: steps.kokkos-cache.outputs.cache-hit != 'true'
+        run: |
+          cd D:\a\kokkos
+          cmake -BBuild . -DCMAKE_INSTALL_PREFIX=D:\a\install_dir\${{ matrix.exec_model }} `
+                          -DKokkos_ENABLE_COMPLEX_ALIGN=OFF `
+                          -DKokkos_ENABLE_${{ matrix.exec_model }}=ON `
+                          -DKokkos_ENABLE_DEPRECATION_WARNINGS=OFF `
+                          -DCMAKE_CXX_STANDARD=17 `
+                          -DCMAKE_POSITION_INDEPENDENT_CODE=ON `
+                          -DCMAKE_BUILD_TYPE=RelWithDebInfo `
+                          -T clangcl
+          cmake --build ./Build --config RelWithDebInfo --verbose
+          cmake --install ./Build --config RelWithDebInfo --verbose
+
+  pythontests_serial:
+    needs: [win-set-matrix-x86, build_dependencies]
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest]
+        arch: [AMD64]
+        exec_model: ${{ fromJson(needs.win-set-matrix-x86.outputs.exec_model) }}
+        kokkos_version: ${{ fromJson(needs.win-set-matrix-x86.outputs.kokkos_version) }}
+    name: Python tests (SERIAL)
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.10.0
+        with:
+          access_token: ${{ github.token }}
+
+      - name: Configure MSVC for amd64 # Use cl.exe as a default compiler
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: amd64
+
+      - name: Restoring cached dependencies
+        id: kokkos-cache
+        uses: actions/cache@v3
+        with:
+          path: D:\a\install_dir\${{ matrix.exec_model }}
+          key: ${{ matrix.os }}-kokkos${{ matrix.kokkos_version }}-${{ matrix.exec_model }}
+
+      - uses: actions/checkout@v3
+
+      - name: Copy cached libraries
+        if: steps.kokkos-cache.outputs.cache-hit == 'true'
+        run: |
+          Copy-Item -Path "D:\a\install_dir\${{ matrix.exec_model }}\" `
+                    -Destination "D:\a\pennylane-lightning-kokkos\pennylane-lightning-kokkos\Kokkos" -Recurse -Force
+
+      - uses: actions/setup-python@v3
+        name: Install Python
+        with:
+          python-version: '3.10'
+
+      - name: Get required Python packages
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pytest pytest-mock flaky
+          pip uninstall pennylane -y
+          pip install git+https://github.com/PennyLaneAI/pennylane.git
+
+      - name: Install lightning.kokkos device
+        run: |
+          Set-Variable -Name BACKEND -Value "SERIAL"
+          python setup.py build_ext
+          python -m pip install -e .
+
+      - name: Run unit tests
+        run: |
+          pytest tests/
+          pl-device-test --device lightning.kokkos

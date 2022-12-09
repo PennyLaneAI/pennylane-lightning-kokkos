@@ -1,5 +1,10 @@
 #pragma once
 
+#ifndef _USE_MATH_DEFINES
+#define _USE_MATH_DEFINES // for C++
+#endif
+#include <cmath>
+
 #include <Kokkos_Core.hpp>
 #include <Kokkos_StdAlgorithms.hpp>
 

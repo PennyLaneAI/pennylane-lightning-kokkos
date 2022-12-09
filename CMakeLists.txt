@@ -13,7 +13,7 @@ set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15" CACHE STRING "Minimum OS X deployment ve
 
 project(pennylane_lightning_kokkos
     DESCRIPTION "Lightning-Kokkos bindings for PennyLane. Backed by the Kokkos library."
-    LANGUAGES CXX C
+    LANGUAGES C CXX
 )
 
 ##########################
@@ -101,14 +101,50 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 option(Kokkos_ENABLE_DEPRECATION_WARNINGS "Enable Kokkos deprecation warnings" OFF)
 
-include(FetchContent)
-FetchContent_Declare(kokkos
-  GIT_REPOSITORY https://github.com/kokkos/kokkos.git
-  GIT_TAG        3.6.00
+find_package(Kokkos
+HINTS   ${CMAKE_SOURCE_DIR}/Kokkos
+        /usr
+        /usr/local
+        /opt
 )
-FetchContent_MakeAvailable(kokkos)
-get_target_property(PLKOKKOS_KOKKOS_INC_DIR kokkos INTERFACE_INCLUDE_DIRECTORIES)
-set_target_properties(kokkos PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${PLKOKKOS_KOKKOS_INC_DIR}")
+if(Kokkos_FOUND)
+    message(STATUS "Found existing Kokkos library")
+endif()
+
+find_package(KokkosKernels
+HINTS   ${CMAKE_SOURCE_DIR}/Kokkos
+        ${CMAKE_SOURCE_DIR}/KokkosKernels
+        /usr
+        /usr/local
+        /opt
+)
+if(KokkosKernels_FOUND)
+    message(STATUS "Found existing Kokkos Kernels library")
+endif()
+
+
+if (NOT (Kokkos_FOUND AND KokkosKernels_FOUND))
+    # Setting the Serial device.
+    option(Kokkos_ENABLE_SERIAL  "Enable Kokkos SERIAL device" ON)
+    message(STATUS "KOKKOS SERIAL DEVICE ENABLED.")
+
+    option(Kokkos_ENABLE_COMPLEX_ALIGN "Enable complex alignment in memory" OFF)
+
+    set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+    include(FetchContent)
+
+    FetchContent_Declare(kokkos
+                        GIT_REPOSITORY https://github.com/kokkos/kokkos.git
+                        GIT_TAG        3.6.00
+                        GIT_SUBMODULES "" # Avoid recursively cloning all submodules
+    )
+
+    FetchContent_MakeAvailable(kokkos)
+
+    get_target_property(PLKOKKOS_KOKKOS_INC_DIR kokkos INTERFACE_INCLUDE_DIRECTORIES)
+    set_target_properties(kokkos PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${PLKOKKOS_KOKKOS_INC_DIR}")
+
+endif()
 
 
 ############################
@@ -159,12 +195,23 @@ if(PLKOKKOS_ENABLE_WARNINGS)
     # Explicitly disable warnings for Kokkos-specific library issues.
 endif()
 
+if(WIN32) # For M_PI
+target_compile_options(kokkos INTERFACE "/D_USE_MATH_DEFINES=ON")
+target_compile_options(lightning_kokkos_qubit_ops PUBLIC "/D_USE_MATH_DEFINES=ON")
+target_compile_options(pennylane_lightning_kokkos INTERFACE "/D_USE_MATH_DEFINES=ON")
+endif()
+
 if(PLKOKKOS_ENABLE_NATIVE)
     message(STATUS "ENABLE_NATIVE is ON. Using -march=native")
     add_compile_options(-march=native)
     target_compile_options(pennylane_lightning_kokkos INTERFACE -march=native)
     target_compile_options(lightning_kokkos_qubit_ops PRIVATE -march=native)
 endif()
+
+
+IF(MSVC)
+    SET(CMAKE_CXX_FLAGS "/EHsc")
+ENDIF(MSVC)
 
 if (PLKOKKOS_BUILD_TESTS)
     enable_testing()
