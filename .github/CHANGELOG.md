@@ -20,6 +20,9 @@
 
 ### Bug fixes
 
+* Avoid integer overflow in middle value calculation of binary search in `Sampler`.
+[#18] (https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/18)
+
 ### Contributors
 
 This release contains contributions from (in alphabetical order):
