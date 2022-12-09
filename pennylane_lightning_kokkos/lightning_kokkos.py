@@ -13,7 +13,8 @@
 # limitations under the License.
 r"""
 This module contains the :class:`~.LightningKokkos` class, a PennyLane simulator device that
-interfaces with the NVIDIA cuQuantum cuStateVec simulator library for Kokkos-enabled calculations.
+interfaces with Kokkos-enabled calculations to run efficiently on different kinds of shared memory
+hardware systems, such as AMD and Nvidia GPUs, or many-core CPUs. 
 """
 from warnings import warn
 
@@ -65,7 +66,7 @@ class LightningKokkos(LightningQubit):
         c_dtype: Datatypes for statevector representation. Must be one of ``np.complex64`` or ``np.complex128``.
     """
 
-    name = "PennyLane plugin for Kokkos-backed Lightning device using NVIDIA cuQuantum SDK"
+    name = "PennyLane plugin for Kokkos-backed Lightning device"
     short_name = "lightning.kokkos"
     pennylane_requires = ">=0.22"
     version = __version__

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.21)
 
-project(pennylane_lightning_tests)
+project(pennylane_lightning_kokkos_tests)
 
 set(CMAKE_CXX_STANDARD 17)
 

@@ -7,3 +7,4 @@ Build/
 __pycache__
 .pytest_cache/
 *.so
+BuildTests/
