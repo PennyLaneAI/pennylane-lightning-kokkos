@@ -21,6 +21,9 @@
 
 ### Documentation
 
+* Update version string in package for release.
+[(#27)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/27)
+
 ### Bug fixes
 
 * Avoid integer overflow in middle value calculation of binary search in `Sampler`.
@@ -30,8 +33,9 @@
 
 This release contains contributions from (in alphabetical order):
 
-Amintor Dusko, Shuli Shu, Matthew Silverman
+Amintor Dusko, Lee J. O'Riordan, Shuli Shu, Matthew Silverman
 
+--
 # Release 0.27.0
 
 ### New features since last release
