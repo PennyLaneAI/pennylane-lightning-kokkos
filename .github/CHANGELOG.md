@@ -16,22 +16,24 @@
  >>> dev._package_backend_info()
  "The current lightning.kokkos package was built by the user."
  ```
-
- [(#14)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/14)
-
- * Remove support for Python 3.7
  [(#14)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/14)
  
- * Deprecate the Python and C++ tests with threading backend in workflows.
+ * Drop python3.7 and deprecate the Python and C++ tests with threading backend in workflows.
  Note this deprecation is based on the fact that Kokkos cannot promise that its Threads back-end will 
  not conflict with the application's direct use of operating system threads. 
- [(#14)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/14)
- 
+ [(#23)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/23)
+
+  * Remove the unused `supports_reversible_diff` device capability from `LightningKokkos`
+ [(#20)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/20)
+
 ### Improvements
 
 ### Documentation
 
 ### Bug fixes
+
+* Avoid integer overflow in middle value calculation of binary search in `Sampler`.
+[#18] (https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/18)
 
 ### Contributors
 
@@ -39,7 +41,6 @@ This release contains contributions from (in alphabetical order):
 
 Shuli Shu, Matthew Silverman
 
----
 # Release 0.27.0
 
 ### New features since last release
@@ -51,6 +52,7 @@ Shuli Shu, Matthew Silverman
  [(#9)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/9)
 
 ### Breaking changes
+
 
 ### Improvements
 
