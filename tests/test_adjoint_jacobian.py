@@ -23,6 +23,11 @@ from pennylane import QNode, qnode
 from scipy.stats import unitary_group
 import pennylane_lightning_kokkos as plk
 
+from pennylane import (
+    QuantumFunctionError,
+)
+
+
 I, X, Y, Z = (
     np.eye(2),
     qml.PauliX.compute_matrix(),
@@ -89,21 +94,6 @@ class TestAdjointJacobian:
         with pytest.raises(qml.QuantumFunctionError, match="Adjoint differentiation method does"):
             dev_kokkos.adjoint_jacobian(tape)
 
-    def test_finite_shots_fail(self):
-        """Tests exception raised when finite shots specified"""
-
-        dev = qml.device("lightning.kokkos", wires=1, shots=1)
-
-        with qml.tape.QuantumTape() as tape:
-            qml.PauliX(0)
-            qml.expval(qml.PauliZ(0))
-
-        with pytest.raises(
-            NotImplementedError,
-            match="lightning.kokkos does not currently support finite shots",
-        ):
-            dev.apply(tape)
-
     @pytest.mark.skip(reason="Warning not currently raised in favour of NotImplementedError")
     def test_finite_shots_warns(self):
         """Tests warning raised when finite shots specified"""
@@ -169,7 +159,6 @@ class TestAdjointJacobian:
 
         with pytest.raises(
             qml.QuantumFunctionError,
-            match="Lightning adjoint differentiation method does not",
         ):
             dev_kokkos.adjoint_jacobian(tape)
 
@@ -179,7 +168,6 @@ class TestAdjointJacobian:
 
         with pytest.raises(
             qml.QuantumFunctionError,
-            match="Lightning adjoint differentiation method does not",
         ):
             dev_kokkos.adjoint_jacobian(tape)
 
@@ -399,9 +387,9 @@ class TestAdjointJacobianQNode:
                 qml.RX(x, wires=0)
                 return qml.expval(qml.PauliZ(0))
 
-        with pytest.raises(
-            NotImplementedError,
-            match="lightning.kokkos does not currently support finite shots",
+        with pytest.warns(
+            UserWarning,
+            match="Requested adjoint differentiation to be computed with finite shots.",
         ):
             qml.grad(circ)(0.1)
 
@@ -738,3 +726,136 @@ def test_integration_custom_wires(returns):
     j_lightning = qml.jacobian(qnode_lightning)(params)
 
     assert np.allclose(j_kokkos, j_lightning, atol=1e-7)
+
+
+@pytest.mark.parametrize(
+    "returns",
+    [
+        qml.Hermitian(np.array([[0, 1], [1, 0]], requires_grad=False), wires=custom_wires[0]),
+        qml.Hermitian(
+            np.kron(qml.PauliY.compute_matrix(), qml.PauliZ.compute_matrix()),
+            wires=[custom_wires[3], custom_wires[2]],
+        ),
+        qml.Hermitian(np.array([[0, 1], [1, 0]], requires_grad=False), wires=custom_wires[0])
+        @ qml.PauliZ(custom_wires[2]),
+    ],
+)
+def test_fail_adjoint_Hermitian(returns):
+    """Integration tests that compare to default.qubit for a large circuit containing parametrized
+    operations and when using custom wire labels"""
+
+    dev_kokkos = qml.device("lightning.kokkos", wires=custom_wires)
+
+    def circuit(params):
+        circuit_ansatz(params, wires=custom_wires)
+        return qml.expval(returns)
+
+    n_params = 30
+    np.random.seed(1337)
+    params = np.random.rand(n_params)
+
+    qnode_kokkos = qml.QNode(circuit, dev_kokkos, diff_method="adjoint")
+
+    with pytest.raises(
+        qml._device.DeviceError,
+        match="Observable Hermitian not supported on device",
+    ):
+        j_kokkos = qml.jacobian(qnode_kokkos)(params)
+
+
+@pytest.mark.parametrize(
+    "returns",
+    [
+        0.6
+        * qml.Hermitian(np.array([[0, 1], [1, 0]], requires_grad=False), wires=custom_wires[0])
+        @ qml.PauliX(wires=custom_wires[1]),
+    ],
+)
+def test_fail_adjoint_mixed_Hamiltonian_Hermitian(returns):
+    """Integration tests that compare to default.qubit for a large circuit containing parametrized
+    operations and when using custom wire labels"""
+
+    dev_kokkos = qml.device("lightning.kokkos", wires=custom_wires)
+
+    def circuit(params):
+        circuit_ansatz(params, wires=custom_wires)
+        return qml.expval(returns)
+
+    n_params = 30
+    np.random.seed(1337)
+    params = np.random.rand(n_params)
+
+    qnode_kokkos = qml.QNode(circuit, dev_kokkos, diff_method="adjoint")
+
+    with pytest.raises(Exception):
+        j_kokkos = qml.jacobian(qnode_kokkos)(params)
+
+
+def test_fail_adjoint_Hamiltonian():
+    """Integration tests that compare to default.qubit for a large circuit containing parametrized
+    operations and when using custom wire labels"""
+
+    coeffs = [0.5, -0.25, 1.0]
+    obs = [qml.PauliX(0) @ qml.PauliX(1), qml.PauliZ(0) @ qml.PauliY(2), qml.PauliZ(3)]
+    hamiltonian = qml.Hamiltonian(coeffs, obs)
+
+    dev_kokkos = qml.device("lightning.kokkos", wires=custom_wires)
+
+    def circuit(params):
+        circuit_ansatz(params, wires=custom_wires)
+        return qml.expval(hamiltonian)
+
+    n_params = 30
+    np.random.seed(1337)
+    params = np.random.rand(n_params)
+
+    qnode_kokkos = qml.QNode(circuit, dev_kokkos, diff_method="adjoint")
+
+    with pytest.raises(Exception):
+        j_kokkos = qml.jacobian(qnode_kokkos)(params)
+
+
+@pytest.mark.parametrize(
+    "returns",
+    [
+        qml.SparseHamiltonian(
+            qml.utils.sparse_hamiltonian(
+                0.1 * qml.PauliX(wires=custom_wires[0]) @ qml.PauliZ(wires=custom_wires[1]),
+                wires=custom_wires,
+            ),
+            wires=custom_wires,
+        ),
+        qml.SparseHamiltonian(
+            qml.utils.sparse_hamiltonian(
+                2 * qml.PauliX(wires=custom_wires[2]) @ qml.PauliZ(wires=custom_wires[0]),
+                wires=custom_wires,
+            ),
+            wires=custom_wires,
+        ),
+        qml.SparseHamiltonian(
+            qml.utils.sparse_hamiltonian(
+                1.1 * qml.PauliX(wires=custom_wires[0]) @ qml.PauliZ(wires=custom_wires[2]),
+                wires=custom_wires,
+            ),
+            wires=custom_wires,
+        ),
+    ],
+)
+def test_fail_adjoint_SparseHamiltonian(returns):
+    """Integration tests that compare to default.qubit for a large circuit containing parametrized
+    operations and when using custom wire labels"""
+
+    dev_kokkos = qml.device("lightning.kokkos", wires=custom_wires)
+
+    def circuit(params):
+        circuit_ansatz(params, wires=custom_wires)
+        return qml.expval(returns)
+
+    n_params = 30
+    np.random.seed(1337)
+    params = np.random.rand(n_params)
+
+    qnode_kokkos = qml.QNode(circuit, dev_kokkos, diff_method="adjoint")
+
+    with pytest.raises(Exception):
+        j_kokkos = qml.jacobian(qnode_kokkos)(params)

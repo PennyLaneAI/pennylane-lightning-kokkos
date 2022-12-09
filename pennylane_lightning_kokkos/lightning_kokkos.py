@@ -24,6 +24,8 @@ from pennylane import (
     QubitStateVector,
     DeviceError,
     Projector,
+    Hamiltonian,
+    SparseHamiltonian,
     Hermitian,
     Rot,
     CRot,
@@ -83,6 +85,8 @@ class LightningKokkos(LightningQubit):
         "PauliY",
         "PauliZ",
         "Hadamard",
+        "SparseHamiltonian",
+        "Hamiltonian",
         "Identity",
     }
 
@@ -109,7 +113,6 @@ class LightningKokkos(LightningQubit):
         capabilities = super().capabilities().copy()
         capabilities.update(
             model="qubit",
-            supports_reversible_diff=False,
             supports_inverse_operations=True,
             supports_analytic_computation=True,
             supports_finite_shots=False,
@@ -117,6 +120,21 @@ class LightningKokkos(LightningQubit):
         )
         capabilities.pop("passthru_devices", None)
         return capabilities
+
+    @property
+    def stopping_condition(self):
+        def accepts_obj(obj):
+            if obj.name == "QFT" and len(obj.wires) >= 6:
+                return False
+            if obj.name == "GroverOperator" and len(obj.wires) >= 13:
+                return False
+            if getattr(obj, "has_matrix", False):
+                # pow operations dont work with backprop or adjoint without decomposition
+                # use class name string so we don't need to use isinstance check
+                return not (obj.__class__.__name__ == "Pow" and qml.operation.is_trainable(obj))
+            return obj.name in self.observables.union(self.operations)
+
+        return qml.BooleanFn(accepts_obj)
 
     def apply_cq(self, operations, **kwargs):
         # Skip over identity operations instead of performing
@@ -155,8 +173,6 @@ class LightningKokkos(LightningQubit):
                 method(wires, inv, param)
 
     def apply(self, operations, **kwargs):
-        if self._shots:
-            raise NotImplementedError("lightning.kokkos does not currently support finite shots")
 
         # State preparation is currently done in Python
         if operations:  # make sure operations[0] exists
@@ -180,6 +196,14 @@ class LightningKokkos(LightningQubit):
 
         if self._sync:
             self.syncD2H()
+
+    def generate_samples(self):
+        """Generate samples
+
+        Returns:
+            array[int]: array of samples in binary representation with shape ``(dev.shots, dev.num_wires)``
+        """
+        return self._kokkos_state.GenerateSamples(len(self.wires), self.shots).astype(int)
 
     def var(self, observable, shot_range=None, bin_size=None):
         if self.shots is not None:
@@ -207,14 +231,64 @@ class LightningKokkos(LightningQubit):
 
         return squared_mean - (mean**2)
 
+    def probability(self, wires=None, shot_range=None, bin_size=None):
+        """Return the probability of each computational basis state.
+
+        Devices that require a finite number of shots always return the
+        estimated probability.
+
+        Args:
+            wires (Iterable[Number, str], Number, str, Wires): wires to return
+                marginal probabilities for. Wires not provided are traced out of the system.
+            shot_range (tuple[int]): 2-tuple of integers specifying the range of samples
+                to use. If not specified, all samples are used.
+            bin_size (int): Divides the shot range into bins of size ``bin_size``, and
+                returns the measurement statistic separately over each bin. If not
+                provided, the entire shot range is treated as a single bin.
+
+        Returns:
+            array[float]: list of the probabilities
+        """
+        if self.shots is not None:
+            return self.estimate_probability(wires=wires, shot_range=shot_range, bin_size=bin_size)
+
+        wires = wires or self.wires
+        wires = Wires(wires)
+
+        # translate to wire labels used by device
+        device_wires = self.map_wires(wires)
+
+        return self._kokkos_state.probs(device_wires)
+
     def expval(self, observable, shot_range=None, bin_size=None):
         if observable.name in [
             "Projector",
-            "Hamiltonian",
-            "SparseHamiltonian",
         ]:
             self.syncD2H()
             return super().expval(observable, shot_range=shot_range, bin_size=bin_size)
+
+        if observable.name in ["SparseHamiltonian"]:
+            CSR_SparseHamiltonian = observable.sparse_matrix().tocsr()
+            return self._kokkos_state.ExpectationValue(
+                CSR_SparseHamiltonian.data,
+                CSR_SparseHamiltonian.indices,
+                CSR_SparseHamiltonian.indptr,
+            )
+
+        if observable.name in ["Hamiltonian"]:
+            if len(observable.wires) < 13:
+                device_wires = self.map_wires(observable.wires)
+                return self._kokkos_state.ExpectationValue(
+                    device_wires, qml.matrix(observable).ravel(order="C")
+                )
+            else:
+                Hmat = qml.utils.sparse_hamiltonian(observable, wires=self.wires)
+                CSR_SparseHamiltonian = observable.sparse_matrix().tocsr()
+                return self._kokkos_state.ExpectationValue(
+                    CSR_SparseHamiltonian.data,
+                    CSR_SparseHamiltonian.indices,
+                    CSR_SparseHamiltonian.indptr,
+                )
 
         if self.shots is not None:
             # estimate the expectation value
@@ -249,6 +323,7 @@ class LightningKokkos(LightningQubit):
         Args:
             tape (.QuantumTape): quantum tape to differentiate
         """
+        unsupported = [Projector, Hamiltonian, SparseHamiltonian, Hermitian]
         for m in tape.measurements:
             if m.return_type is not Expectation:
                 raise QuantumFunctionError(
@@ -256,18 +331,22 @@ class LightningKokkos(LightningQubit):
                     f" measurement {m.return_type.value}"
                 )
             if not isinstance(m.obs, Tensor):
-                if isinstance(m.obs, Projector):
+                if any([isinstance(m.obs, k) for k in unsupported]):
                     raise QuantumFunctionError(
-                        "Adjoint differentiation method does not support the Projector observable"
-                    )
-                if isinstance(m.obs, Hermitian):
-                    raise QuantumFunctionError(
-                        "Lightning adjoint differentiation method does not currently support the Hermitian observable"
+                        f"Adjoint differentiation method does not support the {m.obs.name} observable"
                     )
             else:
                 if any([isinstance(o, Projector) for o in m.obs.non_identity_obs]):
                     raise QuantumFunctionError(
                         "Adjoint differentiation method does not support the Projector observable"
+                    )
+                if any([isinstance(o, Hamiltonian) for o in m.obs.non_identity_obs]):
+                    raise QuantumFunctionError(
+                        "Adjoint differentiation method does not currently support the Hamiltonian observable"
+                    )
+                if any([isinstance(o, SparseHamiltonian) for o in m.obs.non_identity_obs]):
+                    raise QuantumFunctionError(
+                        "Adjoint differentiation method does not currently support the SparseHamiltonian observable"
                     )
                 if any([isinstance(o, Hermitian) for o in m.obs.non_identity_obs]):
                     raise QuantumFunctionError(
