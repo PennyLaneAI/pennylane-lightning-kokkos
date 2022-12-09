@@ -22,7 +22,7 @@ jobs:
 
     steps:
       - name: Cancel previous runs
-        uses: styfle/cancel-workflow-action@0.10.0
+        uses: styfle/cancel-workflow-action@0.11.0
         with:
           access_token: ${{ github.token }}
 
@@ -51,7 +51,7 @@ jobs:
     strategy:
       matrix:
         os: [macos-11]
-        exec_model: ["SERIAL", "THREADS"]
+        exec_model: ["SERIAL"]
 
     name: Python tests for ${{ matrix.exec_model }} Kokkos Backend
     runs-on: ${{ matrix.os }}
