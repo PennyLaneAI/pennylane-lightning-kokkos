@@ -1,16 +1,16 @@
 #### Before posting an issue
 
 Search existing GitHub issues to make sure the issue does not already exist:
-https://github.com/xanaduai/pennylane-lightning/issues
+https://github.com/PennyLaneAI/pennylane-lightning-kokkos/issues
 
-If posting a PennyLane-Lightning issue, delete everything above the dashed line, and fill
+If posting a PennyLane-Lightning-Kokkos issue, delete everything above the dashed line, and fill
 in the template. If the issue is a bug, start the title of the issue with [BUG].
 
 If making a feature request, delete the following template and describe, in detail,
 the feature and why it is needed.
 
 For general technical details check out our documentation:
-https://pennylane-lightning.readthedocs.io/
+https://docs.pennylane.ai/projects/lightning-kokkos/en/latest/
 
 -------------------------------------------------------------------------------------------------------------
 
