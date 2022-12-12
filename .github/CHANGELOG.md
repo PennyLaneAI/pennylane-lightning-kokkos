@@ -6,7 +6,7 @@
  [(#11)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/11)
 
 * Add sample generation support.
-  [(#9)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/9)
+  [(#91)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/9)
 
 ### Breaking changes
 
