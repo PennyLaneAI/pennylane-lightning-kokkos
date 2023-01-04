@@ -1,6 +1,5 @@
-# Release 0.28.0
+# Release 0.29.0-dev
 
- 
 ### New features since last release
 
  * Add X86-64 Linux wheels building with OpenMP backend for lightning.kokkos in workflows.
@@ -17,18 +16,44 @@
  "The current lightning.kokkos package was built by the user."
  ```
  [(#14)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/14)
- 
- * Drop python3.7 and deprecate the Python and C++ tests with threading backend in workflows.
- Note this deprecation is based on the fact that Kokkos cannot promise that its Threads back-end will 
- not conflict with the application's direct use of operating system threads. 
- [(#23)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/23)
 
-  * Remove the unused `supports_reversible_diff` device capability from `LightningKokkos`
- [(#20)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/20)
 
 ### Improvements
 
 ### Documentation
+
+### Bug fixes
+
+### Contributors
+
+Shuli Shu
+
+This release contains contributions from (in alphabetical order):
+
+---
+
+
+# Release 0.28.0
+
+### Breaking changes
+
+* Drop python3.7 and deprecate the Python and C++ tests with threading backend in workflows.
+Note this deprecation is based on the fact that Kokkos cannot promise that its Threads back-end will
+not conflict with the application's direct use of operating system threads.
+[(#23)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/23)
+
+* Remove the unused `supports_reversible_diff` device capability from `LightningKokkos`
+[(#20)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/20)
+
+### Improvements
+
+* Improve the stopping condition method.
+[(#25)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/25)
+
+### Documentation
+
+* Update version string in package for release.
+[(#27)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/27)
 
 ### Bug fixes
 
@@ -39,8 +64,9 @@
 
 This release contains contributions from (in alphabetical order):
 
-Shuli Shu, Matthew Silverman
+Amintor Dusko, Lee J. O'Riordan, Shuli Shu, Matthew Silverman
 
+--
 # Release 0.27.0
 
 ### New features since last release
