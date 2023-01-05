@@ -1,0 +1,132 @@
+name: Wheel::AMD:HIP
+
+# **What it does**: Builds python wheels for Linux (ubuntu-latest) architecture x86_64 and store it as artifacts.
+#                   Python versions: 3.8, 3.9, 3.10, 3.11.
+# **Why we have it**: To build wheels for pennylane-lightning-kokkos installation.
+# **Who does it impact**: Wheels to be uploaded to PyPI.
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  release:
+    types: [published]
+
+env:
+  GCC_VERSION: 10
+  PY_VERSION: 3.8
+  EXE_MODEL: "HIP"
+
+jobs:
+  set_wheel_build_matrix:
+    name: "Set wheel build matrix"
+    uses: ./.github/workflows/set_amd_wheel_build_matrix.yml
+    with:
+      event_name: ${{ github.event_name }}
+
+  linux-wheels-x86-64:
+    needs: [set_wheel_build_matrix]
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        arch: [x86_64]
+        cibw_build: ${{ fromJson(needs.set_wheel_build_matrix.outputs.python_version) }}
+        exec_model: ${{ fromJson(needs.set_wheel_build_matrix.outputs.exec_model) }}
+        amd_arch: ${{ fromJson(needs.set_wheel_build_matrix.outputs.amd_arch) }}
+        container_img: ["quay.io/pypa/manylinux2014_x86_64"]
+
+    name: ${{ matrix.os }} (Python ${{ fromJson('{"cp38-*":"3.8","cp39-*":"3.9","cp310-*":"3.10","cp311-*":"3.11" }')[matrix.cibw_build] }} ${{ matrix.exec_model }} ${{ matrix.amd_arch }})
+    runs-on: ${{ matrix.os }}
+    container: ${{ matrix.container_img }}
+
+    steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.11.0
+        with:
+          access_token: ${{ github.token }}
+
+      - name: Checkout PennyLane-Lightning-Kokkos
+        uses: actions/checkout@v3
+
+      - name: Install dependencies (CentOS)
+        if: ${{ (matrix.container_img == 'quay.io/pypa/manylinux2014_x86_64') }}
+        run: |
+          # Reduce wait time for repos not responding
+          cat /etc/yum.conf | sed "s/\[main\]/\[main\]\ntimeout=5/g" > /etc/yum.conf
+          yum update -y && yum install -y docker
+  
+      - name: Install cibuildwheel
+        run: python3.8 -m pip install cibuildwheel~=2.11.0
+
+      - name: Build wheels
+        env:
+          CIBW_ARCHS_LINUX: ${{matrix.arch}}
+
+          CIBW_BUILD: ${{ matrix.cibw_build }}
+
+          CIBW_SKIP: "*-musllinux*"
+
+          # Python build settings
+          CIBW_BEFORE_BUILD: |
+            cat /etc/yum.conf | sed "s/\[main\]/\[main\]\ntimeout=5/g" > /etc/yum.conf
+            pip install ninja cmake~=3.25.0 auditwheel
+            yum install -y epel-release
+            yum install centos-release-scl-rh -y
+            yum install -y https://repo.radeon.com/amdgpu-install/21.40.2/rhel/7.9/amdgpu-install-21.40.2.40502-1.el7.noarch.rpm
+            amdgpu-install -y --accept-eula --usecase=rocm,hiplibsdk --no-dkms
+            yum install devtoolset-10 -y
+            source /opt/rh/devtoolset-10/enable -y
+            sed -i "16 s/CXX C/CXX C HIP/g" ./CMakeLists.txt
+            BACKEND=${{ matrix.exec_model }} ARCH=${{ matrix.amd_arch }} python3.8 install.py
+          #sed -i "77 s/default/AMD_GPU "${{ matrix.amd_arch }}"/g" ./pennylane_lightning_kokkos/lightning_kokkos.py
+
+          CIBW_ENVIRONMENT: |
+            PATH=/opt/rh/devtoolset-10/root/usr/bin:/opt/rocm/bin:/opt/rocm/profiler/bin:/opt/rocm/opencl/bin:$PATH LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/rocm/lib CXX=/opt/rocm/hip/bin/hipcc BACKEND=${{ matrix.exec_model }} ARCH=${{ matrix.amd_arch }}
+          
+          # Testing of built wheels
+          CIBW_TEST_REQUIRES: numpy~=1.21 scipy pytest pytest-cov pytest-mock flaky
+
+          CIBW_BEFORE_TEST: |
+            pip install git+https://github.com/PennyLaneAI/pennylane.git@master
+          
+          #CIBW_TEST_COMMAND: |
+          #  pl-device-test --device=lightning.kokkos --skip-ops -x --tb=short --no-flaky-report
+          
+          CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
+
+          CIBW_REPAIR_WHEEL_COMMAND_LINUX: "./docker/auditwheel repair -w {dest_dir} {wheel}"
+          
+          CIBW_BUILD_VERBOSITY: 3
+
+        run: | 
+          python3.8 -m cibuildwheel --output-dir wheelhouse
+      - uses: actions-ecosystem/action-regex-match@v2
+        id: rc_build
+        with:
+          text: ${{ github.event.pull_request.head.ref }}
+          regex: '.*[0-9]+.[0-9]+.[0-9]+[-_]?rc[0-9]+'
+
+      - uses: actions/upload-artifact@v2
+        #if: ${{ github.event_name == 'release' || github.ref == 'refs/heads/master' || steps.rc_build.outputs.match != ''}}
+        with:
+          name: ${{ runner.os }}-wheels-${{ matrix.arch }}-${{ matrix.amd_arch }}-HIP.zip
+          path: ./wheelhouse/*.whl
+
+  upload-pypi:
+    needs: linux-wheels-x86-64
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'release' || github.ref == 'refs/heads/master'}}
+    steps:
+      - uses: actions/download-artifact@v2
+        with:
+          name: Linux-wheels-x86_64-HIP.zip
+          path: dist
+
+      - name: Upload wheels to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+          repository_url: https://test.pypi.org/legacy/

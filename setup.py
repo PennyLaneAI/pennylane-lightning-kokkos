@@ -17,6 +17,7 @@ import platform
 import sys
 import subprocess
 import shutil
+import json
 from pathlib import Path
 from setuptools import setup, find_packages
 
@@ -24,15 +25,15 @@ if not os.getenv("READTHEDOCS"):
 
     from setuptools import Extension
     from setuptools.command.build_ext import build_ext
-
+    
     class CMakeExtension(Extension):
         def __init__(self, name, sourcedir=""):
             Extension.__init__(self, name, sources=[])
             self.sourcedir = Path(sourcedir).absolute()
-
+    
     class CMakeBuild(build_ext):
         """
-        This class is based upon the build infrastructure of Pennylane-Lightning.
+        This class is based upon the build infrastructure of Pennylane-Lightning-Kokkos.
         """
 
         user_options = build_ext.user_options + [
@@ -97,6 +98,8 @@ if not os.getenv("READTHEDOCS"):
                 else:
                     raise RuntimeError(f"Unsupported backend: '{self.backend}'")
                 if self.arch:
+                    configure_args.append(f"-DCMAKE_CXX_COMPILER=/opt/rocm/hip/bin/hipcc")
+                    configure_args.append(f"-DCMAKE_C_COMPILER=/opt/rocm/llvm/bin/amdclang")
                     configure_args.append(f"-DKokkos_ARCH_{self.arch}=ON")
 
             # Add more platform dependent options
@@ -113,15 +116,22 @@ if not os.getenv("READTHEDOCS"):
                             f"-DCMAKE_LINKER={llvmpath}/bin/lld",
                     ] # Use clang instead of appleclang
                 # Disable OpenMP in M1 Macs
-                if os.environ.get("USE_OMP"):
-                    configure_args += []
-                else:
-                    configure_args += ["-DKokkos_ENABLE_OPENMP=OFF"]
+                configure_args += ["-DKokkos_ENABLE_OPENMP=OFF"]
             elif platform.system() == "Windows":
                 configure_args += ["-DKokkos_ENABLE_OPENMP=OFF"] # only build with Clang under Windows
             else:
                 if platform.system() != "Linux":
                     raise RuntimeError(f"Unsupported '{platform.system()}' platform")
+            
+            # Data to be written
+            built_info = {
+                "Backend": f"{self.backend}",
+                "Device_Arch": f"{self.arch}",
+                "Platform": f"{platform.system()}"
+            }
+            with open("./pennylane_lightning_kokkos/built_info.json", "w") as f:
+                json.dump(built_info, f)
+            f.close()
 
             if not Path(self.build_temp).exists():
                 os.makedirs(self.build_temp)
@@ -131,7 +141,7 @@ if not os.getenv("READTHEDOCS"):
             )
             subprocess.check_call(["cmake", "--build", "."] + build_args, cwd=self.build_temp)
 
-
+                 
 with open("pennylane_lightning_kokkos/_version.py") as f:
     version = f.readlines()[-1].split()[-1].strip("\"'")
 
@@ -152,7 +162,7 @@ info = {
     "url": "https://github.com/PennyLaneAI/pennylane-lightning-kokkos",
     "license": "Apache License 2.0",
     "packages": find_packages(where="."),
-    "package_data": {"pennylane_lightning_kokkos": ["src/*"]},
+    "package_data": {"pennylane_lightning_kokkos": ["src/*","*.txt","*.json"]},
     "entry_points": {
         "pennylane.plugins": [
             "lightning.kokkos = pennylane_lightning_kokkos:LightningKokkos",
@@ -183,6 +193,7 @@ classifiers = [
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3 :: Only",
     "Topic :: Scientific/Engineering :: Physics",
 ]
