@@ -300,3 +300,9 @@ class TestLightningKokkosIntegration:
         assert dev.num_wires == 2
         assert dev.shots is None
         assert dev.short_name == "lightning.kokkos"
+
+        with pytest.raises(
+            Exception,
+            match="'tests' is not supported. Supported keynames are 'Backend', 'Device_Arch' and 'Platform'.",
+        ):
+            dev._build_info("tests")

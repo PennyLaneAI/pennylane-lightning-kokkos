@@ -14,9 +14,9 @@ on:
       python_version:
         description: "Python versions."
         value: ${{ jobs.set-builder-matrix.outputs.python_version }}
-      exec_model:
-        description: "Kokkos' execution model."
-        value: ${{ jobs.set-builder-matrix.outputs.exec_model }}
+      cpu_exec_model:
+        description: "Kokkos' cpu execution model."
+        value: ${{ jobs.set-builder-matrix.outputs.cpu_exec_model }}
 
 jobs:
   set-builder-matrix:
@@ -45,10 +45,10 @@ jobs:
               --range)"
           fi
 
-      - name: Kokkos execution strategy
-        id: exec_model
-        run: echo "::set-output name=exec_model::[\"OPENMP\"]"
+      - name: Kokkos execution strategy (CPU)
+        id: cpu_exec_model
+        run: echo "::set-output name=cpu_exec_model::[\"SERIAL\",\"OPENMP\"]"
 
     outputs:
       python_version: ${{ steps.pyver.outputs.python_version }}
-      exec_model: ${{ steps.exec_model.outputs.exec_model }}
+      cpu_exec_model: ${{ steps.cpu_exec_model.outputs.cpu_exec_model }}

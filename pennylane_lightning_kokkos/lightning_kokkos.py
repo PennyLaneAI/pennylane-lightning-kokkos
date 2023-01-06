@@ -17,7 +17,8 @@ interfaces with Kokkos-enabled calculations to run efficiently on different kind
 hardware systems, such as AMD and Nvidia GPUs, or many-core CPUs. 
 """
 from warnings import warn
-
+import json
+import os
 import numpy as np
 from pennylane import (
     math,
@@ -67,7 +68,6 @@ class LightningKokkos(LightningQubit):
     """
 
     name = "PennyLane plugin for Kokkos-backed Lightning device"
-    package_built_info = "The current lightning.kokkos package was built by the user."
     short_name = "lightning.kokkos"
     pennylane_requires = ">=0.22"
     version = __version__
@@ -102,8 +102,18 @@ class LightningKokkos(LightningQubit):
         self._kokkos_state.DeviceToHost(self._state.ravel(order="C"))
         self._pre_rotated_state = self._state
 
-    def _package_backend_info(self):
-        print(self.package_built_info)
+    def _build_info(self, keyname="Backend"):
+        """Backend information (Backend, Device architecture, and Platform) query for the package installed."""
+        if not keyname in ["Backend", "Device_Arch", "Platform"]:
+            raise Exception(
+                f"'{keyname}' is not supported. Supported keynames are 'Backend', 'Device_Arch' and 'Platform'."
+            )
+        dir = os.path.dirname(__file__)
+        build_info_file = os.path.join(dir, "build_info.json")
+        with open(build_info_file, "r") as f:
+            build_info = json.load(f)
+        f.close()
+        print(build_info[keyname])
 
     @classmethod
     def capabilities(cls):

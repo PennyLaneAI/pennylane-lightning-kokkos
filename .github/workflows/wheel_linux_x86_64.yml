@@ -32,7 +32,7 @@ jobs:
         os: [ubuntu-latest]
         arch: [x86_64]
         cibw_build: ${{ fromJson(needs.set_wheel_build_matrix.outputs.python_version) }}
-        exec_model: ${{ fromJson(needs.set_wheel_build_matrix.outputs.exec_model) }}
+        exec_model: ${{ fromJson(needs.set_wheel_build_matrix.outputs.cpu_exec_model) }}
         container_img: ["quay.io/pypa/manylinux2014_x86_64"]
 
     name: ${{ matrix.os }} (Python ${{ fromJson('{"cp38-*":"3.8", "cp39-*":"3.9","cp310-*":"3.10","cp311-*":"3.11" }')[matrix.cibw_build] }} ${{ matrix.exec_model }})
@@ -74,7 +74,7 @@ jobs:
             yum install centos-release-scl-rh -y
             yum install devtoolset-11-gcc-c++ -y
             source /opt/rh/devtoolset-11/enable -y
-            sed -i "77 s/by the user/with "${{ matrix.exec_model }}" backend in the CI/g" ./pennylane_lightning_kokkos/lightning_kokkos.py
+
           CIBW_ENVIRONMENT: |
             PATH=/opt/rh/devtoolset-11/root/usr/bin:$PATH BACKEND=${{ matrix.exec_model }}
           
@@ -99,7 +99,7 @@ jobs:
           regex: '.*[0-9]+.[0-9]+.[0-9]+[-_]?rc[0-9]+'
 
       - uses: actions/upload-artifact@v2
-        if: ${{ github.event_name == 'release' || github.ref == 'refs/heads/master' || steps.rc_build.outputs.match != ''}}
+        #if: ${{ github.event_name == 'release' || github.ref == 'refs/heads/master' || steps.rc_build.outputs.match != ''}}
         with:
           name: ${{ runner.os }}-wheels-${{ matrix.arch }}-${{ matrix.exec_model }}.zip
           path: ./wheelhouse/*.whl
