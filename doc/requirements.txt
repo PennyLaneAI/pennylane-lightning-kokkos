@@ -1,5 +1,5 @@
 docutils==0.16
-sphinx=6.0.0
+sphinx
 sphinx-automodapi
 breathe
 exhale
