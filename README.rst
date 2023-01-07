@@ -20,21 +20,12 @@ Installation
    cmake -Bbuild -DKokkos_ENABLE_OPENMP=On -DPLKOKKOS_BUILD_TESTS=On -G Ninja
    cmake --build ./build
 
-or for the THREADS backend
-
-.. code-block:: console
-
-   cmake -Bbuild -DKokkos_ENABLE_THREADS=On -DPLKOKKOS_BUILD_TESTS=On -G Ninja
-   cmake --build ./build
-
 You can install the python interface with:
 
 .. code-block:: console
 
-   python setup.py build_ext --backend="OPENMP"
-   python setup.py bdist_wheel
+   BACKEND="OPENMP" python setup.py bdist_wheel
    pip install ./dist/PennyLane*.whl --force-reinstall
-
 
 or for an editable `pip` installation with:
 
@@ -44,7 +35,8 @@ or for an editable `pip` installation with:
 
 
 Supported backend options are "SERIAL", "OPENMP", "THREADS", "HIP" and "CUDA". For "HIP" and "CUDA", the appropriate software stacks are required to enable compilation and subsequent use.
-For explicit targeting of a given supported architecture, the environment varaible `ARCH` can also be specified which directly sets the `-DKokkos_ARCH_{...}=ON` build option.
+For explicit targeting of a given supported architecture, the environment varaible `ARCH` can also be specified which directly sets the `-DKokkos_ARCH_{...}=ON` build option. Note that THREADS
+backend is not recommended since `Kokkos <https://github.com/kokkos/kokkos/wiki/Initialization>`_ does not guarantee its safey.
 
 .. installation-end-inclusion-marker-do-not-remove
 
