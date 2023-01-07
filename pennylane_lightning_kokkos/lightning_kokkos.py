@@ -103,7 +103,7 @@ class LightningKokkos(LightningQubit):
         self._pre_rotated_state = self._state
 
     def _build_info(self, keyname="Backend"):
-        """Backend information (Backend, Device architecture, and Platform) query for the package installed."""
+        """Build information (Backend, Device architecture, and Platform) query."""
         if not keyname in ["Backend", "Device_Arch", "Platform"]:
             raise Exception(
                 f"'{keyname}' is not supported. Supported keynames are 'Backend', 'Device_Arch' and 'Platform'."
