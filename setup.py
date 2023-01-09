@@ -210,7 +210,8 @@ classifiers = [
 ]
 
 def run_setup(classifiers, info):
-    record_build_info()
+    if not os.getenv("READTHEDOCS"):
+        record_build_info()
     setup(classifiers=classifiers, **(info))
 
 run_setup(classifiers, info)
