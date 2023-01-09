@@ -18,4 +18,3 @@ build:
   apt_packages:
     - cmake
     - graphviz
-    - build-essential
