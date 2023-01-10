@@ -86,7 +86,7 @@ jobs:
       - name: Install lightning.kokkos device
         run: |
           cd main
-          BACKEND="SERIAL" python -m pip install -e . --verbose
+          CXX=$(brew --prefix llvm)/bin/clang++ BACKEND="SERIAL" python -m pip install -e . --verbose
          
       - name: Run PennyLane-Lightning unit tests
         run: |
