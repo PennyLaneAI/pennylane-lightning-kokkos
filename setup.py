@@ -17,40 +17,8 @@ import platform
 import sys
 import subprocess
 import shutil
-import json
 from pathlib import Path
 from setuptools import setup, find_packages
-
-def envar():
-    backends = {"CUDA", "HIP", "OPENMP", "THREADS", "SERIAL"}
-    archs = {"VEGA900","VEGA906","VEGA908","VEGA90A"}
-
-    backend = None
-    arch = None
-
-    if os.getenv("BACKEND") and not backend:
-        backend = os.getenv("BACKEND")
-        if backend not in backends:
-            raise RuntimeError('Unsupported backend: {backend}')
-    if os.getenv("ARCH") and not arch:
-        arch = os.getenv("ARCH")
-        if arch not in archs:
-            raise RuntimeError('Unsupported architecture: {arch} .')
-    #Only record build information when backend info is provided
-    if not backend:
-        raise RuntimeError('Required backend information is not provided.')
-    return backend, arch
-
-def record_build_info():
-    backend, arch = envar()
-    build_info = {
-        "Backend":f"{backend}",
-        "Device_Arch":f"{arch}",
-        "Platform":f"{platform.system()}"
-    }
-    with open("./pennylane_lightning_kokkos/build_info.json", "w") as f:
-        json.dump(build_info, f)
-    f.close()
 
 if not os.getenv("READTHEDOCS"):
 
@@ -73,7 +41,9 @@ if not os.getenv("READTHEDOCS"):
             ("backend=", "B", "Define compiled Kokkos backend"),
             ("arch=", "A", "Define backend targetted architecture"),
         ]
-        
+     
+        backends = {"CUDA", "HIP", "OPENMP", "THREADS", "SERIAL"}
+
         def initialize_options(self):
             super().initialize_options()
             self.define = None
@@ -117,11 +87,18 @@ if not os.getenv("READTHEDOCS"):
 
             build_args = []
 
-            self.backend, self.arch = envar()
+            if os.getenv("BACKEND") and not self.backend:
+                self.backend = os.getenv("BACKEND")
+            if os.getenv("ARCH") and not self.arch:
+                self.arch = os.getenv("ARCH")
+
             if self.backend:
-                configure_args.append(f"-DKokkos_ENABLE_{self.backend}=ON")
-            if self.arch:
-                configure_args.append(f"-DKokkos_ARCH_{self.arch}=ON")
+                if self.backend in self.backends:
+                    configure_args.append(f"-DKokkos_ENABLE_{self.backend}=ON")
+                else:
+                    raise RuntimeError(f"Unsupported backend: '{self.backend}'")
+                if self.arch:
+                    configure_args.append(f"-DKokkos_ARCH_{self.arch}=ON")
 
             # Add more platform dependent options
             if platform.system() == "Darwin":
@@ -173,7 +150,7 @@ info = {
     "url": "https://github.com/PennyLaneAI/pennylane-lightning-kokkos",
     "license": "Apache License 2.0",
     "packages": find_packages(where="."),
-    "package_data": {"pennylane_lightning_kokkos": ["src/*","*.json"]},
+    "package_data": {"pennylane_lightning_kokkos": ["src/*"]},
     "entry_points": {
         "pennylane.plugins": [
             "lightning.kokkos = pennylane_lightning_kokkos:LightningKokkos",
@@ -209,9 +186,5 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Physics",
 ]
 
-def run_setup(classifiers, info):
-    if not os.getenv("READTHEDOCS"):
-        record_build_info()
-    setup(classifiers=classifiers, **(info))
+setup(classifiers=classifiers, **(info))
 
-run_setup(classifiers, info)

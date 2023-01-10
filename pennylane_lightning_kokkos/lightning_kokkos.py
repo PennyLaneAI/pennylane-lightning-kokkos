@@ -48,6 +48,7 @@ from .lightning_kokkos_qubit_ops import LightningKokkos_C128
 from .lightning_kokkos_qubit_ops import LightningKokkos_C64
 from .lightning_kokkos_qubit_ops import AdjointJacobianKokkos_C128
 from .lightning_kokkos_qubit_ops import AdjointJacobianKokkos_C64
+from .lightning_kokkos_qubit_ops import kokkos_configuration
 
 from ._serialize import _serialize_obs, _serialize_ops
 
@@ -102,18 +103,8 @@ class LightningKokkos(LightningQubit):
         self._kokkos_state.DeviceToHost(self._state.ravel(order="C"))
         self._pre_rotated_state = self._state
 
-    def _build_info(self, keyname="Backend"):
-        """Build information (Backend, Device architecture, and Platform) query."""
-        if not keyname in ["Backend", "Device_Arch", "Platform"]:
-            raise Exception(
-                f"'{keyname}' is not supported. Supported keynames are 'Backend', 'Device_Arch' and 'Platform'."
-            )
-        dir = os.path.dirname(__file__)
-        build_info_file = os.path.join(dir, "build_info.json")
-        with open(build_info_file, "r") as f:
-            build_info = json.load(f)
-        f.close()
-        print(build_info[keyname])
+    def print_configuration(self):
+        kokkos_configuration()
 
     @classmethod
     def capabilities(cls):
