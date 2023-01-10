@@ -88,7 +88,6 @@ jobs:
           cd main
           python setup.py build_ext -i --define="Kokkos_ENABLE_${{ matrix.exec_model }}=ON;CMAKE_CXX_COMPILER=$(brew --prefix llvm)/bin/clang++"
           pip install -e .
-         
       - name: Run PennyLane-Lightning unit tests
         run: |
           cd main/

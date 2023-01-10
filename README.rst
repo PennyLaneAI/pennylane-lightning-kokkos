@@ -28,6 +28,7 @@ You can install the python interface with:
    python setup.py bdist_wheel
    pip install ./dist/PennyLane*.whl --force-reinstall
 
+
 or for an editable `pip` installation with:
 
 .. code-block:: console

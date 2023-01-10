@@ -89,8 +89,6 @@ Amintor Dusko, Lee J. O'Riordan, Shuli Shu, Matthew Silverman
 ### Documentation
 
 ### Bug fixes
- * Update this device following changes in LightningQubit inheritance from DefaultQubit to QubitDevice.
- [(#16)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/16)
 
 ### Contributors
 

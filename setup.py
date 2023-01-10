@@ -24,12 +24,12 @@ if not os.getenv("READTHEDOCS"):
 
     from setuptools import Extension
     from setuptools.command.build_ext import build_ext
-    
+
     class CMakeExtension(Extension):
         def __init__(self, name, sourcedir=""):
             Extension.__init__(self, name, sources=[])
             self.sourcedir = Path(sourcedir).absolute()
-    
+
     class CMakeBuild(build_ext):
         """
         This class is based upon the build infrastructure of Pennylane-Lightning-Kokkos.
@@ -41,7 +41,7 @@ if not os.getenv("READTHEDOCS"):
             ("backend=", "B", "Define compiled Kokkos backend"),
             ("arch=", "A", "Define backend targetted architecture"),
         ]
-     
+
         backends = {"CUDA", "HIP", "OPENMP", "THREADS", "SERIAL"}
 
         def initialize_options(self):
@@ -86,7 +86,6 @@ if not os.getenv("READTHEDOCS"):
                 ]
 
             build_args = []
-
             if os.getenv("BACKEND") and not self.backend:
                 self.backend = os.getenv("BACKEND")
             if os.getenv("ARCH") and not self.arch:
@@ -187,4 +186,3 @@ classifiers = [
 ]
 
 setup(classifiers=classifiers, **(info))
-
