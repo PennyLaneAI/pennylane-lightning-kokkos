@@ -2,22 +2,15 @@
 
 ### New features since last release
 
- * Add X86-64 Linux wheels building with OpenMP backend for lightning.kokkos in workflows.
+ * Add X86-64 Linux wheels building with OpenMP and SERIAL backend for lightning.kokkos in workflows.
  [(#14)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/14)
 
- * Add the build information record support by adding the `record_build_info()` method in `setup.py`.
- With the `record_build_info()` method, running before the `setup()` method, a json file `build_info.json` will be created and stored with the build information of backend, device architecture and platform. This json file is then included into the installed package. 
- [(#14)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/14)
-
- * Add the build information query support with the `_build_info(keyname)` method.
- Supported `keyname`s are `Backend`, `Device_Arch` and `Platform`.
- The workflow for `_build_info(keyname)`is:
+ * Add the build information query support with the `print_configuration()` method.
+ The workflow for `print_configuration()`is:
  ```python
  >>> import pennylane as qml
- >>> import pennylane_lightning_kokkos as plk
  >>> dev = qml.device('lightning.kokkos', wires=3)
- >>> dev._build_info('Backend')
- "OPENMP"
+ >>> dev.print_configuration()
  ```
  [(#14)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/14)
 

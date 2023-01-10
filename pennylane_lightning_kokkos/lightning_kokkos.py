@@ -17,8 +17,6 @@ interfaces with Kokkos-enabled calculations to run efficiently on different kind
 hardware systems, such as AMD and Nvidia GPUs, or many-core CPUs. 
 """
 from warnings import warn
-import json
-import os
 import numpy as np
 from pennylane import (
     math,

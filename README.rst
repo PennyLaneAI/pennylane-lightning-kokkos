@@ -24,7 +24,8 @@ You can install the python interface with:
 
 .. code-block:: console
 
-   BACKEND="OPENMP" python setup.py bdist_wheel
+   python setup.py build_ext --backend="OPENMP"
+   python setup.py bdist_wheel
    pip install ./dist/PennyLane*.whl --force-reinstall
 
 or for an editable `pip` installation with:
