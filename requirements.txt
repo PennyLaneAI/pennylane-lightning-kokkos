@@ -8,4 +8,3 @@ pybind11
 pytest
 pytest-cov
 pytest-mock
-jsons>=1.6.0
