@@ -1,0 +1,19 @@
+#!/usr/bin/env python3
+
+# Patch to not ship ROCm system libraries
+# Follows https://github.com/DIPlib/diplib/tree/master/tools/travis
+import sys
+
+from auditwheel.main import main
+from auditwheel.policy import _POLICIES as POLICIES
+
+# Do not include licensed dynamic libraries
+libs = ["libamdhip*", "libtinfo*", "libelf*", "libdrm_amdgpu*", "libnuma*", "libhsa-runtime*", "libamd_comgr*", "libdrm*"]
+
+print(f"Excluding {libs}")
+
+for p in POLICIES:
+    p['lib_whitelist'].extend(libs)
+
+if __name__ == "__main__":
+    sys.exit(main())

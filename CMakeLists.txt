@@ -13,7 +13,7 @@ set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15" CACHE STRING "Minimum OS X deployment ve
 
 project(pennylane_lightning_kokkos
     DESCRIPTION "Lightning-Kokkos bindings for PennyLane. Backed by the Kokkos library."
-    LANGUAGES CXX C
+    LANGUAGES CXX C 
 )
 
 ##########################
@@ -104,7 +104,7 @@ option(Kokkos_ENABLE_DEPRECATION_WARNINGS "Enable Kokkos deprecation warnings" O
 include(FetchContent)
 FetchContent_Declare(kokkos
   GIT_REPOSITORY https://github.com/kokkos/kokkos.git
-  GIT_TAG        3.6.00
+  GIT_TAG        3.7.00
 )
 FetchContent_MakeAvailable(kokkos)
 get_target_property(PLKOKKOS_KOKKOS_INC_DIR kokkos INTERFACE_INCLUDE_DIRECTORIES)
@@ -126,7 +126,7 @@ if(PLKOKKOS_ENABLE_PYTHON)
 FetchContent_Declare(
     pybind11
     GIT_REPOSITORY https://github.com/pybind/pybind11.git
-    GIT_TAG        v2.9.1
+    GIT_TAG        v2.10.1
 )
 FetchContent_MakeAvailable(pybind11)
 

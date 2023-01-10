@@ -47,6 +47,7 @@ from .lightning_kokkos_qubit_ops import LightningKokkos_C128
 from .lightning_kokkos_qubit_ops import LightningKokkos_C64
 from .lightning_kokkos_qubit_ops import AdjointJacobianKokkos_C128
 from .lightning_kokkos_qubit_ops import AdjointJacobianKokkos_C64
+from .lightning_kokkos_qubit_ops import kokkos_configuration
 
 from ._serialize import _serialize_obs, _serialize_ops
 
@@ -100,6 +101,9 @@ class LightningKokkos(LightningQubit):
         """Explicitly synchronize Kokkos data to CPU"""
         self._kokkos_state.DeviceToHost(self._state.ravel(order="C"))
         self._pre_rotated_state = self._state
+
+    def print_configuration(self):
+        kokkos_configuration()
 
     @classmethod
     def capabilities(cls):
