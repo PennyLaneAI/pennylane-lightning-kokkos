@@ -14,16 +14,19 @@ on:
       python_version:
         description: "Python versions."
         value: ${{ jobs.set-builder-matrix.outputs.python_version }}
-      exec_model:
+      amd_gpu_exec_model:
         description: "The wheel building model."
-        value: ${{ jobs.set-builder-matrix.outputs.exec_model }}
-      amd_arch:
+        value: ${{ jobs.set-builder-matrix.outputs.amd_gpu_exec_model }}
+      amd_gpu_arch:
         description: "AMD GPU architecture."
-        value: ${{ jobs.set-builder-matrix.outputs.amd_arch }}
+        value: ${{ jobs.set-builder-matrix.outputs.amd_gpu_arch }}
+      cpu_exec_model:
+        description: "Kokkos' cpu execution model."
+        value: ${{ jobs.set-builder-matrix.outputs.cpu_exec_model }}
 
 jobs:
   set-builder-matrix:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Cancel Previous Runs
@@ -48,15 +51,20 @@ jobs:
               --range)"
           fi
 
-      - name: Wheels building strategy
-        id: exec_model
-        run: echo "::set-output name=exec_model::[\"HIP\"]"
+      - name: AMD GPU wheels building strategy
+        id: amd_gpu_exec_model
+        run: echo "::set-output name=amd_gpu_exec_model::[\"HIP\"]"
 
       - name: AMD GPU architecture
-        id: amd_arch
-        run: echo "::set-output name=amd_arch::[\"VEGA900\",\"VEGA906\",\"VEGA908\",\"VEGA90A\"]"
+        id: amd_gpu_arch
+        run: echo "::set-output name=amd_gpu_arch::[\"VEGA900\",\"VEGA906\",\"VEGA908\",\"VEGA90A\"]"
+
+      - name: CPU wheels execution strategy (CPU)
+        id: cpu_exec_model
+        run: echo "::set-output name=cpu_exec_model::[\"SERIAL\",\"OPENMP\"]"
 
     outputs:
       python_version: ${{ steps.pyver.outputs.python_version }}
-      exec_model: ${{ steps.exec_model.outputs.exec_model }}
-      amd_arch: ${{ steps.amd_arch.outputs.amd_arch }}
+      amd_gpu_exec_model: ${{ steps.amd_gpu_exec_model.outputs.amd_gpu_exec_model }}
+      amd_gpu_arch: ${{ steps.amd_gpu_arch.outputs.amd_gpu_arch }}
+      cpu_exec_model: ${{ steps.cpu_exec_model.outputs.cpu_exec_model }}

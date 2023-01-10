@@ -1,9 +1,13 @@
-name: Wheel::AMD:HIP
+name: Wheel::Linux::x86_64
 
 # **What it does**: Builds python wheels for Linux (ubuntu-latest) architecture x86_64 and store it as artifacts.
 #                   Python versions: 3.8, 3.9, 3.10, 3.11.
 # **Why we have it**: To build wheels for pennylane-lightning-kokkos installation.
 # **Who does it impact**: Wheels to be uploaded to PyPI.
+
+env:
+  GCC_VERSION: 11
+  PY_VERSION: 3.8
 
 on:
   pull_request:
@@ -12,11 +16,6 @@ on:
       - main
   release:
     types: [published]
-
-env:
-  GCC_VERSION: 10
-  PY_VERSION: 3.8
-  EXE_MODEL: "HIP"
 
 jobs:
   set_wheel_build_matrix:
@@ -33,11 +32,10 @@ jobs:
         os: [ubuntu-latest]
         arch: [x86_64]
         cibw_build: ${{ fromJson(needs.set_wheel_build_matrix.outputs.python_version) }}
-        exec_model: ${{ fromJson(needs.set_wheel_build_matrix.outputs.amd_gpu_exec_model) }}
-        amd_gpu_arch: ${{ fromJson(needs.set_wheel_build_matrix.outputs.amd_gpu_arch) }}
+        exec_model: ${{ fromJson(needs.set_wheel_build_matrix.outputs.cpu_exec_model) }}
         container_img: ["quay.io/pypa/manylinux2014_x86_64"]
 
-    name: ${{ matrix.os }} (Python ${{ fromJson('{"cp38-*":"3.8","cp39-*":"3.9","cp310-*":"3.10","cp311-*":"3.11" }')[matrix.cibw_build] }} ${{ matrix.exec_model }} ${{ matrix.amd_gpu_arch }})
+    name: ${{ matrix.os }} (Python ${{ fromJson('{"cp38-*":"3.8", "cp39-*":"3.9","cp310-*":"3.10","cp311-*":"3.11" }')[matrix.cibw_build] }} ${{ matrix.exec_model }})
     runs-on: ${{ matrix.os }}
     container: ${{ matrix.container_img }}
 
@@ -71,31 +69,25 @@ jobs:
           # Python build settings
           CIBW_BEFORE_BUILD: |
             cat /etc/yum.conf | sed "s/\[main\]/\[main\]\ntimeout=5/g" > /etc/yum.conf
-            pip install ninja cmake~=3.25.0 auditwheel
-            yum install -y epel-release
+            pip install ninja cmake~=3.24.0
+            yum clean all -y
             yum install centos-release-scl-rh -y
-            yum install -y https://repo.radeon.com/amdgpu-install/21.40.2/rhel/7.9/amdgpu-install-21.40.2.40502-1.el7.noarch.rpm
-            amdgpu-install -y --accept-eula --usecase=rocm,hiplibsdk --no-dkms
-            yum install devtoolset-10 -y
-            source /opt/rh/devtoolset-10/enable -y
-            sed -i "16 s/CXX C/CXX C HIP/g" ./CMakeLists.txt
+            yum install devtoolset-11-gcc-c++ -y
+            source /opt/rh/devtoolset-11/enable -y
 
           CIBW_ENVIRONMENT: |
-            PATH=/opt/rh/devtoolset-10/root/usr/bin:/opt/rocm/bin:/opt/rocm/profiler/bin:/opt/rocm/opencl/bin:$PATH LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/rocm/lib CXX=/opt/rocm/hip/bin/hipcc BACKEND=${{ matrix.exec_model }} ARCH=${{ matrix.amd_gpu_arch }}
+            PATH=/opt/rh/devtoolset-11/root/usr/bin:$PATH BACKEND=${{ matrix.exec_model }}
           
           # Testing of built wheels
           CIBW_TEST_REQUIRES: numpy~=1.21 scipy pytest pytest-cov pytest-mock flaky
 
           CIBW_BEFORE_TEST: |
             pip install git+https://github.com/PennyLaneAI/pennylane.git@master
-          
-          #CIBW_TEST_COMMAND: |
-          #  pl-device-test --device=lightning.kokkos --skip-ops -x --tb=short --no-flaky-report
+          CIBW_TEST_COMMAND: |
+            pl-device-test --device=lightning.kokkos --skip-ops -x --tb=short --no-flaky-report
           
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
 
-          CIBW_REPAIR_WHEEL_COMMAND_LINUX: "./docker/auditwheel repair -w {dest_dir} {wheel}"
-          
           CIBW_BUILD_VERBOSITY: 3
 
         run: | 
@@ -109,7 +101,7 @@ jobs:
       - uses: actions/upload-artifact@v2
         #if: ${{ github.event_name == 'release' || github.ref == 'refs/heads/master' || steps.rc_build.outputs.match != ''}}
         with:
-          name: ${{ runner.os }}-wheels-${{ matrix.arch }}-${{ matrix.amd_gpu_arch }}-HIP.zip
+          name: ${{ runner.os }}-wheels-${{ matrix.arch }}-${{ matrix.exec_model }}.zip
           path: ./wheelhouse/*.whl
 
   upload-pypi:
@@ -119,7 +111,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@v2
         with:
-          name: Linux-wheels-x86_64-HIP.zip
+          name: Linux-wheels-x86_64-${{ matrix.exec_model }}.zip
           path: dist
 
       - name: Upload wheels to PyPI

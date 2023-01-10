@@ -17,8 +17,7 @@ interfaces with Kokkos-enabled calculations to run efficiently on different kind
 hardware systems, such as AMD and Nvidia GPUs, or many-core CPUs. 
 """
 from warnings import warn
-import json
-import os
+
 import numpy as np
 from pennylane import (
     math,
@@ -48,6 +47,7 @@ from .lightning_kokkos_qubit_ops import LightningKokkos_C128
 from .lightning_kokkos_qubit_ops import LightningKokkos_C64
 from .lightning_kokkos_qubit_ops import AdjointJacobianKokkos_C128
 from .lightning_kokkos_qubit_ops import AdjointJacobianKokkos_C64
+from .lightning_kokkos_qubit_ops import kokkos_configuration
 
 from ._serialize import _serialize_obs, _serialize_ops
 
@@ -102,13 +102,8 @@ class LightningKokkos(LightningQubit):
         self._kokkos_state.DeviceToHost(self._state.ravel(order="C"))
         self._pre_rotated_state = self._state
 
-    def _backend_info(self):
-        dir = os.path.dirname(__file__)
-        built_info_file = os.path.join(dir, "built_info.json")
-        with open(built_info_file, "r") as f:
-            backend_info = json.load(f)
-        f.close()
-        print(backend_info)
+    def print_configuration(self):
+        kokkos_configuration()
 
     @classmethod
     def capabilities(cls):

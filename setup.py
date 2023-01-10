@@ -17,7 +17,6 @@ import platform
 import sys
 import subprocess
 import shutil
-import json
 from pathlib import Path
 from setuptools import setup, find_packages
 
@@ -25,12 +24,12 @@ if not os.getenv("READTHEDOCS"):
 
     from setuptools import Extension
     from setuptools.command.build_ext import build_ext
-    
+
     class CMakeExtension(Extension):
         def __init__(self, name, sourcedir=""):
             Extension.__init__(self, name, sources=[])
             self.sourcedir = Path(sourcedir).absolute()
-    
+
     class CMakeBuild(build_ext):
         """
         This class is based upon the build infrastructure of Pennylane-Lightning-Kokkos.
@@ -93,14 +92,9 @@ if not os.getenv("READTHEDOCS"):
                 self.arch = os.getenv("ARCH")
 
             if self.backend:
-                if self.backend in self.backends:
-                    configure_args.append(f"-DKokkos_ENABLE_{self.backend}=ON")
-                else:
-                    raise RuntimeError(f"Unsupported backend: '{self.backend}'")
-                if self.arch:
-                    configure_args.append(f"-DCMAKE_CXX_COMPILER=/opt/rocm/hip/bin/hipcc")
-                    configure_args.append(f"-DCMAKE_C_COMPILER=/opt/rocm/llvm/bin/amdclang")
-                    configure_args.append(f"-DKokkos_ARCH_{self.arch}=ON")
+                configure_args.append(f"-DKokkos_ENABLE_{self.backend}=ON")
+            if self.arch:
+                configure_args.append(f"-DKokkos_ARCH_{self.arch}=ON")
 
             # Add more platform dependent options
             if platform.system() == "Darwin":
@@ -122,16 +116,6 @@ if not os.getenv("READTHEDOCS"):
             else:
                 if platform.system() != "Linux":
                     raise RuntimeError(f"Unsupported '{platform.system()}' platform")
-            
-            # Data to be written
-            built_info = {
-                "Backend": f"{self.backend}",
-                "Device_Arch": f"{self.arch}",
-                "Platform": f"{platform.system()}"
-            }
-            with open("./pennylane_lightning_kokkos/built_info.json", "w") as f:
-                json.dump(built_info, f)
-            f.close()
 
             if not Path(self.build_temp).exists():
                 os.makedirs(self.build_temp)
@@ -141,7 +125,7 @@ if not os.getenv("READTHEDOCS"):
             )
             subprocess.check_call(["cmake", "--build", "."] + build_args, cwd=self.build_temp)
 
-                 
+
 with open("pennylane_lightning_kokkos/_version.py") as f:
     version = f.readlines()[-1].split()[-1].strip("\"'")
 
@@ -162,7 +146,7 @@ info = {
     "url": "https://github.com/PennyLaneAI/pennylane-lightning-kokkos",
     "license": "Apache License 2.0",
     "packages": find_packages(where="."),
-    "package_data": {"pennylane_lightning_kokkos": ["src/*","*.txt","*.json"]},
+    "package_data": {"pennylane_lightning_kokkos": ["src/*"]},
     "entry_points": {
         "pennylane.plugins": [
             "lightning.kokkos = pennylane_lightning_kokkos:LightningKokkos",

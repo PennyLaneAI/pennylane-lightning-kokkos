@@ -2,8 +2,24 @@
 
 ### New features since last release
 
+ * Add X86-64 Linux wheels building with OpenMP and SERIAL backend for lightning.kokkos in workflows.
+ [(#14)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/14)
+
+ * Add the build information query support with the `print_configuration()` method.
+ The workflow for `print_configuration()`is:
+ ```python
+ >>> import pennylane as qml
+ >>> dev = qml.device('lightning.kokkos', wires=3)
+ >>> dev.print_configuration()
+ ```
+ [(#14)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/14)
+
+ * Add AMD GPU wheels building with HIP backend for lightning.kokkos in workflows.
+ [(#21)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/21)
+
 ### Breaking changes
 
+ 
 ### Improvements
 
 ### Documentation
@@ -11,6 +27,8 @@
 ### Bug fixes
 
 ### Contributors
+
+Shuli Shu
 
 This release contains contributions from (in alphabetical order):
 
@@ -75,8 +93,6 @@ Amintor Dusko, Lee J. O'Riordan, Shuli Shu, Matthew Silverman
 ### Documentation
 
 ### Bug fixes
- * Fix for errors caused by new lightning inheirtance implementation(DefaultQubit->QubitDevice).
- [(#16)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/16)
 
 ### Contributors
 
