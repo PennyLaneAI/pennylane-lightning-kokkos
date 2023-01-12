@@ -5,7 +5,7 @@
  * Add support for building X86-64 Linux wheels with OpenMP and SERIAL backends with Github Actions.
  [(#14)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/14)
 
- * Add the build information query support with the `print_configuration()` method.
+ * Add build information query support with the `print_configuration()` method.
  The workflow for `print_configuration()`is:
  ```python
  >>> import pennylane as qml
