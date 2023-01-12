@@ -47,7 +47,7 @@ from .lightning_kokkos_qubit_ops import LightningKokkos_C128
 from .lightning_kokkos_qubit_ops import LightningKokkos_C64
 from .lightning_kokkos_qubit_ops import AdjointJacobianKokkos_C128
 from .lightning_kokkos_qubit_ops import AdjointJacobianKokkos_C64
-from .lightning_kokkos_qubit_ops import kokkos_configuration
+from .lightning_kokkos_qubit_ops import kokkos_config_dict
 
 from ._serialize import _serialize_obs, _serialize_ops
 
@@ -102,8 +102,16 @@ class LightningKokkos(LightningQubit):
         self._kokkos_state.DeviceToHost(self._state.ravel(order="C"))
         self._pre_rotated_state = self._state
 
-    def print_configuration(self):
-        kokkos_configuration()
+    def print_configuration(self, keyname=None):
+        if keyname is None:
+            print(kokkos_config_dict()["All_Info"])
+        else:
+            if keyname not in ["Backend", "Compiler", "Kokkos_Version", "Device_Arch"]:
+                raise Exception(
+                    "Unsupported keyname. Supported keynames are: Backend, Compiler, Kokkos_Version, Device_Arch."
+                )
+            else:
+                print(kokkos_config_dict()[keyname])
 
     @classmethod
     def capabilities(cls):
