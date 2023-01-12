@@ -2,6 +2,18 @@
 
 ### New features since last release
 
+ * Add support for building X86-64 Linux wheels with OpenMP and SERIAL backends with Github Actions.
+ [(#14)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/14)
+
+ * Add build information query support with the `print_configuration()` method.
+ The workflow for `print_configuration()`is:
+ ```python
+ >>> import pennylane as qml
+ >>> dev = qml.device('lightning.kokkos', wires=3)
+ >>> dev.print_configuration()
+ ```
+ [(#14)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/14)
+
 ### Breaking changes
 
 ### Improvements
@@ -11,6 +23,8 @@
 ### Bug fixes
 
 ### Contributors
+
+Shuli Shu
 
 This release contains contributions from (in alphabetical order):
 
@@ -59,7 +73,7 @@ Amintor Dusko, Lee J. O'Riordan, Shuli Shu, Matthew Silverman
  [(#11)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/11)
 
  * Add sample generation support.
-  [(#9)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/9)
+ [(#9)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/9)
 
 ### Breaking changes
 

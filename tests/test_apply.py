@@ -23,7 +23,6 @@ import pytest
 from pennylane import DeviceError
 import pennylane_lightning_kokkos as plk
 
-
 U2 = np.array(
     [
         [
@@ -300,3 +299,8 @@ class TestLightningKokkosIntegration:
         assert dev.num_wires == 2
         assert dev.shots is None
         assert dev.short_name == "lightning.kokkos"
+        with pytest.raises(
+            Exception,
+            match="Unsupported keyname. Supported keynames are: Backend, Compiler, Kokkos_Version, Device_Arch.",
+        ):
+            dev.print_configuration("BACKEND")
