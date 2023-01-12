@@ -10,7 +10,8 @@
  ```python
  >>> import pennylane as qml
  >>> dev = qml.device('lightning.kokkos', wires=3)
- >>> dev.print_configuration()
+ >>> dev.print_configuration("Backend")
+ OPENMP
  ```
  [(#14)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/14)
 

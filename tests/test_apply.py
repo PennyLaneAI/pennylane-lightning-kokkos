@@ -301,6 +301,6 @@ class TestLightningKokkosIntegration:
         assert dev.short_name == "lightning.kokkos"
         with pytest.raises(
             Exception,
-            match="Unsupported keyname. Supported keynames are: Backend, Compiler, Kokkos_Version, Device_Arch.",
+            match="Unsupported keyname. Supported keynames are: Arch, Backend, Compiler, Kokkos_Version.",
         ):
             dev.print_configuration("BACKEND")

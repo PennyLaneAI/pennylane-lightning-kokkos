@@ -47,7 +47,7 @@ from .lightning_kokkos_qubit_ops import LightningKokkos_C128
 from .lightning_kokkos_qubit_ops import LightningKokkos_C64
 from .lightning_kokkos_qubit_ops import AdjointJacobianKokkos_C128
 from .lightning_kokkos_qubit_ops import AdjointJacobianKokkos_C64
-from .lightning_kokkos_qubit_ops import kokkos_config_dict
+from .lightning_kokkos_qubit_ops import kokkos_config
 
 from ._serialize import _serialize_obs, _serialize_ops
 
@@ -104,14 +104,36 @@ class LightningKokkos(LightningQubit):
 
     def print_configuration(self, keyname=None):
         if keyname is None:
-            print(kokkos_config_dict()["All_Info"])
+            print(kokkos_config()["All_Info"])
         else:
-            if keyname not in ["Backend", "Compiler", "Kokkos_Version", "Device_Arch"]:
+            if keyname not in ["Arch", "Backend", "Compiler", "Kokkos Version"]:
                 raise Exception(
-                    "Unsupported keyname. Supported keynames are: Backend, Compiler, Kokkos_Version, Device_Arch."
+                    "Unsupported keyname. Supported keynames are: Arch, Backend, Compiler, Kokkos_Version."
                 )
             else:
-                print(kokkos_config_dict()[keyname])
+                info_str = kokkos_config()["All_Info"]
+                info_str_list = info_str.split("\n")
+
+                keyname_out_map = {
+                    "Arch": "Architecture",
+                    "Backend": "Runtime Configuration",
+                    "Compiler": "Compiler",
+                    "Kokkos Version": "Kokkos Version",
+                }
+
+                if keyname in ["Arch", "Compiler", "Kokkos Version"]:
+                    for i in range(len(info_str_list)):
+                        if keyname_out_map[keyname] in info_str_list[i]:
+                            if keyname_out_map[keyname] == "Kokkos Version":
+                                print(info_str_list[i])
+                            else:
+                                print(info_str_list[i + 1])
+
+                if keyname is "Backend":
+                    for i in range(len(info_str_list) - 1, 0, -1):
+                        if keyname_out_map[keyname] in info_str_list[i]:
+                            backend = info_str_list[i].split(" ")
+                            print(backend[0])
 
     @classmethod
     def capabilities(cls):

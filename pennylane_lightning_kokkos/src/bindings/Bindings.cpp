@@ -736,7 +736,7 @@ PYBIND11_MODULE(lightning_kokkos_qubit_ops, // NOLINT: No control over
 
     m.def("kokkos_start", []() { Kokkos::initialize(); });
     m.def("kokkos_end", []() { Kokkos::finalize(); });
-    m.def("kokkos_config_dict", &getConfig, "Kokkos configurations query.");
+    m.def("kokkos_config", &getConfig, "Kokkos configurations query.");
 }
 }
 
