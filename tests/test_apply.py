@@ -300,8 +300,4 @@ class TestLightningKokkosIntegration:
         assert dev.num_wires == 2
         assert dev.shots is None
         assert dev.short_name == "lightning.kokkos"
-        with pytest.raises(
-            Exception,
-            match="Unsupported keyname. Supported keynames are: Arch, Backend, Compiler, Kokkos_Version.",
-        ):
-            dev.print_configuration("BACKEND")
+        assert bool(dev.kokkos_config["Backend"]) == True

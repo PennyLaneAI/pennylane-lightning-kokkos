@@ -47,7 +47,7 @@ from .lightning_kokkos_qubit_ops import LightningKokkos_C128
 from .lightning_kokkos_qubit_ops import LightningKokkos_C64
 from .lightning_kokkos_qubit_ops import AdjointJacobianKokkos_C128
 from .lightning_kokkos_qubit_ops import AdjointJacobianKokkos_C64
-from .lightning_kokkos_qubit_ops import kokkos_config
+from .lightning_kokkos_qubit_ops import kokkos_config_info
 
 from ._serialize import _serialize_obs, _serialize_ops
 
@@ -73,6 +73,7 @@ class LightningKokkos(LightningQubit):
     version = __version__
     author = "Xanadu Inc."
     _CPP_BINARY_AVAILABLE = True
+    kokkos_config = {}
 
     observables = {
         "PauliX",
@@ -88,6 +89,8 @@ class LightningKokkos(LightningQubit):
         super().__init__(wires, c_dtype=c_dtype, shots=shots)
         self._kokkos_state = _kokkos_dtype(self._state.dtype)(self._state)
         self._sync = sync
+        if not LightningKokkos.kokkos_config:
+            LightningKokkos.kokkos_config = LightningKokkos.kokkos_config_dict()
 
     def reset(self):
         super().reset()
@@ -102,38 +105,31 @@ class LightningKokkos(LightningQubit):
         self._kokkos_state.DeviceToHost(self._state.ravel(order="C"))
         self._pre_rotated_state = self._state
 
-    def print_configuration(self, keyname=None):
-        if keyname is None:
-            print(kokkos_config()["All_Info"])
-        else:
-            if keyname not in ["Arch", "Backend", "Compiler", "Kokkos Version"]:
-                raise Exception(
-                    "Unsupported keyname. Supported keynames are: Arch, Backend, Compiler, Kokkos_Version."
-                )
-            else:
-                info_str = kokkos_config()["All_Info"]
-                info_str_list = info_str.split("\n")
+    @staticmethod
+    def kokkos_config_dict():
+        """Convert Kokkos configuration string into dictionary for further query."""
+        info_str = kokkos_config_info()["All_Info"]
+        info_str_list = info_str.split("\n")
 
-                keyname_out_map = {
-                    "Arch": "Architecture",
-                    "Backend": "Runtime Configuration",
-                    "Compiler": "Compiler",
-                    "Kokkos Version": "Kokkos Version",
-                }
+        config_dict = {
+            "Arch": "Architecture",
+            "Backend": "Runtime Configuration",
+            "Compiler": "Compiler",
+            "Kokkos Version": "Kokkos Version",
+        }
 
-                if keyname in ["Arch", "Compiler", "Kokkos Version"]:
-                    for i in range(len(info_str_list)):
-                        if keyname_out_map[keyname] in info_str_list[i]:
-                            if keyname_out_map[keyname] == "Kokkos Version":
-                                print(info_str_list[i])
-                            else:
-                                print(info_str_list[i + 1])
+        for i in range(len(info_str_list)):
+            if "Kokkos Version" in info_str_list[i]:
+                config_dict["Kokkos Version"] = info_str_list[i]
+            elif "Compiler" in info_str_list[i]:
+                config_dict["Compiler"] = info_str_list[i + 1]
+            elif "Architecture" in info_str_list[i]:
+                config_dict["Arch"] = info_str_list[i + 1]
+            elif "Runtime Configuration" in info_str_list[i]:  # for Backend
+                backend = info_str_list[i].split(" ")
+                config_dict["Backend"] = backend[0]
 
-                if keyname is "Backend":
-                    for i in range(len(info_str_list) - 1, 0, -1):
-                        if keyname_out_map[keyname] in info_str_list[i]:
-                            backend = info_str_list[i].split(" ")
-                            print(backend[0])
+        return config_dict
 
     @classmethod
     def capabilities(cls):

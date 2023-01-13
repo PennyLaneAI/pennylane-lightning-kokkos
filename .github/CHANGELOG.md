@@ -5,12 +5,12 @@
  * Add support for building X86-64 Linux wheels with OpenMP and SERIAL backends with Github Actions.
  [(#14)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/14)
 
- * Add build information query support with the `print_configuration()` method.
- The workflow for `print_configuration()`is:
+ * Add build information query support with `kokkos_config`, which contains the kokkos configuration information.
+ The workflow for build information query is:
  ```python
  >>> import pennylane as qml
  >>> dev = qml.device('lightning.kokkos', wires=3)
- >>> dev.print_configuration("Backend")
+ >>> dev.kokkos_config["Backend"]
  OPENMP
  ```
  [(#14)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/14)
