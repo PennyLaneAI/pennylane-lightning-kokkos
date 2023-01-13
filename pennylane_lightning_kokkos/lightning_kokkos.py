@@ -69,7 +69,7 @@ class LightningKokkos(LightningQubit):
 
     name = "PennyLane plugin for Kokkos-backed Lightning device"
     short_name = "lightning.kokkos"
-    pennylane_requires = ">=0.22"
+    pennylane_requires = "<=0.28"
     version = __version__
     author = "Xanadu Inc."
     _CPP_BINARY_AVAILABLE = True
@@ -86,13 +86,6 @@ class LightningKokkos(LightningQubit):
 
     def __init__(self, wires, *, sync=True, c_dtype=np.complex128, shots=None, batch_obs=False):
         super().__init__(wires, c_dtype=c_dtype, shots=shots)
-        if c_dtype is np.complex64:
-            self.use_csingle = True
-        elif c_dtype is np.complex128:
-            self.use_csingle = False
-        else:
-            raise TypeError(f"Unsupported complex Type: {c_dtype}")
-
         self._kokkos_state = _kokkos_dtype(self._state.dtype)(self._state)
         self._sync = sync
 

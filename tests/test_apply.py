@@ -23,6 +23,7 @@ import pytest
 from pennylane import DeviceError
 import pennylane_lightning_kokkos as plk
 
+
 U2 = np.array(
     [
         [
