@@ -109,27 +109,84 @@ class LightningKokkos(LightningQubit):
     def kokkos_config_dict():
         """Convert Kokkos configuration string into dictionary for further query."""
         info_str = kokkos_config_info()["All_Info"]
-        info_str_list = info_str.split("\n")
 
-        config_dict = {
-            "Arch": "Architecture",
-            "Backend": "Runtime Configuration",
-            "Compiler": "Compiler",
-            "Kokkos Version": "Kokkos Version",
+        config_meta_map = {
+            "Kokkos Version": {},
+            "Compiler": {},
+            "Arch": {},
+            "Atomics": {},
+            "Vectorization": {},
+            "Memory": {},
+            "Options": {},
+            "Backend": {},
+            "Runtime Config": {},
         }
 
-        for i in range(len(info_str_list)):
-            if "Kokkos Version" in info_str_list[i]:
-                config_dict["Kokkos Version"] = info_str_list[i]
-            elif "Compiler" in info_str_list[i]:
-                config_dict["Compiler"] = info_str_list[i + 1]
-            elif "Architecture" in info_str_list[i]:
-                config_dict["Arch"] = info_str_list[i + 1]
-            elif "Runtime Configuration" in info_str_list[i]:  # for Backend
-                backend = info_str_list[i].split(" ")
-                config_dict["Backend"] = backend[0]
+        info_str_list = info_str.split("\n")
 
-        return config_dict
+        looped_category = []
+        for i in range(len(info_str_list)):
+            tmp_str = info_str_list[i]
+
+            match len(looped_category):
+                case 0:
+                    if "Kokkos Version" in tmp_str:
+                        looped_category.append("Kokkos Version")
+                        config_meta_map["Kokkos Version"] = tmp_str
+                case 1:
+                    if "Compiler" in tmp_str:
+                        looped_category.append("Compiler")
+                case 2:
+                    if "Architecture" in tmp_str:
+                        looped_category.append("Architecture")
+                    else:
+                        tmp_strlist = tmp_str.split(": ")
+                        config_meta_map["Compiler"][tmp_strlist[0]] = tmp_strlist[1]
+                case 3:
+                    if "Atomics" in tmp_str:
+                        looped_category.append("Atomics")
+                    else:
+                        tmp_strlist = tmp_str.split(": ")
+                        config_meta_map["Arch"][tmp_strlist[0]] = tmp_strlist[1]
+                case 4:
+                    if "Vectorization" in tmp_str:
+                        looped_category.append("Vectorization")
+                    else:
+                        tmp_strlist = tmp_str.split(": ")
+                        config_meta_map["Atomics"][tmp_strlist[0]] = tmp_strlist[1]
+                case 5:
+                    if "Memory" in tmp_str:
+                        looped_category.append("Memory")
+                    else:
+                        tmp_strlist = tmp_str.split(": ")
+                        config_meta_map["Vectorization"][tmp_strlist[0]] = tmp_strlist[1]
+                case 6:
+                    if "Options" in tmp_str:
+                        looped_category.append("Options")
+                    else:
+                        tmp_strlist = tmp_str.split(": ")
+                        config_meta_map["Memory"][tmp_strlist[0]] = tmp_strlist[1]
+                case 7:
+                    if (
+                        "ASM" in tmp_str
+                        or "CXX" in tmp_str
+                        or "DEBUG" in tmp_str
+                        or "HWLOC" in tmp_str
+                        or "LIBDL" in tmp_str
+                        or "LIBRT" in tmp_str
+                    ):
+                        tmp_strlist = tmp_str.split(": ")
+                        config_meta_map["Options"][tmp_strlist[0]] = tmp_strlist[1]
+                    elif "Runtime Configuration" in tmp_str:
+                        if "Serial" in tmp_str:
+                            config_meta_map["Runtime Config"] = "Serial"
+                            config_meta_map["Backend"] = "Serial"
+                        else:
+                            tmp_strlist = tmp_str.split(" ")
+                            config_meta_map["Backend"] = tmp_strlist[0]
+                            config_meta_map["Runtime Config"] = info_str_list[i + 1]
+
+        return config_meta_map
 
     @classmethod
     def capabilities(cls):
