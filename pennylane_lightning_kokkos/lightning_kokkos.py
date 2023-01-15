@@ -110,81 +110,63 @@ class LightningKokkos(LightningQubit):
         """Convert Kokkos configuration string into dictionary for further query."""
         info_str = kokkos_config_info()["All_Info"]
 
-        config_meta_map = {
-            "Kokkos Version": {},
-            "Compiler": {},
-            "Arch": {},
-            "Atomics": {},
-            "Vectorization": {},
-            "Memory": {},
-            "Options": {},
-            "Backend": {},
-            "Runtime Config": {},
-        }
+        query_keys = [
+            "Kokkos Version",
+            "Compiler",
+            "Arch",
+            "Atomics",
+            "Vectorization",
+            "Memory",
+            "Options",
+            "Backend",
+            "Runtime Config",
+        ]
+
+        config_meta_map = {}
+
+        for i in range(len(query_keys)):
+            key = query_keys[i]
+            config_meta_map[key] = {}
 
         info_str_list = info_str.split("\n")
 
-        looped_category = []
+        looped_keys = []
+
         for i in range(len(info_str_list)):
             tmp_str = info_str_list[i]
+            looped_len = len(looped_keys)
+            if looped_len == 0 and query_keys[looped_len] in tmp_str:
+                looped_keys.append(query_keys[looped_len])
+                config_meta_map[query_keys[looped_len]] = tmp_str
 
-            match len(looped_category):
-                case 0:
-                    if "Kokkos Version" in tmp_str:
-                        looped_category.append("Kokkos Version")
-                        config_meta_map["Kokkos Version"] = tmp_str
-                case 1:
-                    if "Compiler" in tmp_str:
-                        looped_category.append("Compiler")
-                case 2:
-                    if "Architecture" in tmp_str:
-                        looped_category.append("Architecture")
+            elif looped_len == 1 and query_keys[looped_len] in tmp_str:
+                looped_keys.append(query_keys[looped_len])
+
+            elif looped_len in [2, 3, 4, 5, 6]:
+                if query_keys[looped_len] in tmp_str:
+                    looped_keys.append(query_keys[looped_len])
+                else:
+                    tmp_strlist = tmp_str.split(": ")
+                    config_meta_map[query_keys[looped_len - 1]][tmp_strlist[0]] = tmp_strlist[1]
+            elif looped_len == 7:
+                if (
+                    "ASM" in tmp_str
+                    or "CXX" in tmp_str
+                    or "DEBUG" in tmp_str
+                    or "HWLOC" in tmp_str
+                    or "LIBDL" in tmp_str
+                    or "LIBRT" in tmp_str
+                ):
+                    tmp_strlist = tmp_str.split(": ")
+                    config_meta_map[query_keys[looped_len - 1]][tmp_strlist[0]] = tmp_strlist[1]
+                elif query_keys[looped_len + 1] in tmp_str:
+                    if "Serial" in tmp_str:
+                        config_meta_map[query_keys[looped_len]] = "Serial"
+                        config_meta_map[query_keys[looped_len + 1]] = "Serial"
                     else:
-                        tmp_strlist = tmp_str.split(": ")
-                        config_meta_map["Compiler"][tmp_strlist[0]] = tmp_strlist[1]
-                case 3:
-                    if "Atomics" in tmp_str:
-                        looped_category.append("Atomics")
-                    else:
-                        tmp_strlist = tmp_str.split(": ")
-                        config_meta_map["Arch"][tmp_strlist[0]] = tmp_strlist[1]
-                case 4:
-                    if "Vectorization" in tmp_str:
-                        looped_category.append("Vectorization")
-                    else:
-                        tmp_strlist = tmp_str.split(": ")
-                        config_meta_map["Atomics"][tmp_strlist[0]] = tmp_strlist[1]
-                case 5:
-                    if "Memory" in tmp_str:
-                        looped_category.append("Memory")
-                    else:
-                        tmp_strlist = tmp_str.split(": ")
-                        config_meta_map["Vectorization"][tmp_strlist[0]] = tmp_strlist[1]
-                case 6:
-                    if "Options" in tmp_str:
-                        looped_category.append("Options")
-                    else:
-                        tmp_strlist = tmp_str.split(": ")
-                        config_meta_map["Memory"][tmp_strlist[0]] = tmp_strlist[1]
-                case 7:
-                    if (
-                        "ASM" in tmp_str
-                        or "CXX" in tmp_str
-                        or "DEBUG" in tmp_str
-                        or "HWLOC" in tmp_str
-                        or "LIBDL" in tmp_str
-                        or "LIBRT" in tmp_str
-                    ):
-                        tmp_strlist = tmp_str.split(": ")
-                        config_meta_map["Options"][tmp_strlist[0]] = tmp_strlist[1]
-                    elif "Runtime Configuration" in tmp_str:
-                        if "Serial" in tmp_str:
-                            config_meta_map["Runtime Config"] = "Serial"
-                            config_meta_map["Backend"] = "Serial"
-                        else:
-                            tmp_strlist = tmp_str.split(" ")
-                            config_meta_map["Backend"] = tmp_strlist[0]
-                            config_meta_map["Runtime Config"] = info_str_list[i + 1]
+                        tmp_strlist = tmp_str.split(" ")
+                        config_meta_map[query_keys[looped_len]] = tmp_strlist[0]
+                        config_meta_map[query_keys[looped_len + 1]] = info_str_list[i + 1]
 
         return config_meta_map
 
