@@ -142,7 +142,7 @@ class LightningKokkos(LightningQubit):
             elif looped_len == 1 and query_keys[looped_len] in tmp_str:
                 looped_keys.append(query_keys[looped_len])
 
-            elif looped_len in [2, 3, 4, 5, 6]:
+            elif looped_len < 7:
                 if query_keys[looped_len] in tmp_str:
                     looped_keys.append(query_keys[looped_len])
                 else:
