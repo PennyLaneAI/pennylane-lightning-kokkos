@@ -17,19 +17,14 @@
  * interfacing with Pybind11
  */
 #pragma once
-#include "pybind11/complex.h"
-#include "pybind11/functional.h"
-#include "pybind11/numpy.h"
 #include "pybind11/pybind11.h"
 #include "pybind11/stl.h"
 #include "pybind11/stl_bind.h"
 
-#include <cassert>
 #include <cstring>
-#include <iostream>
-#include <set>
+#include <sstream>
 #include <string>
-#include <tuple>
+#include <unordered_map>
 #include <vector>
 
 namespace Pennylane {
@@ -115,7 +110,7 @@ auto getConfig() {
             } else if (is_in_str(query_keys[looped_len + 1], tmp_str)) {
                 std::string substr = "Serial";
                 if (is_in_str(substr, tmp_str)) {
-                    meta_map[query_keys[looped_len]]["Serial"] = "yes";
+                    meta_map[query_keys[looped_len]]["Serial"] = "Serial";
                     meta_map[query_keys[looped_len + 1]]["Serial"] = "Serial";
                 } else {
                     auto tmp_str_list0 = string_split(tmp_str, " ");
