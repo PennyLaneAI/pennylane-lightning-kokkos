@@ -90,7 +90,7 @@ class LightningKokkos(LightningQubit):
         self._kokkos_state = _kokkos_dtype(self._state.dtype)(self._state)
         self._sync = sync
         if not LightningKokkos.kokkos_config:
-            LightningKokkos.kokkos_config = LightningKokkos.kokkos_config_dict()
+            LightningKokkos.kokkos_config = kokkos_config_info()
 
     def reset(self):
         super().reset()
@@ -105,9 +105,9 @@ class LightningKokkos(LightningQubit):
         self._kokkos_state.DeviceToHost(self._state.ravel(order="C"))
         self._pre_rotated_state = self._state
 
+    """
     @staticmethod
     def kokkos_config_dict():
-        """Convert Kokkos configuration string into dictionary for further query."""
         info_str = kokkos_config_info()["All_Info"]
 
         query_keys = [
@@ -169,6 +169,7 @@ class LightningKokkos(LightningQubit):
                         config_meta_map[query_keys[looped_len + 1]] = info_str_list[i + 1]
 
         return config_meta_map
+    """
 
     @classmethod
     def capabilities(cls):
