@@ -81,7 +81,7 @@ auto getConfig() {
 
     Kokkos::print_configuration(buffer, true);
 
-    std::string bufferstr(std::move(buffer.str()));
+    std::string bufferstr = std::move(buffer.str());
 
     auto str_list = string_split(bufferstr, "\n");
 
