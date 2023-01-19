@@ -11,8 +11,6 @@ using namespace Pennylane;
 namespace {} // namespace
 
 TEMPLATE_TEST_CASE("Bindings::getConfig", "[Backend Info]", float) {
-    const std::size_t num_qubits = 3;
-    StateVectorKokkos<TestType> kokkos_sv{num_qubits};
 
     SECTION("Check string split") {
         const std::string str = "Check string split!";
@@ -31,25 +29,17 @@ TEMPLATE_TEST_CASE("Bindings::getConfig", "[Backend Info]", float) {
         const std::string substr1 = "CHECK";
         issubstr = is_substr(substr1, str);
         PL_ASSERT(issubstr == false);
-
-        const std::vector<std::string> sub_str_vec0 = {"contain", "List",
-                                                       "Test"};
-        bool contain_substr = is_substr(sub_str_vec0, str);
-        PL_ASSERT(contain_substr == true);
-
-        const std::vector<std::string> sub_str_vec1 = {"Unit", "List", "Test"};
-        contain_substr = is_substr(sub_str_vec1, str);
-        PL_ASSERT(contain_substr == false);
     }
 
     SECTION("Check All Info") {
+        const std::size_t num_qubits = 3;
+        StateVectorKokkos<TestType> kokkos_sv{num_qubits};
+
         auto config_info = getConfig();
 
         std::vector<std::string> query_categories = {
-            "Kokkos Version", "Compiler",      "Arch",
-            "Atomics",        "Vectorization", "Memory",
-            "Options",        "Backend",       "Runtime Config",
-        };
+            "Kokkos Version", "Compiler", "Architecture", "Atomics",
+            "Vectorization",  "Memory",   "Options",      "Backend"};
 
         std::unordered_map<std::string, std::vector<std::string>> query_keys = {
             {"Kokkos Version", {"Kokkos Version"}},
@@ -73,9 +63,8 @@ TEMPLATE_TEST_CASE("Bindings::getConfig", "[Backend Info]", float) {
               "KOKKOS_ENABLE_CXX20", "KOKKOS_ENABLE_DEBUG_BOUNDS_CHECK",
               "KOKKOS_ENABLE_HWLOC", "KOKKOS_ENABLE_LIBRT",
               "KOKKOS_ENABLE_LIBDL"}},
-            {"Arch", {"Default Device"}},
-            {"Backend", {"Serial", "Parallel"}},
-            {"Runtime Config", {"Serial", "Parallel"}}};
+            {"Architecture", {"Default Device"}},
+            {"Backend", {"Serial", "Parallel"}}};
 
         for (auto &category : query_categories) {
 
@@ -102,7 +91,8 @@ TEMPLATE_TEST_CASE("Bindings::getConfig", "[Backend Info]", float) {
                     bool is_alpha = isalpha(c);
                     PL_ASSERT(is_alpha == false);
                 }
-            } else if (category == "Comipler" || category == "Arch") {
+            }
+            if (category == "Comipler" || category == "Architecture") {
                 for (auto &key : query_keys[category]) {
                     if (config_info[category].find(key) !=
                         config_info[category].end()) {
@@ -110,9 +100,9 @@ TEMPLATE_TEST_CASE("Bindings::getConfig", "[Backend Info]", float) {
                         PL_ASSERT(str.length() != 0);
                     }
                 }
-            } else if (std::find(sub_query_category.begin(),
-                                 sub_query_category.end(),
-                                 category) != sub_query_category.end()) {
+            }
+            if (std::find(sub_query_category.begin(), sub_query_category.end(),
+                          category) != sub_query_category.end()) {
                 for (auto &key : query_keys[category]) {
                     if (config_info[category].find(key) !=
                         config_info[category].end()) {
@@ -120,7 +110,8 @@ TEMPLATE_TEST_CASE("Bindings::getConfig", "[Backend Info]", float) {
                         PL_ASSERT(str == "yes" || str == "no");
                     }
                 }
-            } else if (category == "Backend") {
+            }
+            if (category == "Backend") {
                 for (auto &key : query_keys[category]) {
                     if (config_info[category].find(key) !=
                         config_info[category].end()) {
@@ -135,18 +126,6 @@ TEMPLATE_TEST_CASE("Bindings::getConfig", "[Backend Info]", float) {
                                           config_info[category][key]) !=
                                 backend_list.end();
                             PL_ASSERT(is_found == true);
-                        }
-                    }
-                }
-            } else if (category == "Runtime Config") {
-                for (auto &key : query_keys[category]) {
-                    if (config_info[category].find(key) !=
-                        config_info[category].end()) {
-                        if (key == "Serial") {
-                            PL_ASSERT(config_info[category][key] == "Serial");
-                        } else if (key == "Parallel") {
-                            auto str = config_info[category][key];
-                            PL_ASSERT(str.length() != 0);
                         }
                     }
                 }

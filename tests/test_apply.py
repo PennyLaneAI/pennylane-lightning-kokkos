@@ -298,13 +298,12 @@ class TestLightningKokkosIntegration:
         query_categories = [
             "Kokkos Version",
             "Compiler",
-            "Arch",
+            "Architecture",
             "Atomics",
             "Vectorization",
             "Memory",
             "Options",
             "Backend",
-            "Runtime Config",
         ]
 
         query_keys = {
@@ -343,9 +342,8 @@ class TestLightningKokkosIntegration:
                 "KOKKOS_ENABLE_LIBRT",
                 "KOKKOS_ENABLE_LIBDL",
             ],
-            "Arch": ["Default Device"],
+            "Architecture": ["Default Device"],
             "Backend": ["Serial", "Parallel"],
-            "Runtime Config": ["Serial", "Parallel"],
         }
 
         dev = qml.device("lightning.kokkos", wires=2)
@@ -369,24 +367,18 @@ class TestLightningKokkosIntegration:
                 for key in query_keys[category]:
                     if key in config_info[category]:
                         assert config_info[category][key] is not None
-            elif category in ["Atomics", "Vectorization", "Memory", "Options"]:
+            if category in ["Atomics", "Vectorization", "Memory", "Options"]:
                 for key in query_keys[category]:
                     if key in config_info[category]:
                         assert config_info[category][key] in ["yes", "no"]
-            elif category == "Backend":
+            if category == "Backend":
                 for key in query_keys[category]:
                     if key in config_info[category]:
                         if key == "Serial":
-                            assert config_info[category][key] == "Serial"
+                            assert config_info[category][key] == "yes"
                         elif key == "Parallel":
                             assert config_info[category][key] in [
                                 "OpenMP",
                                 "HIP",
                                 "CUDA",
                             ]  # Need check for HIP & CUDA
-            elif category == "Runtime Config":
-                if key in config_info[category]:
-                    if key == "Serial":
-                        assert config_info[category][key] == "Serial"
-                    elif key == "Parallel":
-                        assert config_info[category][key] is not None

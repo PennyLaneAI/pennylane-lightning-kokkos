@@ -55,21 +55,6 @@ bool is_substr(const std::string &substr, const std::string &str) {
     else
         return false;
 }
-/*@brief Check if a string contains substrings that is in a string vector.
- *
- *@param substr The substring vector to be checked.
- *@param string The string to be checked.
- *@return bool type.
- * */
-bool is_substr(const std::vector<std::string> &substrs,
-               const std::string &str) {
-    for (std::size_t i = 0; i < substrs.size(); i++) {
-        if (str.find(substrs[i]) != std::string::npos)
-            return true;
-    }
-    return false;
-}
-
 /*@brief Parse the backend details based on the output of
  *Kokkos::print_configuration.
  *
@@ -86,10 +71,7 @@ auto getConfig() {
 
     const auto str_list = string_split(bufferstr, "\n");
 
-    const std::vector<std::string> query_keys{
-        "Kokkos Version", "Compiler",      "Arch",
-        "Atomics",        "Vectorization", "Memory",
-        "Options",        "Backend",       "Runtime Config"};
+    std::vector<std::string> query_keys;
 
     using value_map = std::unordered_map<std::string, std::string>;
 
@@ -97,45 +79,55 @@ auto getConfig() {
 
     category_map meta_map;
 
-    std::size_t looped_len = 0;
-
     for (std::size_t i = 0; i < str_list.size(); i++) {
-        const std::string tmp_str = str_list[i];
-        bool is_key_contained = is_substr(query_keys[looped_len], tmp_str);
-        if (looped_len == 0 && is_key_contained) {
-            const auto tmp_str_list = string_split(tmp_str, ":");
-            const auto tmp_str_list1 = string_split(tmp_str_list[1], " ");
-            meta_map[query_keys[looped_len]][tmp_str_list[0]] =
-                tmp_str_list1[0];
-            looped_len++;
-        } else if (looped_len < 7) {
-            if (is_key_contained) {
-                looped_len++;
-            } else {
-                const auto tmp_str_list = string_split(tmp_str, ":");
-                const auto tmp_str_list1 = string_split(tmp_str_list[1], " ");
-                meta_map[query_keys[looped_len - 1]][tmp_str_list[0]] =
-                    tmp_str_list1[0];
-            }
-        } else if (looped_len == 7) {
-            std::vector<std::string> substrs{"ASM",   "CXX",   "DEBUG",
-                                             "HWLOC", "LIBDL", "LIBRT"};
 
-            if (is_substr(substrs, tmp_str)) {
-                const auto tmp_str_list = string_split(tmp_str, ": ");
-                meta_map[query_keys[looped_len - 1]][tmp_str_list[0]] =
-                    tmp_str_list[1];
-            } else if (is_substr(query_keys[looped_len + 1], tmp_str)) {
-                std::string substr = "Serial";
-                if (is_substr(substr, tmp_str)) {
-                    meta_map[query_keys[looped_len]]["Serial"] = "Serial";
-                    meta_map[query_keys[looped_len + 1]]["Serial"] = "Serial";
+        const std::string tmp_str = str_list[i];
+
+        const auto tmp_str_list = string_split(tmp_str, ":");
+
+        if (i == 0) {
+            const auto tmp_str_list1 = string_split(tmp_str_list[1], " ");
+            meta_map[tmp_str_list[0]][tmp_str_list[0]] = tmp_str_list1[0];
+            query_keys.push_back(tmp_str_list[0]);
+        } else {
+            // Current string or line only contains a key of category_map.
+            if (tmp_str_list.size() == 1) {
+                // Append key to the back of the query_keys vector.
+                query_keys.push_back(tmp_str_list[0]);
+                // Serial Runtime Configuration is the last line for serial
+                // backend
+                const std::string runtime_config = "Serial Runtime";
+                if (is_substr(runtime_config, query_keys.back())) {
+                    meta_map[query_keys.back()]["Serial"] = "yes";
+                    meta_map["Backend"]["Serial"] = "yes";
+                    return meta_map;
+                }
+                // Current string only contains value of category_map, which is
+                // a value_map.
+            } else {
+                const std::string runtime_config = "Runtime";
+                if (is_substr(runtime_config, query_keys.back())) {
+                    meta_map[query_keys.back()]["Parallel"] = tmp_str_list[1];
+                    const auto tmp_str_list0 =
+                        string_split(tmp_str_list[1], " ");
+                    meta_map["Backend"]["Parallel"] = tmp_str_list0[0];
                 } else {
-                    const auto tmp_str_list0 = string_split(tmp_str, " ");
-                    meta_map[query_keys[looped_len]]["Parallel"] =
-                        tmp_str_list0[0];
-                    meta_map[query_keys[looped_len + 1]]["Parallel"] =
-                        str_list[i + 1];
+                    const std::string substr = "KOKKOS_ENABLE";
+                    if (is_substr(substr, tmp_str_list[0])) { // remove space
+                        const auto tmp_str_list0 =
+                            string_split(tmp_str_list[0], " ");
+
+                        const auto tmp_str_list1 =
+                            string_split(tmp_str_list[1], " ");
+                        meta_map[query_keys.back()][tmp_str_list0[0]] =
+                            tmp_str_list1[0];
+                    } else {
+                        const auto tmp_str_list1 =
+                            string_split(tmp_str_list[1], " ");
+
+                        meta_map[query_keys.back()][tmp_str_list[0]] =
+                            tmp_str_list1[0];
+                    }
                 }
             }
         }
