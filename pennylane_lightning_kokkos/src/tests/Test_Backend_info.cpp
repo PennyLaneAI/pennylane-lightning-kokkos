@@ -15,29 +15,30 @@ TEMPLATE_TEST_CASE("Bindings::getConfig", "[Backend Info]", float) {
     StateVectorKokkos<TestType> kokkos_sv{num_qubits};
 
     SECTION("Check string split") {
-        std::string str = "Check string split!";
-        auto str_list = string_split(str, " ");
+        const std::string str = "Check string split!";
+        const auto str_list = string_split(str, " ");
         PL_ASSERT(str_list[0] == "Check");
         PL_ASSERT(str_list[1] == "string");
         PL_ASSERT(str_list[2] == "split!")
     }
 
     SECTION("Check string contain") {
-        std::string str = "Check string contain!";
-        std::string substr = "Check";
-        bool issubstr = is_substr(substr, str);
+        const std::string str = "Check string contain!";
+        const std::string substr0 = "Check";
+        bool issubstr = is_substr(substr0, str);
         PL_ASSERT(issubstr == true);
 
-        substr = "CHECK";
-        issubstr = is_substr(substr, str);
+        const std::string substr1 = "CHECK";
+        issubstr = is_substr(substr1, str);
         PL_ASSERT(issubstr == false);
 
-        std::vector<std::string> sub_str_vec = {"contain", "List", "Test"};
-        bool contain_substr = is_substr(sub_str_vec, str);
+        const std::vector<std::string> sub_str_vec0 = {"contain", "List",
+                                                       "Test"};
+        bool contain_substr = is_substr(sub_str_vec0, str);
         PL_ASSERT(contain_substr == true);
 
-        sub_str_vec = {"Unit", "List", "Test"};
-        contain_substr = is_substr(sub_str_vec, str);
+        const std::vector<std::string> sub_str_vec1 = {"Unit", "List", "Test"};
+        contain_substr = is_substr(sub_str_vec1, str);
         PL_ASSERT(contain_substr == false);
     }
 
@@ -78,7 +79,7 @@ TEMPLATE_TEST_CASE("Bindings::getConfig", "[Backend Info]", float) {
 
         for (auto &category : query_categories) {
 
-            assert(config_info.find(category) != config_info.end());
+            PL_ASSERT(config_info.find(category) != config_info.end());
 
             bool key_found = false;
 

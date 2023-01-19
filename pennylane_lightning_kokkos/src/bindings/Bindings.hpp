@@ -31,10 +31,10 @@ namespace Pennylane {
  *@param delimiters Poniter to the delimiters.
  *@return str_list Substring vector.
  * */
-auto string_split(std::string &str, const char *delimiters)
+auto string_split(const std::string &str, const char *delimiters)
     -> std::vector<std::string> {
     std::vector<std::string> str_list;
-    char *token = std::strtok(str.data(), delimiters);
+    char *token = std::strtok(const_cast<char *>(str.data()), delimiters);
     while (token != 0) {
         str_list.push_back(token);
         token = std::strtok(nullptr, delimiters);
@@ -48,7 +48,7 @@ auto string_split(std::string &str, const char *delimiters)
  *@param string The string to be checked.
  *@return bool type.
  * */
-bool is_substr(std::string &substr, std::string &str) {
+bool is_substr(const std::string &substr, const std::string &str) {
 
     if (str.find(substr) != std::string::npos)
         return true;
@@ -61,7 +61,8 @@ bool is_substr(std::string &substr, std::string &str) {
  *@param string The string to be checked.
  *@return bool type.
  * */
-bool is_substr(std::vector<std::string> &substrs, std::string &str) {
+bool is_substr(const std::vector<std::string> &substrs,
+               const std::string &str) {
     for (std::size_t i = 0; i < substrs.size(); i++) {
         if (str.find(substrs[i]) != std::string::npos)
             return true;
@@ -81,41 +82,38 @@ auto getConfig() {
 
     Kokkos::print_configuration(buffer, true);
 
-    std::string bufferstr(buffer.str());
+    const std::string bufferstr(buffer.str());
 
-    auto str_list = string_split(bufferstr, "\n");
+    const auto str_list = string_split(bufferstr, "\n");
 
-    std::vector<std::string> query_keys{
+    const std::vector<std::string> query_keys{
         "Kokkos Version", "Compiler",      "Arch",
         "Atomics",        "Vectorization", "Memory",
         "Options",        "Backend",       "Runtime Config"};
 
-    typedef std::unordered_map<std::string, std::string> value_map;
+    using value_map = std::unordered_map<std::string, std::string>;
 
-    typedef std::unordered_map<std::string, value_map> category_map;
+    using category_map = std::unordered_map<std::string, value_map>;
 
     category_map meta_map;
 
-    std::vector<std::string> looped_keys;
+    std::size_t looped_len = 0;
 
     for (std::size_t i = 0; i < str_list.size(); i++) {
-        std::string tmp_str = str_list[i];
-        std::size_t looped_len = looped_keys.size();
+        const std::string tmp_str = str_list[i];
         bool is_key_contained = is_substr(query_keys[looped_len], tmp_str);
         if (looped_len == 0 && is_key_contained) {
-            looped_keys.push_back(query_keys[looped_len]);
-            auto tmp_str_list = string_split(tmp_str, ":");
-            auto tmp_str_list1 = string_split(tmp_str_list[1], " ");
+            const auto tmp_str_list = string_split(tmp_str, ":");
+            const auto tmp_str_list1 = string_split(tmp_str_list[1], " ");
             meta_map[query_keys[looped_len]][tmp_str_list[0]] =
                 tmp_str_list1[0];
-        } else if (looped_len == 1 && is_key_contained) {
-            looped_keys.push_back(query_keys[looped_len]);
+            looped_len++;
         } else if (looped_len < 7) {
             if (is_key_contained) {
-                looped_keys.push_back(query_keys[looped_len]);
+                looped_len++;
             } else {
-                auto tmp_str_list = string_split(tmp_str, ":");
-                auto tmp_str_list1 = string_split(tmp_str_list[1], " ");
+                const auto tmp_str_list = string_split(tmp_str, ":");
+                const auto tmp_str_list1 = string_split(tmp_str_list[1], " ");
                 meta_map[query_keys[looped_len - 1]][tmp_str_list[0]] =
                     tmp_str_list1[0];
             }
@@ -124,8 +122,7 @@ auto getConfig() {
                                              "HWLOC", "LIBDL", "LIBRT"};
 
             if (is_substr(substrs, tmp_str)) {
-                const char *local_del = ": ";
-                auto tmp_str_list = string_split(tmp_str, local_del);
+                const auto tmp_str_list = string_split(tmp_str, ": ");
                 meta_map[query_keys[looped_len - 1]][tmp_str_list[0]] =
                     tmp_str_list[1];
             } else if (is_substr(query_keys[looped_len + 1], tmp_str)) {
@@ -134,7 +131,7 @@ auto getConfig() {
                     meta_map[query_keys[looped_len]]["Serial"] = "Serial";
                     meta_map[query_keys[looped_len + 1]]["Serial"] = "Serial";
                 } else {
-                    auto tmp_str_list0 = string_split(tmp_str, " ");
+                    const auto tmp_str_list0 = string_split(tmp_str, " ");
                     meta_map[query_keys[looped_len]]["Parallel"] =
                         tmp_str_list0[0];
                     meta_map[query_keys[looped_len + 1]]["Parallel"] =
