@@ -17,25 +17,24 @@
  * interfacing with Pybind11
  */
 #pragma once
-#include "pybind11/pybind11.h"
-#include "pybind11/stl.h"
-#include "pybind11/stl_bind.h"
-
+#include "Kokkos_Core.hpp"
 #include <cstring>
 #include <sstream>
 #include <string>
 #include <unordered_map>
+#include <utility>
 #include <vector>
-
 namespace Pennylane {
-
-auto string_split(std::string str, const char *delimiters)
+/*@brief Split a string into a string vector based on the delimiters.
+ *
+ *@param str String to be splitted.
+ *@param delimiters Poniter to the delimiters.
+ *@return str_list Substring vector.
+ * */
+auto string_split(std::string &str, const char *delimiters)
     -> std::vector<std::string> {
     std::vector<std::string> str_list;
-    std::vector<char> cstr;
-    cstr.reserve(str.length() + 1);
-    std::strcpy(cstr.data(), str.c_str());
-    char *token = std::strtok(cstr.data(), delimiters);
+    char *token = std::strtok(str.data(), delimiters);
     while (token != 0) {
         str_list.push_back(token);
         token = std::strtok(nullptr, delimiters);
@@ -43,15 +42,26 @@ auto string_split(std::string str, const char *delimiters)
     return str_list;
 }
 
-bool is_in_str(std::string substr, std::string str) {
+/*@brief Check if a string contains a substring.
+ *
+ *@param substr The substring to be checked.
+ *@param string The string to be checked.
+ *@return bool type.
+ * */
+bool is_substr(std::string &substr, std::string &str) {
 
     if (str.find(substr) != std::string::npos)
         return true;
     else
         return false;
 }
-
-bool is_in_str(std::vector<std::string> substrs, std::string str) {
+/*@brief Check if a string contains substrings that is in a string vector.
+ *
+ *@param substr The substring vector to be checked.
+ *@param string The string to be checked.
+ *@return bool type.
+ * */
+bool is_substr(std::vector<std::string> &substrs, std::string &str) {
     for (std::size_t i = 0; i < substrs.size(); i++) {
         if (str.find(substrs[i]) != std::string::npos)
             return true;
@@ -59,28 +69,39 @@ bool is_in_str(std::vector<std::string> substrs, std::string str) {
     return false;
 }
 
+/*@brief Parse the backend details based on the output of
+ *Kokkos::print_configuration.
+ *
+ *@return meta_map std::unordered_map<std::string,
+ *std::unordered_map<std::string, std::string>> type.
+ * */
 auto getConfig() {
-    using namespace pybind11::literals;
 
     std::ostringstream buffer;
+
     Kokkos::print_configuration(buffer, true);
+
+    std::string bufferstr(std::move(buffer.str()));
+
+    auto str_list = string_split(bufferstr, "\n");
+
     std::vector<std::string> query_keys{
         "Kokkos Version", "Compiler",      "Arch",
         "Atomics",        "Vectorization", "Memory",
         "Options",        "Backend",       "Runtime Config"};
+
     typedef std::unordered_map<std::string, std::string> value_map;
+
     typedef std::unordered_map<std::string, value_map> category_map;
 
     category_map meta_map;
-
-    auto str_list = string_split(buffer.str(), "\n");
 
     std::vector<std::string> looped_keys;
 
     for (std::size_t i = 0; i < str_list.size(); i++) {
         std::string tmp_str = str_list[i];
         std::size_t looped_len = looped_keys.size();
-        bool is_key_contained = is_in_str(query_keys[looped_len], tmp_str);
+        bool is_key_contained = is_substr(query_keys[looped_len], tmp_str);
         if (looped_len == 0 && is_key_contained) {
             looped_keys.push_back(query_keys[looped_len]);
             auto tmp_str_list = string_split(tmp_str, ":");
@@ -102,14 +123,14 @@ auto getConfig() {
             std::vector<std::string> substrs{"ASM",   "CXX",   "DEBUG",
                                              "HWLOC", "LIBDL", "LIBRT"};
 
-            if (is_in_str(substrs, tmp_str)) {
+            if (is_substr(substrs, tmp_str)) {
                 const char *local_del = ": ";
                 auto tmp_str_list = string_split(tmp_str, local_del);
                 meta_map[query_keys[looped_len - 1]][tmp_str_list[0]] =
                     tmp_str_list[1];
-            } else if (is_in_str(query_keys[looped_len + 1], tmp_str)) {
+            } else if (is_substr(query_keys[looped_len + 1], tmp_str)) {
                 std::string substr = "Serial";
-                if (is_in_str(substr, tmp_str)) {
+                if (is_substr(substr, tmp_str)) {
                     meta_map[query_keys[looped_len]]["Serial"] = "Serial";
                     meta_map[query_keys[looped_len + 1]]["Serial"] = "Serial";
                 } else {

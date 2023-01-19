@@ -36,9 +36,11 @@ target_link_libraries(runner_kokkos INTERFACE OpenMP::OpenMP_CXX)
 endif()
 
 target_link_libraries(runner_kokkos PUBLIC pennylane_lightning_kokkos Catch2::Catch2 kokkos)
-target_sources(runner_kokkos PRIVATE Test_StateVectorKokkos_Measure.cpp Test_StateVectorKokkos_NonParam.cpp Test_StateVectorKokkos_Param.cpp Test_StateVectorKokkos_Generator.cpp Test_StateVectorKokkos_Expval.cpp Test_AdjointDiffKokkos.cpp)
+target_sources(runner_kokkos PRIVATE Test_Backend_info.cpp Test_StateVectorKokkos_Measure.cpp Test_StateVectorKokkos_NonParam.cpp Test_StateVectorKokkos_Param.cpp Test_StateVectorKokkos_Generator.cpp Test_StateVectorKokkos_Expval.cpp Test_AdjointDiffKokkos.cpp)
 
+get_filename_component(PARENT_DIR ../ ABSOLUTE)
 target_include_directories(runner_kokkos INTERFACE ${kokkos_INC_DIR})
+target_include_directories(runner_kokkos PUBLIC "${PARENT_DIR}/bindings/")
 target_compile_options(runner_kokkos PRIVATE "$<$<CONFIG:DEBUG>:-Wall>")
 
 if(PLKOKKOS_ENABLE_NATIVE)
