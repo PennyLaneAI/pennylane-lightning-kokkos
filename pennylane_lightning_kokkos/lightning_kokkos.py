@@ -58,7 +58,7 @@ def _kokkos_dtype(dtype):
     return LightningKokkos_C128 if dtype == np.complex128 else LightningKokkos_C64
 
 
-    allowed_operations = {
+allowed_operations = {
     "Identity",
     "BasisState",
     "QubitStateVector",
@@ -115,7 +115,8 @@ def _kokkos_dtype(dtype):
     "OrbitalRotation",
     "QFT",
     "ECR",
-    }
+}
+
 
 class LightningKokkos(LightningQubit):
     """PennyLane-Lightning-Kokkos device.
@@ -145,7 +146,6 @@ class LightningKokkos(LightningQubit):
         "Hamiltonian",
         "Identity",
     }
-
 
     def __init__(self, wires, *, sync=True, c_dtype=np.complex128, shots=None, batch_obs=False):
         super().__init__(wires, c_dtype=c_dtype, shots=shots)
