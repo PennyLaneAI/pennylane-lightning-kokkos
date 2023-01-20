@@ -130,6 +130,7 @@ allowed_observables = {
     "Identity",
 }
 
+
 class LightningKokkos(QubitDevice):
     """PennyLane-Lightning-Kokkos device.
 
