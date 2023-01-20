@@ -104,7 +104,7 @@ option(Kokkos_ENABLE_DEPRECATION_WARNINGS "Enable Kokkos deprecation warnings" O
 include(FetchContent)
 FetchContent_Declare(kokkos
   GIT_REPOSITORY https://github.com/kokkos/kokkos.git
-  GIT_TAG        3.7.01
+  GIT_TAG        3.7.0
 )
 FetchContent_MakeAvailable(kokkos)
 get_target_property(PLKOKKOS_KOKKOS_INC_DIR kokkos INTERFACE_INCLUDE_DIRECTORIES)
@@ -126,7 +126,7 @@ if(PLKOKKOS_ENABLE_PYTHON)
 FetchContent_Declare(
     pybind11
     GIT_REPOSITORY https://github.com/pybind/pybind11.git
-    GIT_TAG        v2.10.3
+    GIT_TAG        v2.10.1
 )
 FetchContent_MakeAvailable(pybind11)
 

@@ -24,7 +24,7 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
-namespace Pennylane {
+namespace {
 /*@brief Split a string into a string vector based on the delimiters.
  *
  *@param str String to be splitted.
@@ -134,4 +134,4 @@ auto getConfig() {
     }
     return meta_map;
 }
-} // namespace Pennylane
+} // namespace

@@ -737,12 +737,6 @@ PYBIND11_MODULE(lightning_kokkos_qubit_ops, // NOLINT: No control over
     m.def("kokkos_start", []() { Kokkos::initialize(); });
     m.def("kokkos_end", []() { Kokkos::finalize(); });
     m.def("kokkos_config_info", &getConfig, "Kokkos configurations query.");
-    // m.def("kokkos_config_info", []() {
-    // using namespace pybind11::literals;
-    // std::ostringstream buffer;
-    // Kokkos::print_configuration(buffer, true);
-    // return pybind11::dict("All_Info"_a = buffer.str());
-    //});
 }
 }
 

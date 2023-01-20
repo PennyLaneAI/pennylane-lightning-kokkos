@@ -3,32 +3,28 @@
 #include "StateVectorKokkos.hpp"
 #include "TestHelpers.hpp"
 #include <algorithm>
-#include <cassert>
 #include <catch2/catch.hpp>
 #include <cctype>
-
-using namespace Pennylane;
-namespace {} // namespace
 
 TEMPLATE_TEST_CASE("Bindings::getConfig", "[Backend Info]", float) {
 
     SECTION("Check string split") {
         const std::string str = "Check string split!";
         const auto str_list = string_split(str, " ");
-        PL_ASSERT(str_list[0] == "Check");
-        PL_ASSERT(str_list[1] == "string");
-        PL_ASSERT(str_list[2] == "split!")
+        CHECK(str_list[0] == "Check");
+        CHECK(str_list[1] == "string");
+        CHECK(str_list[2] == "split!");
     }
 
     SECTION("Check string contain") {
         const std::string str = "Check string contain!";
         const std::string substr0 = "Check";
         bool issubstr = is_substr(substr0, str);
-        PL_ASSERT(issubstr == true);
+        CHECK(issubstr == true);
 
         const std::string substr1 = "CHECK";
         issubstr = is_substr(substr1, str);
-        PL_ASSERT(issubstr == false);
+        CHECK(issubstr == false);
     }
 
     SECTION("Check All Info") {
@@ -67,8 +63,7 @@ TEMPLATE_TEST_CASE("Bindings::getConfig", "[Backend Info]", float) {
             {"Backend", {"Serial", "Parallel"}}};
 
         for (auto &category : query_categories) {
-
-            PL_ASSERT(config_info.find(category) != config_info.end());
+            CHECK(config_info.find(category) != config_info.end());
 
             bool key_found = false;
 
@@ -79,7 +74,7 @@ TEMPLATE_TEST_CASE("Bindings::getConfig", "[Backend Info]", float) {
                 }
             }
 
-            PL_ASSERT(key_found == true);
+            CHECK(key_found == true);
 
             std::vector<std::string> sub_query_category = {
                 "Atomics", "Vectorization", "Memory", "Options"};
@@ -89,7 +84,7 @@ TEMPLATE_TEST_CASE("Bindings::getConfig", "[Backend Info]", float) {
                     config_info["Kokkos Version"]["Kokkos Version"];
                 for (auto &c : version_info) {
                     bool is_alpha = isalpha(c);
-                    PL_ASSERT(is_alpha == false);
+                    CHECK(is_alpha == false);
                 }
             }
             if (category == "Comipler" || category == "Architecture") {
@@ -97,7 +92,7 @@ TEMPLATE_TEST_CASE("Bindings::getConfig", "[Backend Info]", float) {
                     if (config_info[category].find(key) !=
                         config_info[category].end()) {
                         auto str = config_info[category][key];
-                        PL_ASSERT(str.length() != 0);
+                        CHECK(str.length() != 0);
                     }
                 }
             }
@@ -107,7 +102,8 @@ TEMPLATE_TEST_CASE("Bindings::getConfig", "[Backend Info]", float) {
                     if (config_info[category].find(key) !=
                         config_info[category].end()) {
                         auto str = config_info[category][key];
-                        PL_ASSERT(str == "yes" || str == "no");
+                        bool isstr = str == "yes" || str == "no";
+                        CHECK(isstr == true);
                     }
                 }
             }
@@ -116,7 +112,7 @@ TEMPLATE_TEST_CASE("Bindings::getConfig", "[Backend Info]", float) {
                     if (config_info[category].find(key) !=
                         config_info[category].end()) {
                         if (key == "Serial") {
-                            PL_ASSERT(config_info[category][key] == "yes");
+                            CHECK(config_info[category][key] == "yes");
                         } else if (key == "Parallel") {
                             std::vector<std::string> backend_list = {
                                 "OpenMP", "HIP", "CUDA"};
@@ -125,7 +121,7 @@ TEMPLATE_TEST_CASE("Bindings::getConfig", "[Backend Info]", float) {
                                           backend_list.end(),
                                           config_info[category][key]) !=
                                 backend_list.end();
-                            PL_ASSERT(is_found == true);
+                            CHECK(is_found == true);
                         }
                     }
                 }
