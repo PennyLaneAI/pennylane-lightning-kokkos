@@ -6,6 +6,9 @@
 
 ### Improvements
 
+* Change LightningKokkos to inherit from QubitDevice instead of LightningQubit.
+[(#31)] (https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/31)
+
 ### Documentation
 
 ### Bug fixes
@@ -13,6 +16,8 @@
 ### Contributors
 
 This release contains contributions from (in alphabetical order):
+
+Shuli Shu
 
 ---
 

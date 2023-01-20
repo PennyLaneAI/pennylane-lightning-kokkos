@@ -59,6 +59,7 @@ def _kokkos_dtype(dtype):
         raise ValueError(f"Data type is not supported for state-vector computation: {dtype}")
     return LightningKokkos_C128 if dtype == np.complex128 else LightningKokkos_C64
 
+
 allowed_operations = {
     "Identity",
     "BasisState",
@@ -118,6 +119,7 @@ allowed_operations = {
     "ECR",
 }
 
+
 class LightningKokkos(QubitDevice):
     """PennyLane-Lightning-Kokkos device.
 
@@ -145,7 +147,9 @@ class LightningKokkos(QubitDevice):
         "Identity",
     }
 
-    def __init__(self, wires, *, sync=True, c_dtype=np.complex128, shots=None, batch_obs=False, analytic=None):
+    def __init__(
+        self, wires, *, sync=True, c_dtype=np.complex128, shots=None, batch_obs=False, analytic=None
+    ):
         if c_dtype is np.complex64:
             r_dtype = np.float32
             self.use_csingle = True
@@ -298,7 +302,7 @@ class LightningKokkos(QubitDevice):
 
     def _apply_unitary():
         pass
-    
+
     def apply_cq(self, operations, **kwargs):
         # Skip over identity operations instead of performing
         # matrix multiplication with the identity.
