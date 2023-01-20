@@ -116,7 +116,7 @@ TEMPLATE_TEST_CASE("Bindings::getConfig", "[Backend Info]", float) {
                     if (config_info[category].find(key) !=
                         config_info[category].end()) {
                         if (key == "Serial") {
-                            assert(config_info[category][key] == "Serial");
+                            PL_ASSERT(config_info[category][key] == "yes");
                         } else if (key == "Parallel") {
                             std::vector<std::string> backend_list = {
                                 "OpenMP", "HIP", "CUDA"};
