@@ -141,7 +141,7 @@ requirements = [
     "cmake",
     "numpy",
     "pennylane-lightning>=0.22",
-    "pennylane<=0.22",
+    "pennylane<=0.28",
 ]
 
 info = {
