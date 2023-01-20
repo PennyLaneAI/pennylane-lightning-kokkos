@@ -136,9 +136,9 @@ requirements = [
     "ninja",
     "wheel",
     "cmake",
-    "numpy<1.24",
-    "pennylane-lightning<=0.28",
-    "pennylane<=0.28",
+    "numpy",
+    "pennylane-lightning>=0.25",
+    "pennylane>=0.25",
 ]
 
 info = {
