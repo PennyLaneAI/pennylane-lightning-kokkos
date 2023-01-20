@@ -17,10 +17,12 @@ interfaces with Kokkos-enabled calculations to run efficiently on different kind
 hardware systems, such as AMD and Nvidia GPUs, or many-core CPUs. 
 """
 from warnings import warn
+from itertools import product
 
 import numpy as np
 from pennylane import (
     math,
+    QubitDevice,
     BasisState,
     QubitStateVector,
     DeviceError,
@@ -34,11 +36,12 @@ from pennylane import (
 )
 from pennylane_lightning import LightningQubit
 from pennylane.operation import Tensor, Operation
-from pennylane.measurements import Expectation
+from pennylane.measurements import Expectation, MeasurementProcess, State
 from pennylane.wires import Wires
 
-# Remove after the next release of PL
-# Add from pennylane import matrix
+# tolerance for numerical errors
+tolerance = 1e-10
+
 import pennylane as qml
 from ._version import __version__
 
@@ -56,8 +59,66 @@ def _kokkos_dtype(dtype):
         raise ValueError(f"Data type is not supported for state-vector computation: {dtype}")
     return LightningKokkos_C128 if dtype == np.complex128 else LightningKokkos_C64
 
+allowed_operations = {
+    "Identity",
+    "BasisState",
+    "QubitStateVector",
+    "QubitUnitary",
+    "ControlledQubitUnitary",
+    "MultiControlledX",
+    "DiagonalQubitUnitary",
+    "PauliX",
+    "PauliY",
+    "PauliZ",
+    "MultiRZ",
+    "Hadamard",
+    "S",
+    "Adjoint(S)",
+    "T",
+    "Adjoint(T)",
+    "SX",
+    "Adjoint(SX)",
+    "CNOT",
+    "SWAP",
+    "ISWAP",
+    "PSWAP",
+    "Adjoint(ISWAP)",
+    "SISWAP",
+    "Adjoint(SISWAP)",
+    "SQISW",
+    "CSWAP",
+    "Toffoli",
+    "CY",
+    "CZ",
+    "PhaseShift",
+    "ControlledPhaseShift",
+    "CPhase",
+    "RX",
+    "RY",
+    "RZ",
+    "Rot",
+    "CRX",
+    "CRY",
+    "CRZ",
+    "CRot",
+    "IsingXX",
+    "IsingYY",
+    "IsingZZ",
+    "IsingXY",
+    "SingleExcitation",
+    "SingleExcitationPlus",
+    "SingleExcitationMinus",
+    "DoubleExcitation",
+    "DoubleExcitationPlus",
+    "DoubleExcitationMinus",
+    "QubitCarry",
+    "QubitSum",
+    "OrbitalRotation",
+    "QFT",
+    "ECR",
+}
 
-class LightningKokkos(LightningQubit):
+class LightningKokkos(QubitDevice):
     """PennyLane-Lightning-Kokkos device.
 
     Args:
@@ -73,6 +134,7 @@ class LightningKokkos(LightningQubit):
     author = "Xanadu Inc."
     _CPP_BINARY_AVAILABLE = True
 
+    operations = allowed_operations
     observables = {
         "PauliX",
         "PauliY",
@@ -83,8 +145,19 @@ class LightningKokkos(LightningQubit):
         "Identity",
     }
 
-    def __init__(self, wires, *, sync=True, c_dtype=np.complex128, shots=None, batch_obs=False):
-        super().__init__(wires, c_dtype=c_dtype, shots=shots)
+    def __init__(self, wires, *, sync=True, c_dtype=np.complex128, shots=None, batch_obs=False, analytic=None):
+        if c_dtype is np.complex64:
+            r_dtype = np.float32
+            self.use_csingle = True
+        elif c_dtype is np.complex128:
+            r_dtype = np.float64
+            self.use_csingle = False
+        else:
+            raise TypeError(f"Unsupported complex Type: {c_dtype}")
+        super().__init__(wires, shots=shots, r_dtype=r_dtype, c_dtype=c_dtype, analytic=analytic)
+        self._state = self._create_basis_state(0)
+        self._pre_rotated_state = self._state
+
         self._kokkos_state = _kokkos_dtype(self._state.dtype)(self._state)
         self._sync = sync
 
@@ -109,6 +182,7 @@ class LightningKokkos(LightningQubit):
             supports_inverse_operations=True,
             supports_analytic_computation=True,
             supports_finite_shots=False,
+            supports_broadcasting=False,
             returns_state=True,
         )
         capabilities.pop("passthru_devices", None)
@@ -131,6 +205,100 @@ class LightningKokkos(LightningQubit):
 
         return qml.BooleanFn(accepts_obj)
 
+    @property
+    def state(self):
+        # Flattening the state.
+        shape = (1 << self.num_wires,)
+        return self._reshape(self._pre_rotated_state, shape)
+
+    def _create_basis_state(self, index):
+        """Return a computational basis state over all wires.
+        Args:
+            index (int): integer representing the computational basis state
+        Returns:
+            array[complex]: complex array of shape ``[2]*self.num_wires``
+            representing the statevector of the basis state
+        Note: This function does not support broadcasted inputs yet.
+        """
+        state = np.zeros(2**self.num_wires, dtype=np.complex128)
+        state[index] = 1
+        state = self._asarray(state, dtype=self.C_DTYPE)
+        return self._reshape(state, [2] * self.num_wires)
+
+    def _apply_state_vector(self, state, device_wires):
+        """Initialize the internal state vector in a specified state.
+        Args:
+            state (array[complex]): normalized input state of length ``2**len(wires)``
+                or broadcasted state of shape ``(batch_size, 2**len(wires))``
+            device_wires (Wires): wires that get initialized in the state
+        """
+
+        # translate to wire labels used by device
+        device_wires = self.map_wires(device_wires)
+
+        state = self._asarray(state, dtype=self.C_DTYPE)
+        output_shape = [2] * self.num_wires
+
+        if not qml.math.is_abstract(state):
+            norm = qml.math.linalg.norm(state, axis=-1, ord=2)
+            if not qml.math.allclose(norm, 1.0, atol=tolerance):
+                raise ValueError("Sum of amplitudes-squared does not equal one.")
+
+        if len(device_wires) == self.num_wires and Wires(sorted(device_wires)) == device_wires:
+            # Initialize the entire device state with the input state
+            self._state = self._reshape(state, output_shape)
+            return
+
+        # generate basis states on subset of qubits via the cartesian product
+        basis_states = np.array(list(product([0, 1], repeat=len(device_wires))))
+
+        # get basis states to alter on full set of qubits
+        unravelled_indices = np.zeros((2 ** len(device_wires), self.num_wires), dtype=int)
+        unravelled_indices[:, device_wires] = basis_states
+
+        # get indices for which the state is changed to input state vector elements
+        ravelled_indices = np.ravel_multi_index(unravelled_indices.T, [2] * self.num_wires)
+
+        state = self._scatter(ravelled_indices, state, [2**self.num_wires])
+        state = self._reshape(state, output_shape)
+        self._state = self._asarray(state, dtype=self.C_DTYPE)
+
+    def _apply_basis_state(self, state, wires):
+        """Initialize the state vector in a specified computational basis state.
+        Args:
+            state (array[int]): computational basis state of shape ``(wires,)``
+                consisting of 0s and 1s.
+            wires (Wires): wires that the provided computational state should be initialized on
+        Note: This function does not support broadcasted inputs yet.
+        """
+        # translate to wire labels used by device
+        device_wires = self.map_wires(wires)
+
+        # length of basis state parameter
+        n_basis_state = len(state)
+
+        if not set(state.tolist()).issubset({0, 1}):
+            raise ValueError("BasisState parameter must consist of 0 or 1 integers.")
+
+        if n_basis_state != len(device_wires):
+            raise ValueError("BasisState parameter and wires must be of equal length.")
+
+        # get computational basis state number
+        basis_states = 2 ** (self.num_wires - 1 - np.array(device_wires))
+        basis_states = qml.math.convert_like(basis_states, state)
+        num = int(qml.math.dot(state, basis_states))
+
+        self._state = self._create_basis_state(num)
+
+    # To be able to validate the adjoint method [_validate_adjoint_method(device)],
+    #  the qnode requires the definition of:
+    # ["_apply_operation", "_apply_unitary", "adjoint_jacobian"]
+    def _apply_operation():
+        pass
+
+    def _apply_unitary():
+        pass
+    
     def apply_cq(self, operations, **kwargs):
         # Skip over identity operations instead of performing
         # matrix multiplication with the identity.
@@ -167,7 +335,7 @@ class LightningKokkos(LightningQubit):
                 param = o.parameters
                 method(wires, inv, param)
 
-    def apply(self, operations, **kwargs):
+    def apply(self, operations, rotations=None, **kwargs):
 
         # State preparation is currently done in Python
         if operations:  # make sure operations[0] exists
