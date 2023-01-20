@@ -181,6 +181,7 @@ class LightningKokkos(LightningQubit):
             supports_inverse_operations=True,
             supports_analytic_computation=True,
             supports_finite_shots=False,
+            supports_broadcasting=False,
             returns_state=True,
         )
         capabilities.pop("passthru_devices", None)
