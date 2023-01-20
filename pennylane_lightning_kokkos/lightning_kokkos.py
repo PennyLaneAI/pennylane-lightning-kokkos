@@ -58,6 +58,65 @@ def _kokkos_dtype(dtype):
     return LightningKokkos_C128 if dtype == np.complex128 else LightningKokkos_C64
 
 
+    allowed_operations = {
+    "Identity",
+    "BasisState",
+    "QubitStateVector",
+    "QubitUnitary",
+    "ControlledQubitUnitary",
+    "MultiControlledX",
+    "DiagonalQubitUnitary",
+    "PauliX",
+    "PauliY",
+    "PauliZ",
+    "MultiRZ",
+    "Hadamard",
+    "S",
+    "Adjoint(S)",
+    "T",
+    "Adjoint(T)",
+    "SX",
+    "Adjoint(SX)",
+    "CNOT",
+    "SWAP",
+    "ISWAP",
+    "PSWAP",
+    "Adjoint(ISWAP)",
+    "SISWAP",
+    "Adjoint(SISWAP)",
+    "SQISW",
+    "CSWAP",
+    "Toffoli",
+    "CY",
+    "CZ",
+    "PhaseShift",
+    "ControlledPhaseShift",
+    "CPhase",
+    "RX",
+    "RY",
+    "RZ",
+    "Rot",
+    "CRX",
+    "CRY",
+    "CRZ",
+    "CRot",
+    "IsingXX",
+    "IsingYY",
+    "IsingZZ",
+    "IsingXY",
+    "SingleExcitation",
+    "SingleExcitationPlus",
+    "SingleExcitationMinus",
+    "DoubleExcitation",
+    "DoubleExcitationPlus",
+    "DoubleExcitationMinus",
+    "QubitCarry",
+    "QubitSum",
+    "OrbitalRotation",
+    "QFT",
+    "ECR",
+    }
+
 class LightningKokkos(LightningQubit):
     """PennyLane-Lightning-Kokkos device.
 
@@ -75,6 +134,8 @@ class LightningKokkos(LightningQubit):
     _CPP_BINARY_AVAILABLE = True
     kokkos_config = {}
 
+    operations = allowed_operations
+
     observables = {
         "PauliX",
         "PauliY",
@@ -84,6 +145,7 @@ class LightningKokkos(LightningQubit):
         "Hamiltonian",
         "Identity",
     }
+
 
     def __init__(self, wires, *, sync=True, c_dtype=np.complex128, shots=None, batch_obs=False):
         super().__init__(wires, c_dtype=c_dtype, shots=shots)
