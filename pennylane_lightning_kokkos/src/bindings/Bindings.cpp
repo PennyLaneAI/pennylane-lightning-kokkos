@@ -18,8 +18,8 @@
 #include <vector>
 
 #include "AdjointDiffKokkos.hpp"
+#include "Error.hpp"         // LightningException
 #include "GetConfigInfo.hpp" // Kokkos configuration info
-#include "Error.hpp" // LightningException
 #include "StateVectorKokkos.hpp"
 
 #include "pybind11/complex.h"

@@ -1,5 +1,5 @@
-#include "GetConfigInfo.hpp"
 #include "Error.hpp"
+#include "GetConfigInfo.hpp"
 #include "StateVectorKokkos.hpp"
 #include "TestHelpers.hpp"
 #include <algorithm>
