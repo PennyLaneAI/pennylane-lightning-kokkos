@@ -39,7 +39,6 @@ target_link_libraries(runner_kokkos PUBLIC pennylane_lightning_kokkos Catch2::Ca
 target_sources(runner_kokkos PRIVATE Test_Backend_info.cpp Test_StateVectorKokkos_Measure.cpp Test_StateVectorKokkos_NonParam.cpp Test_StateVectorKokkos_Param.cpp Test_StateVectorKokkos_Generator.cpp Test_StateVectorKokkos_Expval.cpp Test_AdjointDiffKokkos.cpp)
 
 target_include_directories(runner_kokkos INTERFACE ${kokkos_INC_DIR})
-target_include_directories(runner_kokkos PUBLIC "../bindings/")
 target_compile_options(runner_kokkos PRIVATE "$<$<CONFIG:DEBUG>:-Wall>")
 
 if(PLKOKKOS_ENABLE_NATIVE)

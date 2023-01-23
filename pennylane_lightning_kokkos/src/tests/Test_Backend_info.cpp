@@ -1,4 +1,4 @@
-#include "Bindings.hpp"
+#include "GetConfigInfo.hpp"
 #include "Error.hpp"
 #include "StateVectorKokkos.hpp"
 #include "TestHelpers.hpp"

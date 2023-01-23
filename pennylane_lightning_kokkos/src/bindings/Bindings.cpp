@@ -18,7 +18,7 @@
 #include <vector>
 
 #include "AdjointDiffKokkos.hpp"
-#include "Bindings.hpp"
+#include "GetConfigInfo.hpp" // Kokkos configuration info
 #include "Error.hpp" // LightningException
 #include "StateVectorKokkos.hpp"
 
