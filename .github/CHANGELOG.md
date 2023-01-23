@@ -6,7 +6,7 @@
 
 ### Improvements
 
-* Change LightningKokkos to inherit from QubitDevice instead of LightningQubit.
+* Change LightningKokkos to inherit from QubitDevice instead of LightningQubit and remove Python unit tests with `inv()`.
 [(#31)] (https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/31)
 
 ### Documentation
