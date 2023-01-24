@@ -36,7 +36,7 @@ from pennylane import (
 )
 from pennylane_lightning import LightningQubit
 from pennylane.operation import Tensor, Operation
-from pennylane.measurements import Expectation  # , MeasurementProcess, State
+from pennylane.measurements import Expectation
 from pennylane.wires import Wires
 
 # tolerance for numerical errors
@@ -155,7 +155,7 @@ if CPP_BINARY_AVAILABLE:
             "Identity",
         }
 
-        def __init__(self, wires, *, sync=True, c_dtype=np.complex128, shots=None):
+        def __init__(self, wires, *, sync=True, c_dtype=np.complex128, shots=None, batch_obs=False):
             if c_dtype is np.complex64:
                 r_dtype = np.float32
                 self.use_csingle = True
@@ -266,7 +266,6 @@ if CPP_BINARY_AVAILABLE:
             """Initialize the internal state vector in a specified state.
             Args:
                 state (array[complex]): normalized input state of length ``2**len(wires)``
-                    or broadcasted state of shape ``(batch_size, 2**len(wires))``
                 device_wires (Wires): wires that get initialized in the state
             """
 
