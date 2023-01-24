@@ -60,7 +60,7 @@ class TestHamiltonianExpval:
 
         H = qml.Hamiltonian([3.1415, 9.6], [obs1, obs])
 
-        dev._state = np.array(
+        state_vector = np.array(
             [
                 0.0 + 0.0j,
                 0.0 + 0.1j,
@@ -74,7 +74,7 @@ class TestHamiltonianExpval:
             dtype=np.complex128,
         )
 
-        dev.syncH2D()
+        dev.syncH2D(state_vector)
 
         res = dev.expval(H)
         expected = 3.1415

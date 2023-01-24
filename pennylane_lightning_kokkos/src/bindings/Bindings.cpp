@@ -69,6 +69,29 @@ void StateVectorKokkos_class_bindings(py::module &m) {
                 data_ptr, static_cast<std::size_t>(arr.size()));
         }))
         .def(
+            "setBasisState",
+            [](StateVectorKokkos<PrecisionT> &sv, const size_t index) {
+                sv.setBasisState(index);
+            },
+            "Create Basis State on Device.")
+        .def(
+            "setStateVector",
+            [](StateVectorKokkos<PrecisionT> &sv,
+               const std::vector<std::size_t> &indices, const np_arr_c &state) {
+                const auto buffer = state.request();
+                std::vector<Kokkos::complex<ParamT>> state_kok;
+                if (buffer.size) {
+                    const auto ptr =
+                        static_cast<const Kokkos::complex<ParamT> *>(
+                            buffer.ptr);
+                    state_kok = std::vector<Kokkos::complex<ParamT>>{
+                        ptr, ptr + buffer.size};
+                }
+                sv.setStateVector(indices, state_kok);
+            },
+            "Set State Vector on device with values and their corresponding "
+            "indices for the state vector on device")
+        .def(
             "Identity",
             []([[maybe_unused]] StateVectorKokkos<PrecisionT> &sv,
                [[maybe_unused]] const std::vector<std::size_t> &wires,

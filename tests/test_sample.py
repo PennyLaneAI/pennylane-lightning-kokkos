@@ -71,8 +71,7 @@ class TestSample:
 
         dev = qml.device("lightning.kokkos", wires=2, shots=1000, c_dtype=np.complex128)
 
-        kokkos_ctor = plk.lightning_kokkos._kokkos_dtype(dev.C_DTYPE)
-        dev._kokkos_state = kokkos_ctor(np.array(dev._state).astype(dev.C_DTYPE))
+        dev.reset()
 
         dev.apply([qml.RX(1.5708, wires=[0])])
         dev._wires_measured = {0}
