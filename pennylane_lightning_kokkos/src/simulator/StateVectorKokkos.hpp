@@ -72,7 +72,7 @@ template <typename Precision> struct setBasisStateFunctor {
 };
 
 /**
- * @brief Kokkos functor for setting the basis state
+ * @brief Kokkos functor for setting the state vector
  *
  * @tparam Precision Floating point precision of underlying statevector data
  */

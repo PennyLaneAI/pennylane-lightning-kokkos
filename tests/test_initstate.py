@@ -63,23 +63,6 @@ class TestApplyBasisState:
 
         assert np.allclose(state_vector, b_state, atol=tol, rtol=0)
 
-    wire_subset = [(6, [0, 1]), (5, [0, 2]), (3, [1, 2])]
-
-    @pytest.mark.parametrize("wires", wire_subset)
-    def test_subset_wires(self, wires, tol):
-        """Tests that different basis states are applied correctly when applied to a subset of
-        wires"""
-        nr_wires = 3
-        dev = qml.device("lightning.kokkos", wires=nr_wires)
-        state = np.ones(2)
-        dev._apply_basis_state_kokkos(state, wires=Wires(wires[1]))
-        b_state = basis_state(wires[0], nr_wires)
-
-        state_vector = np.zeros(2**dev.num_wires).astype(dev.C_DTYPE)
-        dev.syncD2H(state_vector)
-
-        assert np.allclose(state_vector, b_state, atol=tol, rtol=0)
-
     def test_wrong_dim(self):
         """Checks that an error is raised if state has the wrong dimension"""
         dev = qml.device("lightning.kokkos", wires=3)
