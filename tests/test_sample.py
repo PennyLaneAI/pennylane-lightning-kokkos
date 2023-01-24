@@ -71,8 +71,6 @@ class TestSample:
 
         dev = qml.device("lightning.kokkos", wires=2, shots=1000, c_dtype=np.complex128)
 
-        dev.reset()
-
         dev.apply([qml.RX(1.5708, wires=[0])])
         dev._wires_measured = {0}
         dev._samples = dev.generate_samples()
