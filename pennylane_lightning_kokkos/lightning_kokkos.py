@@ -139,7 +139,7 @@ if CPP_BINARY_AVAILABLE:
 
         name = "PennyLane plugin for Kokkos-backed Lightning device"
         short_name = "lightning.kokkos"
-        pennylane_requires = ">=0.22"
+        pennylane_requires = ">=0.26"
         version = __version__
         author = "Xanadu Inc."
         _CPP_BINARY_AVAILABLE = True

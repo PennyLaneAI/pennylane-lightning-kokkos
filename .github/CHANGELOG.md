@@ -6,8 +6,8 @@
 
 ### Improvements
 
-* Change LightningKokkos to inherit from QubitDevice instead of LightningQubit, decouple Numpy data initialization and 
-update `inv()` methods in Python unit tests with `qml.adjoint()`.
+* Change LightningKokkos to inherit from QubitDevice instead of LightningQubit. Numpy data initialization is decoupled. 
+Update `inv()` methods in Python unit tests with `qml.adjoint()`.
 [(#31)] (https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/31)
 
 ### Documentation
