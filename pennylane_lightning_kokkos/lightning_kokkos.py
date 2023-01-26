@@ -623,7 +623,7 @@ if CPP_BINARY_AVAILABLE:
 
 else:  # CPP_BINARY_AVAILABLE:
 
-    class LightningKokkos(QubitDevice):
+    class LightningKokkos(LightningQubit):
         name = "PennyLane plugin for Kokkos-backed Lightning device"
         short_name = "lightning.kokkos"
         pennylane_requires = ">=0.22"
