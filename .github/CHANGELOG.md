@@ -6,6 +6,9 @@
 
 ### Improvements
 
+* Update `inv()` methods in Python unit tests with `qml.adjoint()`.
+[(#33)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/33)
+
 ### Documentation
 
 ### Bug fixes
@@ -13,6 +16,8 @@
 ### Contributors
 
 This release contains contributions from (in alphabetical order):
+
+Shuli Shu
 
 ---
 
