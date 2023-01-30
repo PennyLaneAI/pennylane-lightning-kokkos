@@ -498,6 +498,13 @@ template <class Precision> class StateVectorKokkos {
     };
 
     /**
+     * @brief Init zeros for the state-vector on device.
+     */
+    void initZeros() {
+        Kokkos::parallel_for(getLength(), initZerosFunctor(getData()));
+    }
+
+    /**
      * @brief Set value for a single element of the state-vector on device.
      *
      * @param index Index of the target element.
@@ -516,7 +523,7 @@ template <class Precision> class StateVectorKokkos {
     void setStateVector(const std::vector<std::size_t> &indices,
                         const std::vector<Kokkos::complex<Precision>> &values) {
 
-        Kokkos::parallel_for(getLength(), initZerosFunctor(getData()));
+	initZeros();
 
         KokkosSizeTVector d_indices("d_indices", indices.size());
 
