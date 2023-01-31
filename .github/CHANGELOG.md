@@ -13,11 +13,14 @@
 
 ### Bug fixes
 
+* Limit Numpy version to avoid conflicts with Autograd.
+[(#34)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/34)
+
 ### Contributors
 
 This release contains contributions from (in alphabetical order):
 
-Shuli Shu
+Amintor Dusko, Shuli Shu
 
 ---
 
