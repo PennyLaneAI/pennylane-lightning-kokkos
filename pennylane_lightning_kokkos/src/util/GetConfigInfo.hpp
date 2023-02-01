@@ -1,4 +1,4 @@
-// Copyright 2022 Xanadu Quantum Technologies Inc.
+// Copyright 2023 Xanadu Quantum Technologies Inc.
 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 /**
- * @file Bindings.hpp
- * Defines operations to export to Python and other utility functions
- * interfacing with Pybind11
+ * @file GetConfigInfo.hpp
+ * Defines operations to store information from Kokkos::print_configuration in
+ * a unordered_map variable.
  */
 #pragma once
 #include "Kokkos_Core.hpp"
