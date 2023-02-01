@@ -19,15 +19,23 @@
 
 ### Improvements
 
+* Update `inv()` methods in Python unit tests with `qml.adjoint()`.
+[(#33)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/33)
+
 ### Documentation
 
 ### Bug fixes
+
+* Limit Numpy version to avoid conflicts with Autograd.
+[(#34)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/34)
 
 ### Contributors
 
 Shuli Shu
 
 This release contains contributions from (in alphabetical order):
+
+Amintor Dusko, Shuli Shu
 
 ---
 
