@@ -28,7 +28,7 @@ namespace {
 /*@brief Split a string into a string vector based on the delimiters.
  *
  *@param str String to be splitted.
- *@param delimiters Poniter to the delimiters.
+ *@param delimiters Pointer to the delimiters.
  *@return str_list Substring vector.
  * */
 auto string_split(const std::string &str, const char *delimiters)
