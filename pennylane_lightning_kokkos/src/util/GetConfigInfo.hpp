@@ -94,9 +94,17 @@ auto getConfig() {
             if (tmp_str_list.size() == 1) {
                 // Append key to the back of the query_keys vector.
                 query_keys.push_back(tmp_str_list[0]);
+                const std::string runtime_substr =
+                    "Serial Runtime Configuration";
+                if (is_substr(runtime_substr, query_keys.back())) {
+                    meta_map[query_keys.back()]["Serial"] = "yes";
+                }
             } else {
                 const std::string substr = "KOKKOS_ENABLE";
-                if (is_substr(substr, tmp_str_list[0])) { // remove space
+                const std::string runtime_substr = "Runtime Configuration";
+                if (is_substr(runtime_substr, query_keys.back())) {
+                    meta_map[query_keys.back()]["Parallel"] = tmp_str;
+                } else if (is_substr(substr, tmp_str_list[0])) { // remove space
                     const auto tmp_str_list0 =
                         string_split(tmp_str_list[0], " ");
 
