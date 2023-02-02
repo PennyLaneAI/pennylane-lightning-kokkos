@@ -94,44 +94,39 @@ auto getConfig() {
             if (tmp_str_list.size() == 1) {
                 // Append key to the back of the query_keys vector.
                 query_keys.push_back(tmp_str_list[0]);
-                // Serial Runtime Configuration is the last line for serial
-                // backend
-                const std::string runtime_config = "Serial Runtime";
-                if (is_substr(runtime_config, query_keys.back())) {
-                    meta_map[query_keys.back()]["Serial"] = "yes";
-                    meta_map["Backend"]["Serial"] = "yes";
-                    return meta_map;
-                }
-                // Current string only contains value of category_map, which is
-                // a value_map.
             } else {
-                const std::string runtime_config = "Runtime";
-                if (is_substr(runtime_config, query_keys.back())) {
-                    meta_map[query_keys.back()]["Parallel"] = tmp_str_list[1];
+                const std::string substr = "KOKKOS_ENABLE";
+                if (is_substr(substr, tmp_str_list[0])) { // remove space
                     const auto tmp_str_list0 =
+                        string_split(tmp_str_list[0], " ");
+
+                    const auto tmp_str_list1 =
                         string_split(tmp_str_list[1], " ");
-                    meta_map["Backend"]["Parallel"] = tmp_str_list0[0];
+                    meta_map[query_keys.back()][tmp_str_list0[0]] =
+                        tmp_str_list1[0];
                 } else {
-                    const std::string substr = "KOKKOS_ENABLE";
-                    if (is_substr(substr, tmp_str_list[0])) { // remove space
-                        const auto tmp_str_list0 =
-                            string_split(tmp_str_list[0], " ");
+                    const auto tmp_str_list1 =
+                        string_split(tmp_str_list[1], " ");
 
-                        const auto tmp_str_list1 =
-                            string_split(tmp_str_list[1], " ");
-                        meta_map[query_keys.back()][tmp_str_list0[0]] =
-                            tmp_str_list1[0];
-                    } else {
-                        const auto tmp_str_list1 =
-                            string_split(tmp_str_list[1], " ");
-
-                        meta_map[query_keys.back()][tmp_str_list[0]] =
-                            tmp_str_list1[0];
-                    }
+                    meta_map[query_keys.back()][tmp_str_list[0]] =
+                        tmp_str_list1[0];
                 }
             }
         }
     }
+
+    auto backend_str = meta_map["Architecture"]["Default Device"];
+
+    if (is_substr("Serial", backend_str)) {
+        meta_map["Backend"]["Serial"] = "yes";
+    } else if (is_substr("OpenMP", backend_str)) {
+        meta_map["Backend"]["Parallel"] = "OpenMP";
+    } else if (is_substr("Cuda", backend_str)) {
+        meta_map["Backend"]["Parallel"] = "CUDA";
+    } else {
+        meta_map["Backend"]["Parallel"] = "HIP";
+    }
+
     return meta_map;
 }
 } // namespace
