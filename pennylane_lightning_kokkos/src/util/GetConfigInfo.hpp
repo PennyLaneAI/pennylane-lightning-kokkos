@@ -125,7 +125,7 @@ auto getConfig() {
                         }
                     } else if (is_substr("OpenMP", query_keys.back())) {
                         meta_map[query_keys.back()]["OpenMP"] = tmp_str;
-                    } else if (query_keys.back()=="Runtime Configuration") {
+                    } else if (query_keys.back() == "Runtime Configuration") {
                         if (is_substr("KOKKOS_ENABLE_HIP", tmp_str)) {
                             meta_map[query_keys.back()]["KOKKOS_ENABLE_HIP"] =
                                 "defined";

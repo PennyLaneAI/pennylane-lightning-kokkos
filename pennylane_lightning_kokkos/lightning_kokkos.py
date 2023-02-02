@@ -17,7 +17,7 @@ interfaces with Kokkos-enabled calculations to run efficiently on different kind
 hardware systems, such as AMD and Nvidia GPUs, or many-core CPUs. 
 """
 from warnings import warn
-
+import re
 import numpy as np
 from pennylane import (
     math,
@@ -58,6 +58,17 @@ def _kokkos_dtype(dtype):
     return LightningKokkos_C128 if dtype == np.complex128 else LightningKokkos_C64
 
 
+def _kokkos_configuration():
+    config_info = kokkos_config_info()
+    for key in config_info.keys():
+        if "Runtime Configuration" in key:
+            for sub_key in config_info[key].keys():
+                value = config_info[key][sub_key]
+                res = re.sub("\x00:", "::", value)
+                config_info[key][sub_key] = res
+    return config_info
+
+
 class LightningKokkos(LightningQubit):
     """PennyLane-Lightning-Kokkos device.
 
@@ -90,7 +101,7 @@ class LightningKokkos(LightningQubit):
         self._kokkos_state = _kokkos_dtype(self._state.dtype)(self._state)
         self._sync = sync
         if not LightningKokkos.kokkos_config:
-            LightningKokkos.kokkos_config = kokkos_config_info()
+            LightningKokkos.kokkos_config = _kokkos_configuration()
 
     def reset(self):
         super().reset()
