@@ -9,12 +9,12 @@
 * Update `inv()` methods in Python unit tests with `qml.adjoint()`.
 [(#33)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/33)
 
+* Remove explicit Numpy dependence.
+[(#35)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/35)
+
 ### Documentation
 
 ### Bug fixes
-
-* Limit Numpy version to avoid conflicts with Autograd.
-[(#34)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/34)
 
 ### Contributors
 

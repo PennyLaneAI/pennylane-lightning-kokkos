@@ -26,7 +26,6 @@ class TestSparseHamiltonianExpval:
     """Tests for the expval function"""
 
     def test_sparse_hamiltionan_expval(self, qubit_device_3_wires, tol):
-
         dev = LightningKokkos(wires=3, c_dtype=np.complex128)
         obs = qml.Identity(0) @ qml.PauliX(1) @ qml.PauliY(2)
 
