@@ -168,7 +168,6 @@ class LightningKokkos(LightningQubit):
                 method(wires, inv, param)
 
     def apply(self, operations, **kwargs):
-
         # State preparation is currently done in Python
         if operations:  # make sure operations[0] exists
             if isinstance(operations[0], QubitStateVector):
