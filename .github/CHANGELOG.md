@@ -31,8 +31,6 @@
 
 ### Contributors
 
-Shuli Shu
-
 This release contains contributions from (in alphabetical order):
 
 Amintor Dusko, Shuli Shu
