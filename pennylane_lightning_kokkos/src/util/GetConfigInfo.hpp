@@ -77,6 +77,8 @@ auto getConfig() {
 
     using category_map = std::unordered_map<std::string, value_map>;
 
+    std::size_t num_devices = 0;
+
     category_map meta_map;
 
     for (std::size_t i = 0; i < str_list.size(); i++) {
@@ -84,6 +86,7 @@ auto getConfig() {
         const std::string tmp_str = str_list[i];
 
         const auto tmp_str_list = string_split(tmp_str, ":");
+        const auto tmp_str_list_equal = string_split(tmp_str, "=");
 
         if (i == 0) {
             const auto tmp_str_list1 = string_split(tmp_str_list[1], " ");
@@ -91,7 +94,7 @@ auto getConfig() {
             query_keys.push_back(tmp_str_list[0]);
         } else {
             // Current string or line only contains a key of category_map.
-            if (tmp_str_list.size() == 1) {
+            if (tmp_str_list.size() == 1 && tmp_str_list_equal.size() == 1) {
                 // Append key to the back of the query_keys vector.
                 query_keys.push_back(tmp_str_list[0]);
                 const std::string runtime_substr =
@@ -103,7 +106,44 @@ auto getConfig() {
                 const std::string substr = "KOKKOS_ENABLE";
                 const std::string runtime_substr = "Runtime Configuration";
                 if (is_substr(runtime_substr, query_keys.back())) {
-                    meta_map[query_keys.back()]["Parallel"] = tmp_str;
+                    if (is_substr("Cuda", query_keys.back())) {
+                        if (is_substr("KOKKOS_ENABLE_CUDA", tmp_str)) {
+                            meta_map[query_keys.back()]["KOKKOS_ENABLE_CUDA"] =
+                                "defined";
+                        }
+                        if (is_substr("CUDA_VERSION", tmp_str)) {
+                            const auto tmp_str_list0 =
+                                string_split(tmp_str, " ");
+                            meta_map[query_keys.back()]["CUDA_VERSION"] =
+                                tmp_str.back();
+                        }
+                        if (is_substr("Kokkos", tmp_str)) {
+                            std::string device_id = std::to_string(num_devices);
+                            device_id.append("th device");
+                            meta_map[query_keys.back()][device_id] = tmp_str;
+                            num_devices++;
+                        }
+                    } else if (is_substr("OpenMP", query_keys.back())) {
+                        meta_map[query_keys.back()]["OpenMP"] = tmp_str;
+                    } else if (query_keys.back()=="Runtime Configuration") {
+                        if (is_substr("KOKKOS_ENABLE_HIP", tmp_str)) {
+                            meta_map[query_keys.back()]["KOKKOS_ENABLE_HIP"] =
+                                "defined";
+                        }
+                        if (is_substr("HIP_VERSION", tmp_str)) {
+                            const auto tmp_str_list0 =
+                                string_split(tmp_str, " ");
+                            meta_map[query_keys.back()]["HIP_VERSION"] =
+                                tmp_str.back();
+                        }
+                        if (is_substr("Kokkos", tmp_str)) {
+                            std::string device_id = std::to_string(num_devices);
+                            device_id.append("th device");
+                            meta_map[query_keys.back()][device_id] = tmp_str;
+                            num_devices++;
+                        }
+                    }
+
                 } else if (is_substr(substr, tmp_str_list[0])) { // remove space
                     const auto tmp_str_list0 =
                         string_split(tmp_str_list[0], " ");
