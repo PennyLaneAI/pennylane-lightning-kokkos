@@ -2,13 +2,31 @@
 
 ### New features since last release
 
+ * Add support for building X86-64 Linux wheels with OpenMP and SERIAL backends with Github Actions.
+ [(#14)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/14)
+
+ * Add the `kokkos_config` class variable, which stores the kokkos build and runtime information such as `Backend`, `Architecture`, `Kokkos Version`, `Compiler`, to LightningKokkos for users' query purpose. Users can also access other information such as `Options`, `Memory`, `Atomics` and `Vectorization` from `kokkos_config`.   
+ The workflow for build and runtime information query is:
+ ```python
+ >>> import pennylane as qml
+ >>> dev = qml.device('lightning.kokkos', wires=3)
+ >>> dev.kokkos_config["Backend"]
+ {'Parallel': 'OpenMP'}
+ ```
+ [(#14)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/14)
+
 ### Breaking changes
+
+* Change LightningKokkos to inherit from QubitDevice instead of LightningQubit. Numpy data initialization is decoupled. 
+[(#31)] (https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/31)
 
 ### Improvements
 
-* Change LightningKokkos to inherit from QubitDevice instead of LightningQubit. Numpy data initialization is decoupled. 
-Update `inv()` methods in Python unit tests with `qml.adjoint()`.
-[(#31)] (https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/31)
+* Update `inv()` methods in Python unit tests with `qml.adjoint()`.
+[(#33)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/33)
+
+* Remove explicit Numpy requirement.
+[(#35)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/35)
 
 ### Documentation
 
@@ -18,7 +36,7 @@ Update `inv()` methods in Python unit tests with `qml.adjoint()`.
 
 This release contains contributions from (in alphabetical order):
 
-Shuli Shu
+Amintor Dusko, Shuli Shu
 
 ---
 
@@ -65,7 +83,7 @@ Amintor Dusko, Lee J. O'Riordan, Shuli Shu, Matthew Silverman
  [(#11)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/11)
 
  * Add sample generation support.
-  [(#9)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/9)
+ [(#9)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/9)
 
 ### Breaking changes
 

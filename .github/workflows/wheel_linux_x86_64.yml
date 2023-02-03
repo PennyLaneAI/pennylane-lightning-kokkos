@@ -1,0 +1,123 @@
+name: Wheel::Linux::x86_64
+
+# **What it does**: Builds python wheels for Linux (ubuntu-latest) architecture x86_64 and store it as artifacts.
+#                   Python versions: 3.8, 3.9, 3.10, 3.11.
+# **Why we have it**: To build wheels for pennylane-lightning-kokkos installation.
+# **Who does it impact**: Wheels to be uploaded to PyPI.
+
+env:
+  GCC_VERSION: 11
+  PY_VERSION: 3.8
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  release:
+    types: [published]
+
+jobs:
+  set_wheel_build_matrix:
+    name: "Set wheel build matrix"
+    uses: ./.github/workflows/set_wheel_build_matrix.yml
+    with:
+      event_name: ${{ github.event_name }}
+
+  linux-wheels-x86-64:
+    needs: [set_wheel_build_matrix]
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        arch: [x86_64]
+        cibw_build: ${{ fromJson(needs.set_wheel_build_matrix.outputs.python_version) }}
+        exec_model: ${{ fromJson(needs.set_wheel_build_matrix.outputs.cpu_exec_model) }}
+        container_img: ["quay.io/pypa/manylinux2014_x86_64"]
+
+    name: ${{ matrix.os }} (Python ${{ fromJson('{"cp38-*":"3.8", "cp39-*":"3.9","cp310-*":"3.10","cp311-*":"3.11" }')[matrix.cibw_build] }} ${{ matrix.exec_model }})
+    runs-on: ${{ matrix.os }}
+    container: ${{ matrix.container_img }}
+
+    steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.11.0
+        with:
+          access_token: ${{ github.token }}
+
+      - name: Checkout PennyLane-Lightning-Kokkos
+        uses: actions/checkout@v3
+
+      - name: Install dependencies (CentOS)
+        if: ${{ (matrix.container_img == 'quay.io/pypa/manylinux2014_x86_64') }}
+        run: |
+          # Reduce wait time for repos not responding
+          cat /etc/yum.conf | sed "s/\[main\]/\[main\]\ntimeout=5/g" > /etc/yum.conf
+          yum update -y && yum install -y docker
+  
+      - name: Install cibuildwheel
+        run: python3.8 -m pip install cibuildwheel~=2.11.0
+
+      - name: Build wheels
+        env:
+          CIBW_ARCHS_LINUX: ${{matrix.arch}}
+
+          CIBW_BUILD: ${{ matrix.cibw_build }}
+
+          CIBW_SKIP: "*-musllinux*"
+
+          # Python build settings
+          CIBW_BEFORE_BUILD: |
+            cat /etc/yum.conf | sed "s/\[main\]/\[main\]\ntimeout=5/g" > /etc/yum.conf
+            pip install ninja cmake~=3.24.0
+            yum clean all -y
+            yum install centos-release-scl-rh -y
+            yum install devtoolset-11-gcc-c++ -y
+            source /opt/rh/devtoolset-11/enable -y
+
+          CIBW_ENVIRONMENT: |
+            PATH=/opt/rh/devtoolset-11/root/usr/bin:$PATH
+            BACKEND=${{ matrix.exec_model }}
+          
+          # Testing of built wheels
+          CIBW_TEST_REQUIRES: numpy~=1.21 scipy pytest pytest-cov pytest-mock flaky
+
+          CIBW_BEFORE_TEST: |
+            pip install git+https://github.com/PennyLaneAI/pennylane.git@master
+          CIBW_TEST_COMMAND: |
+            pl-device-test --device=lightning.kokkos --skip-ops -x --tb=short --no-flaky-report
+          
+          CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
+
+          CIBW_BUILD_VERBOSITY: 3
+
+        run: | 
+          python3.8 -m cibuildwheel --output-dir wheelhouse
+      - uses: actions-ecosystem/action-regex-match@v2
+        id: rc_build
+        with:
+          text: ${{ github.event.pull_request.head.ref }}
+          regex: '.*[0-9]+.[0-9]+.[0-9]+[-_]?rc[0-9]+'
+
+      - uses: actions/upload-artifact@v2
+        #if: ${{ github.event_name == 'release' || github.ref == 'refs/heads/master' || steps.rc_build.outputs.match != ''}}
+        with:
+          name: ${{ runner.os }}-wheels-${{ matrix.arch }}-${{ matrix.exec_model }}.zip
+          path: ./wheelhouse/*.whl
+
+  upload-pypi:
+    needs: linux-wheels-x86-64
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'release' || github.ref == 'refs/heads/master'}}
+    steps:
+      - uses: actions/download-artifact@v2
+        with:
+          name: Linux-wheels-x86_64-${{ matrix.exec_model }}.zip
+          path: dist
+
+      - name: Upload wheels to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+          repository_url: https://test.pypi.org/legacy/

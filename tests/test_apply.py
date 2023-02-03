@@ -298,8 +298,90 @@ class TestLightningKokkosIntegration:
 
     def test_load_default_qubit_device(self):
         """Test that the default plugin loads correctly"""
+        query_categories = [
+            "Kokkos Version",
+            "Compiler",
+            "Architecture",
+            "Atomics",
+            "Vectorization",
+            "Memory",
+            "Options",
+            "Backend",
+        ]
+
+        query_keys = {
+            "Kokkos Version": ["Kokkos Version"],
+            "Compiler": [
+                "KOKKOS_COMPILER_APPLECC",
+                "KOKKOS_COMPILER_CLANG",
+                "KOKKOS_COMPILER_CRAYC",
+                "KOKKOS_COMPILER_GNU",
+                "KOKKOS_COMPILER_IBM",
+                "KOKKOS_COMPILER_INTEL",
+                "KOKKOS_COMPILER_NVCC",
+                "KOKKOS_COMPILER_PGI",
+                "KOKKOS_COMPILER_MSVC",
+            ],
+            "Atomics": [
+                "KOKKOS_ENABLE_GNU_ATOMICS",
+                "KOKKOS_ENABLE_INTEL_ATOMICS",
+                "KOKKOS_ENABLE_WINDOWS_ATOMICS",
+            ],
+            "Vectorization": [
+                "KOKKOS_ENABLE_PRAGMA_IVDEP",
+                "KOKKOS_ENABLE_PRAGMA_LOOPCOUNT",
+                "KOKKOS_ENABLE_PRAGMA_SIMD",
+                "KOKKOS_ENABLE_PRAGMA_UNROLL",
+                "KOKKOS_ENABLE_PRAGMA_VECTOR",
+            ],
+            "Memory": ["KOKKOS_ENABLE_HBWSPACE", "KOKKOS_ENABLE_INTEL_MM_ALLOC"],
+            "Options": [
+                "KOKKOS_ENABLE_ASM",
+                "KOKKOS_ENABLE_CXX14",
+                "KOKKOS_ENABLE_CXX17",
+                "KOKKOS_ENABLE_CXX20",
+                "KOKKOS_ENABLE_DEBUG_BOUNDS_CHECK",
+                "KOKKOS_ENABLE_HWLOC",
+                "KOKKOS_ENABLE_LIBRT",
+                "KOKKOS_ENABLE_LIBDL",
+            ],
+            "Architecture": ["Default Device"],
+            "Backend": ["Serial", "Parallel"],
+        }
 
         dev = qml.device("lightning.kokkos", wires=2)
+        config_info = dev.kokkos_config
+
         assert dev.num_wires == 2
         assert dev.shots is None
         assert dev.short_name == "lightning.kokkos"
+
+        for category in query_categories:
+            assert category in dev.kokkos_config
+            find_key = False
+            for key in query_keys[category]:
+                if key in config_info[category]:
+                    find_key = True
+            assert find_key == True
+
+            if category == "Kokkos Version":
+                assert config_info["Kokkos Version"]["Kokkos Version"].isalpha() == False
+            if category in ["Compiler", "Arch"]:
+                for key in query_keys[category]:
+                    if key in config_info[category]:
+                        assert config_info[category][key] is not None
+            if category in ["Atomics", "Vectorization", "Memory", "Options"]:
+                for key in query_keys[category]:
+                    if key in config_info[category]:
+                        assert config_info[category][key] in ["yes", "no"]
+            if category == "Backend":
+                for key in query_keys[category]:
+                    if key in config_info[category]:
+                        if key == "Serial":
+                            assert config_info[category][key] == "yes"
+                        elif key == "Parallel":
+                            assert config_info[category][key] in [
+                                "OPENMP",
+                                "HIP",
+                                "CUDA",
+                            ]  # Need check for HIP & CUDA

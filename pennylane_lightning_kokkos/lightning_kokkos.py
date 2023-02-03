@@ -19,6 +19,7 @@ hardware systems, such as AMD and Nvidia GPUs, or many-core CPUs.
 from warnings import warn
 from itertools import product
 
+import re
 import numpy as np
 from pennylane import (
     math,
@@ -51,6 +52,7 @@ try:
         LightningKokkos_C64,
         AdjointJacobianKokkos_C128,
         AdjointJacobianKokkos_C64,
+        kokkos_config_info,
     )
 
     from ._serialize import _serialize_obs, _serialize_ops
@@ -65,6 +67,14 @@ def _kokkos_dtype(dtype):
     if dtype not in [np.complex128, np.complex64]:
         raise ValueError(f"Data type is not supported for state-vector computation: {dtype}")
     return LightningKokkos_C128 if dtype == np.complex128 else LightningKokkos_C64
+
+def _kokkos_configuration():
+    config_info = kokkos_config_info()
+    for key in config_info.keys():
+        if "Runtime Configuration" in key:
+            for sub_key, value in config_info[key].items():
+                config_info[key][sub_key] = re.sub("\x00", ":", value)
+    return config_info
 
 
 allowed_operations = {
@@ -126,11 +136,11 @@ allowed_operations = {
     "ECR",
 }
 
+
 if CPP_BINARY_AVAILABLE:
 
     class LightningKokkos(QubitDevice):
         """PennyLane-Lightning-Kokkos device.
-
         Args:
             wires (int): the number of wires to initialize the device with
             sync (bool): immediately sync with host-sv after applying operations
@@ -168,6 +178,9 @@ if CPP_BINARY_AVAILABLE:
 
             self._kokkos_state = _kokkos_dtype(c_dtype)(self.num_wires)
             self._sync = sync
+
+            if not LightningKokkos.kokkos_config:
+                LightningKokkos.kokkos_config = _kokkos_configuration()
 
         def reset(self):
             super().reset()
