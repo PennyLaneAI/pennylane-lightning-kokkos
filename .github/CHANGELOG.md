@@ -19,7 +19,6 @@
 
 ### Breaking changes
 
- 
 ### Improvements
 
 * Update `inv()` methods in Python unit tests with `qml.adjoint()`.
