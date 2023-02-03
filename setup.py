@@ -139,9 +139,8 @@ requirements = [
     "ninja",
     "wheel",
     "cmake",
-    "numpy",
-    "pennylane-lightning>=0.22",
-    "pennylane>=0.22",
+    "pennylane-lightning>=0.28",
+    "pennylane>=0.28",
 ]
 
 info = {
@@ -180,7 +179,6 @@ classifiers = [
     "Operating System :: POSIX :: Linux",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",

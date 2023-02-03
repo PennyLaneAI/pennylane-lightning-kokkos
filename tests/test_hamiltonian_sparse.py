@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """
-Unit tests for the expval method of the :mod:`pennylane_lightning_kokkos.LightningKOKKOS` device.
+Unit tests for the expval method of the :mod:`pennylane_lightning_kokkos.LightningKokkos` device.
 """
 import math
 
@@ -26,7 +26,6 @@ class TestSparseHamiltonianExpval:
     """Tests for the expval function"""
 
     def test_sparse_hamiltionan_expval(self, qubit_device_3_wires, tol):
-
         dev = LightningKokkos(wires=3, c_dtype=np.complex128)
         obs = qml.Identity(0) @ qml.PauliX(1) @ qml.PauliY(2)
 

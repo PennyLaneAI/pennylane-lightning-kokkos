@@ -13,7 +13,8 @@
 # limitations under the License.
 r"""
 This module contains the :class:`~.LightningKokkos` class, a PennyLane simulator device that
-interfaces with the NVIDIA cuQuantum cuStateVec simulator library for Kokkos-enabled calculations.
+interfaces with Kokkos-enabled calculations to run efficiently on different kinds of shared memory
+hardware systems, such as AMD and Nvidia GPUs, or many-core CPUs. 
 """
 from warnings import warn
 
@@ -28,7 +29,6 @@ from pennylane import (
     SparseHamiltonian,
     Hermitian,
     Rot,
-    CRot,
     QuantumFunctionError,
     QubitStateVector,
 )
@@ -36,7 +36,6 @@ from pennylane_lightning import LightningQubit
 from pennylane.operation import Tensor, Operation
 from pennylane.measurements import Expectation
 from pennylane.wires import Wires
-from pennylane import Device
 
 # Remove after the next release of PL
 # Add from pennylane import matrix
@@ -49,14 +48,8 @@ from .lightning_kokkos_qubit_ops import LightningKokkos_C128
 from .lightning_kokkos_qubit_ops import LightningKokkos_C64
 from .lightning_kokkos_qubit_ops import AdjointJacobianKokkos_C128
 from .lightning_kokkos_qubit_ops import AdjointJacobianKokkos_C64
-from .lightning_kokkos_qubit_ops import ObsStructKokkos_C128
-from .lightning_kokkos_qubit_ops import ObsStructKokkos_C64
-from .lightning_kokkos_qubit_ops import OpsStructKokkos_C128
-from .lightning_kokkos_qubit_ops import OpsStructKokkos_C64
 
 from ._serialize import _serialize_obs, _serialize_ops
-from ctypes.util import find_library
-from importlib import util as imp_util
 
 
 def _kokkos_dtype(dtype):
@@ -75,7 +68,7 @@ class LightningKokkos(LightningQubit):
         kokkos_args (InitArguments): binding for Kokkos::InitArguments (threading parameters).
     """
 
-    name = "PennyLane plugin for Kokkos-backed Lightning device using NVIDIA cuQuantum SDK"
+    name = "PennyLane plugin for Kokkos-backed Lightning device"
     short_name = "lightning.kokkos"
     pennylane_requires = ">=0.22"
     version = __version__
@@ -129,7 +122,6 @@ class LightningKokkos(LightningQubit):
         capabilities = super().capabilities().copy()
         capabilities.update(
             model="qubit",
-            supports_reversible_diff=False,
             supports_inverse_operations=True,
             supports_analytic_computation=True,
             supports_finite_shots=False,
@@ -140,16 +132,18 @@ class LightningKokkos(LightningQubit):
 
     @property
     def stopping_condition(self):
+        """.BooleanFn: Returns the stopping condition for the device. The returned
+        function accepts a queuable object (including a PennyLane operation
+        and observable) and returns ``True`` if supported by the device."""
+
         def accepts_obj(obj):
-            if obj.name == "QFT" and len(obj.wires) >= 6:
-                return False
-            if obj.name == "GroverOperator" and len(obj.wires) >= 13:
-                return False
-            if getattr(obj, "has_matrix", False):
-                # pow operations dont work with backprop or adjoint without decomposition
-                # use class name string so we don't need to use isinstance check
-                return not (obj.__class__.__name__ == "Pow" and qml.operation.is_trainable(obj))
-            return obj.name in self.observables.union(self.operations)
+            if obj.name == "QFT" and len(obj.wires) < 6:
+                return True
+            if obj.name == "GroverOperator" and len(obj.wires) < 13:
+                return True
+            return (not isinstance(obj, qml.tape.QuantumTape)) and getattr(
+                self, "supports_operation", lambda name: False
+            )(obj.name)
 
         return qml.BooleanFn(accepts_obj)
 
@@ -190,7 +184,6 @@ class LightningKokkos(LightningQubit):
                 method(wires, inv, param)
 
     def apply(self, operations, **kwargs):
-
         # State preparation is currently done in Python
         if operations:  # make sure operations[0] exists
             if isinstance(operations[0], QubitStateVector):

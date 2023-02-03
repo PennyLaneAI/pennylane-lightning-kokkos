@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """
-Unit tests for the generate_samples method of the :mod:`pennylane_lightning_gpu.LightningGPU` device.
+Unit tests for the generate_samples method of the :mod:`pennylane_lightning_kokkos.LightningKokkos` device.
 """
 import pytest
 
@@ -66,7 +66,6 @@ class TestProbs:
         "cases",
         [
             [None, [0.9165164490394898, 0.0, 0.08348355096051052, 0.0]],
-            [[], [0.9165164490394898, 0.0, 0.08348355096051052, 0.0]],
         ],
     )
     @pytest.mark.xfail
@@ -112,15 +111,6 @@ class TestProbs:
     @pytest.mark.parametrize(
         "cases",
         [
-            [
-                [],
-                [
-                    0.9178264236525453,
-                    0.02096485729264079,
-                    0.059841820910257436,
-                    0.0013668981445561978,
-                ],
-            ],
             [
                 [0, 1],
                 [

@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """
-Unit tests for the expval method of the :mod:`pennylane_lightning_kokkos.LightningKOKKOS` device.
+Unit tests for the expval method of the :mod:`pennylane_lightning_kokkos.LightningKokkos` device.
 """
 import math
 
@@ -52,7 +52,6 @@ class TestHamiltonianExpval:
         assert np.allclose(circuit(), res, atol=tol, rtol=0)
 
     def test_hamiltonan_expectation(self, qubit_device_3_wires, tol):
-
         dev = qubit_device_3_wires
 
         obs = qml.PauliX(1) @ qml.PauliY(2)
