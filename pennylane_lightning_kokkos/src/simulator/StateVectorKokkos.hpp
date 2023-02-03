@@ -523,7 +523,7 @@ template <class Precision> class StateVectorKokkos {
     void setStateVector(const std::vector<std::size_t> &indices,
                         const std::vector<Kokkos::complex<Precision>> &values) {
 
-	initZeros();
+        initZeros();
 
         KokkosSizeTVector d_indices("d_indices", indices.size());
 

@@ -25,6 +25,7 @@ import pennylane_lightning_kokkos
 
 INV_SQRT2 = 1 / np.sqrt(2)
 
+
 # functions for creating different states used in testing
 def basis_state(index, nr_wires):
     rho = np.zeros((2**nr_wires), dtype=np.complex128)

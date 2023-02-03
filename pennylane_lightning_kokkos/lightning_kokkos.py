@@ -68,6 +68,7 @@ def _kokkos_dtype(dtype):
         raise ValueError(f"Data type is not supported for state-vector computation: {dtype}")
     return LightningKokkos_C128 if dtype == np.complex128 else LightningKokkos_C64
 
+
 def _kokkos_configuration():
     config_info = kokkos_config_info()
     for key in config_info.keys():
@@ -385,7 +386,6 @@ if CPP_BINARY_AVAILABLE:
                     method(wires, inv, param)
 
         def apply(self, operations, **kwargs):
-
             # State preparation is currently done in Python
             if operations:  # make sure operations[0] exists
                 if isinstance(operations[0], QubitStateVector):
