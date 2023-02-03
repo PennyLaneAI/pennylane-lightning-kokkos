@@ -36,9 +36,9 @@ or for an editable `pip` installation with:
    BACKEND="OPENMP" python -m pip install -e .
 
 
-Supported backend options are "SERIAL", "OPENMP", "THREADS", "HIP" and "CUDA". For "HIP" and "CUDA", the appropriate software stacks are required to enable compilation and subsequent use.
+Supported backend options are "SERIAL", "OPENMP", "HIP" and "CUDA". For "HIP" and "CUDA", the appropriate software stacks are required to enable compilation and subsequent use.
 For explicit targeting of a given supported architecture, the environment variable `ARCH` can also be specified which directly sets the `-DKokkos_ARCH_{...}=ON` build option. Note that THREADS
-backend is not recommended since `Kokkos <https://github.com/kokkos/kokkos/wiki/Initialization>`_ does not guarantee its safety.
+backend is not recommended since `Kokkos <https://github.com/kokkos/kokkos-core-wiki/blob/17f08a6483937c26e14ec3c93a2aa40e4ce081ce/docs/source/ProgrammingGuide/Initialization.md?plain=1#L67>`_ does not guarantee its safety.
 
 .. installation-end-inclusion-marker-do-not-remove
 

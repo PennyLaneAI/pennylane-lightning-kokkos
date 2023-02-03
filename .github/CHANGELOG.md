@@ -2,17 +2,17 @@
 
 ### New features since last release
 
- * Add X86-64 Linux wheels building with OpenMP and SERIAL backend for lightning.kokkos in workflows.
+ * Add support for building X86-64 Linux wheels with OpenMP and SERIAL backends with Github Actions.
  [(#14)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/14)
 
- * Add the build information query support with the `print_configuration()` method.
- The workflow for `print_configuration()`is:
+ * Add the `kokkos_config` class variable, which stores the kokkos build and runtime information such as `Backend`, `Architecture`, `Kokkos Version`, `Compiler`, to LightningKokkos for users' query purpose. Users can also access other information such as `Options`, `Memory`, `Atomics` and `Vectorization` from `kokkos_config`.   
+ The workflow for build and runtime information query is:
  ```python
  >>> import pennylane as qml
  >>> dev = qml.device('lightning.kokkos', wires=3)
- >>> dev.print_configuration()
+ >>> dev.kokkos_config["Backend"]
+ {'Parallel': 'OpenMP'}
  ```
- [(#14)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/14)
 
  * Add AMD GPU wheels building with HIP backend for lightning.kokkos in workflows.
  [(#21)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/21)
@@ -22,15 +22,21 @@
  
 ### Improvements
 
+* Update `inv()` methods in Python unit tests with `qml.adjoint()`.
+[(#33)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/33)
+
+* Remove explicit Numpy requirement.
+[(#35)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/35)
+
 ### Documentation
 
 ### Bug fixes
 
 ### Contributors
 
-Shuli Shu
-
 This release contains contributions from (in alphabetical order):
+
+Amintor Dusko, Shuli Shu
 
 ---
 

@@ -18,7 +18,8 @@
 #include <vector>
 
 #include "AdjointDiffKokkos.hpp"
-#include "Error.hpp" // LightningException
+#include "Error.hpp"         // LightningException
+#include "GetConfigInfo.hpp" // Kokkos configuration info
 #include "StateVectorKokkos.hpp"
 
 #include "pybind11/complex.h"
@@ -735,8 +736,7 @@ PYBIND11_MODULE(lightning_kokkos_qubit_ops, // NOLINT: No control over
 
     m.def("kokkos_start", []() { Kokkos::initialize(); });
     m.def("kokkos_end", []() { Kokkos::finalize(); });
-    m.def("kokkos_configuration",
-          []() { Kokkos::print_configuration(std::cout, true); });
+    m.def("kokkos_config_info", &getConfig, "Kokkos configurations query.");
 }
 }
 
