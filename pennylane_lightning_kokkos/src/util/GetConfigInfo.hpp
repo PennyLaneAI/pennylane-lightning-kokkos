@@ -82,16 +82,11 @@ auto getConfig() {
     query_keys.push_back(tmp_str_list0[0]);
 
     for (std::size_t i = 1; i < str_list.size(); i++) {
-
         const std::string tmp_str = str_list[i];
-        const auto tmp_str_list = string_split(tmp_str, ":");
-        const auto tmp_str_list_equal = string_split(tmp_str, "=");
-
-        // Current string or line only contains a key of category_map.
-        if (tmp_str_list.size() == 1 && tmp_str_list_equal.size() == 1) {
+        // If last char of string is ':', this string is key.
+        if (str_list[i].back() == ':') {
             // Append key to the back of the query_keys vector.
-            query_keys.push_back(tmp_str_list[0]);
-
+            query_keys.push_back(tmp_str.substr(0, tmp_str.size() - 1));
             if (query_keys.back() == "Serial Runtime Configuration") {
                 meta_map[query_keys.back()]["Serial"] = "yes";
             }
@@ -107,6 +102,8 @@ auto getConfig() {
                         meta_map[query_keys.back()]
                                 ["KOKKOS_ENABLE_" + backend] = "defined";
                     } else if (is_substr(backend + "_VERSION", tmp_str)) {
+                        const auto tmp_str_list_equal =
+                            string_split(tmp_str, "=");
                         meta_map[query_keys.back()][backend + "_VERSION"] =
                             string_split(tmp_str_list_equal.back(), " ").back();
                     } else {
@@ -117,13 +114,15 @@ auto getConfig() {
                     }
                 }
             } else {
+                const auto tmp_str_list = string_split(tmp_str, ":");
                 const auto tmp_str_list1 = string_split(tmp_str_list[1], " ");
-
                 meta_map[query_keys.back()][tmp_str_list[0]] = tmp_str_list1[0];
 
-                if (query_keys.size() == 3) {
+                if (query_keys.back() == "Architecture") {
+                    const std::string prefix_sub = "NXKokkosX";
                     std::string sub = tmp_str_list1[0].substr(
-                        9, tmp_str_list1[0].size() - 10);
+                        prefix_sub.size(),
+                        tmp_str_list1[0].size() - prefix_sub.size() - 1);
                     if (sub == "Serial") {
                         meta_map["Backend"]["Serial"] = "yes";
                     } else {
