@@ -13,6 +13,7 @@
  >>> dev.kokkos_config["Backend"]
  {'Parallel': 'OpenMP'}
  ```
+ [(#14)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/14)
 
  * Add AMD GPU wheels building with HIP backend for lightning.kokkos in workflows.
  [(#21)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/21)
