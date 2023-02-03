@@ -62,117 +62,79 @@ bool is_substr(const std::string &substr, const std::string &str) {
  *std::unordered_map<std::string, std::string>> type.
  * */
 auto getConfig() {
+    using value_map = std::unordered_map<std::string, std::string>;
+    using category_map = std::unordered_map<std::string, value_map>;
 
     std::ostringstream buffer;
-
     Kokkos::print_configuration(buffer, true);
-
     const std::string bufferstr(buffer.str());
-
     const auto str_list = string_split(bufferstr, "\n");
 
     std::vector<std::string> query_keys;
-
-    using value_map = std::unordered_map<std::string, std::string>;
-
-    using category_map = std::unordered_map<std::string, value_map>;
-
     std::size_t num_devices = 0;
-
     category_map meta_map;
 
-    for (std::size_t i = 0; i < str_list.size(); i++) {
+    // Kokkos version
+    const std::string tmp_str0 = str_list[0];
+    const auto tmp_str_list0 = string_split(tmp_str0, ":");
+    const auto tmp_str_list01 = string_split(tmp_str_list0[1], " ");
+    meta_map[tmp_str_list0[0]][tmp_str_list0[0]] = tmp_str_list01[0];
+    query_keys.push_back(tmp_str_list0[0]);
+
+    for (std::size_t i = 1; i < str_list.size(); i++) {
 
         const std::string tmp_str = str_list[i];
-
         const auto tmp_str_list = string_split(tmp_str, ":");
-        const auto tmp_str_list_equal = string_split(tmp_str, "=");
 
-        if (i == 0) {
-            const auto tmp_str_list1 = string_split(tmp_str_list[1], " ");
-            meta_map[tmp_str_list[0]][tmp_str_list[0]] = tmp_str_list1[0];
+        // Current string or line only contains a key of category_map.
+        if (tmp_str_list.size() == 1) {
+            // Append key to the back of the query_keys vector.
             query_keys.push_back(tmp_str_list[0]);
+
+            if (query_keys.size() > 7 &&
+                query_keys.back() == "Serial Runtime Configuration") {
+                meta_map[query_keys.back()]["Serial"] = "yes";
+            }
         } else {
-            // Current string or line only contains a key of category_map.
-            if (tmp_str_list.size() == 1 && tmp_str_list_equal.size() == 1) {
-                // Append key to the back of the query_keys vector.
-                query_keys.push_back(tmp_str_list[0]);
-                const std::string runtime_substr =
-                    "Serial Runtime Configuration";
-                if (is_substr(runtime_substr, query_keys.back())) {
-                    meta_map[query_keys.back()]["Serial"] = "yes";
+            if (query_keys.size() > 7 &&
+                is_substr("Runtime Configuration", query_keys.back())) {
+
+                std::string backend = meta_map["Backend"]["Parallel"];
+
+                if (backend == "OpenMP") {
+                    meta_map[query_keys.back()]["OpenMP"] = tmp_str;
+                } else {
+
+                    if (is_substr("KOKKOS_ENABLE_", tmp_str)) {
+                        meta_map[query_keys.back()]
+                                ["KOKKOS_ENABLE_" + backend] = "defined";
+                    } else if (is_substr("_VERSION", tmp_str)) {
+                        const auto tmp_str_list0 = string_split(tmp_str, " ");
+                        meta_map[query_keys.back()][backend + "_VERSION"] =
+                            tmp_str.back();
+                    } else { //(is_substr("Kokkos", tmp_str)) {
+                        std::string device_id = std::to_string(num_devices);
+                        device_id.append("th device");
+                        meta_map[query_keys.back()][device_id] = tmp_str;
+                        num_devices++;
+                    }
                 }
             } else {
-                const std::string substr = "KOKKOS_ENABLE";
-                const std::string runtime_substr = "Runtime Configuration";
-                if (is_substr(runtime_substr, query_keys.back())) {
-                    if (is_substr("Cuda", query_keys.back())) {
-                        if (is_substr("KOKKOS_ENABLE_CUDA", tmp_str)) {
-                            meta_map[query_keys.back()]["KOKKOS_ENABLE_CUDA"] =
-                                "defined";
-                        }
-                        if (is_substr("CUDA_VERSION", tmp_str)) {
-                            const auto tmp_str_list0 =
-                                string_split(tmp_str, " ");
-                            meta_map[query_keys.back()]["CUDA_VERSION"] =
-                                tmp_str.back();
-                        }
-                        if (is_substr("Kokkos", tmp_str)) {
-                            std::string device_id = std::to_string(num_devices);
-                            device_id.append("th device");
-                            meta_map[query_keys.back()][device_id] = tmp_str;
-                            num_devices++;
-                        }
-                    } else if (is_substr("OpenMP", query_keys.back())) {
-                        meta_map[query_keys.back()]["OpenMP"] = tmp_str;
-                    } else if (query_keys.back() == "Runtime Configuration") {
-                        if (is_substr("KOKKOS_ENABLE_HIP", tmp_str)) {
-                            meta_map[query_keys.back()]["KOKKOS_ENABLE_HIP"] =
-                                "defined";
-                        }
-                        if (is_substr("HIP_VERSION", tmp_str)) {
-                            const auto tmp_str_list0 =
-                                string_split(tmp_str, " ");
-                            meta_map[query_keys.back()]["HIP_VERSION"] =
-                                tmp_str.back();
-                        }
-                        if (is_substr("Kokkos", tmp_str)) {
-                            std::string device_id = std::to_string(num_devices);
-                            device_id.append("th device");
-                            meta_map[query_keys.back()][device_id] = tmp_str;
-                            num_devices++;
-                        }
+                const auto tmp_str_list1 = string_split(tmp_str_list[1], " ");
+
+                meta_map[query_keys.back()][tmp_str_list[0]] = tmp_str_list1[0];
+
+                if (query_keys.size() == 3) {
+                    std::string sub = tmp_str_list1[0].substr(
+                        9, tmp_str_list1[0].size() - 10);
+                    if (sub == "Serial") {
+                        meta_map["Backend"]["Serial"] = "yes";
+                    } else {
+                        meta_map["Backend"]["Parallel"] = sub;
                     }
-
-                } else if (is_substr(substr, tmp_str_list[0])) { // remove space
-                    const auto tmp_str_list0 =
-                        string_split(tmp_str_list[0], " ");
-
-                    const auto tmp_str_list1 =
-                        string_split(tmp_str_list[1], " ");
-                    meta_map[query_keys.back()][tmp_str_list0[0]] =
-                        tmp_str_list1[0];
-                } else {
-                    const auto tmp_str_list1 =
-                        string_split(tmp_str_list[1], " ");
-
-                    meta_map[query_keys.back()][tmp_str_list[0]] =
-                        tmp_str_list1[0];
                 }
             }
         }
-    }
-
-    auto backend_str = meta_map["Architecture"]["Default Device"];
-
-    if (is_substr("Serial", backend_str)) {
-        meta_map["Backend"]["Serial"] = "yes";
-    } else if (is_substr("OpenMP", backend_str)) {
-        meta_map["Backend"]["Parallel"] = "OpenMP";
-    } else if (is_substr("Cuda", backend_str)) {
-        meta_map["Backend"]["Parallel"] = "CUDA";
-    } else {
-        meta_map["Backend"]["Parallel"] = "HIP";
     }
 
     return meta_map;
