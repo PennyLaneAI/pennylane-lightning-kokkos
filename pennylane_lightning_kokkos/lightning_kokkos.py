@@ -153,6 +153,7 @@ if CPP_BINARY_AVAILABLE:
         version = __version__
         author = "Xanadu Inc."
         _CPP_BINARY_AVAILABLE = True
+        kokkos_config = {}
 
         operations = allowed_operations
         observables = {
