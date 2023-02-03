@@ -92,9 +92,12 @@ if not os.getenv("READTHEDOCS"):
                 self.arch = os.getenv("ARCH")
 
             if self.backend:
-                configure_args.append(f"-DKokkos_ENABLE_{self.backend}=ON")
-            if self.arch:
-                configure_args.append(f"-DKokkos_ARCH_{self.arch}=ON")
+                if self.backend in self.backends:
+                    configure_args.append(f"-DKokkos_ENABLE_{self.backend}=ON")
+                else:
+                    raise RuntimeError(f"Unsupported backend: '{self.backend}'")
+                if self.arch:
+                    configure_args.append(f"-DKokkos_ARCH_{self.arch}=ON")
 
             # Add more platform dependent options
             if platform.system() == "Darwin":
