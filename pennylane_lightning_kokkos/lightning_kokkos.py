@@ -17,7 +17,7 @@ interfaces with Kokkos-enabled calculations to run efficiently on different kind
 hardware systems, such as AMD and Nvidia GPUs, or many-core CPUs. 
 """
 from warnings import warn
-
+import re
 import numpy as np
 from pennylane import (
     math,
@@ -48,6 +48,7 @@ from .lightning_kokkos_qubit_ops import LightningKokkos_C128
 from .lightning_kokkos_qubit_ops import LightningKokkos_C64
 from .lightning_kokkos_qubit_ops import AdjointJacobianKokkos_C128
 from .lightning_kokkos_qubit_ops import AdjointJacobianKokkos_C64
+from .lightning_kokkos_qubit_ops import kokkos_config_info
 
 from ._serialize import _serialize_obs, _serialize_ops
 
@@ -56,6 +57,15 @@ def _kokkos_dtype(dtype):
     if dtype not in [np.complex128, np.complex64]:
         raise ValueError(f"Data type is not supported for state-vector computation: {dtype}")
     return LightningKokkos_C128 if dtype == np.complex128 else LightningKokkos_C64
+
+
+def _kokkos_configuration():
+    config_info = kokkos_config_info()
+    for key in config_info.keys():
+        if "Runtime Configuration" in key:
+            for sub_key, value in config_info[key].items():
+                config_info[key][sub_key] = re.sub("\x00", ":", value)
+    return config_info
 
 
 class LightningKokkos(LightningQubit):
@@ -74,6 +84,7 @@ class LightningKokkos(LightningQubit):
     version = __version__
     author = "Xanadu Inc."
     _CPP_BINARY_AVAILABLE = True
+    kokkos_config = {}
 
     observables = {
         "PauliX",
@@ -103,6 +114,8 @@ class LightningKokkos(LightningQubit):
         else:
             raise TypeError("Argument kokkos_args must be of type InitArguments.")
         self._sync = sync
+        if not LightningKokkos.kokkos_config:
+            LightningKokkos.kokkos_config = _kokkos_configuration()
 
     def reset(self):
         super().reset()
