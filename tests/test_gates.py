@@ -83,6 +83,13 @@ def test_gate_unitary_correct(op, op_name):
 
     if op_name in ("BasisState", "QubitStateVector"):
         pytest.skip("Skipping operation because it is a state preparation")
+    if op_name in (
+        "ControlledQubitUnitary",
+        "QubitUnitary",
+        "MultiControlledX",
+        "DiagonalQubitUnitary",
+    ):
+        pytest.skip("Skipping operation.")  # These are tested in the device test-suite
     if op == None:
         pytest.skip("Skipping operation.")
 
@@ -114,6 +121,13 @@ def test_inverse_unitary_correct(op, op_name):
 
     if op_name in ("BasisState", "QubitStateVector"):
         pytest.skip("Skipping operation because it is a state preparation")
+    if op_name in (
+        "ControlledQubitUnitary",
+        "QubitUnitary",
+        "MultiControlledX",
+        "DiagonalQubitUnitary",
+    ):
+        pytest.skip("Skipping operation.")  # These are tested in the device test-suite
     if op == None:
         pytest.skip("Skipping operation.")
 
