@@ -85,34 +85,31 @@ auto getConfig() {
 
         const std::string tmp_str = str_list[i];
         const auto tmp_str_list = string_split(tmp_str, ":");
+        const auto tmp_str_list_equal = string_split(tmp_str, "=");
 
         // Current string or line only contains a key of category_map.
-        if (tmp_str_list.size() == 1) {
+        if (tmp_str_list.size() == 1 && tmp_str_list_equal.size() == 1) {
             // Append key to the back of the query_keys vector.
             query_keys.push_back(tmp_str_list[0]);
 
-            if (query_keys.size() > 7 &&
-                query_keys.back() == "Serial Runtime Configuration") {
+            if (query_keys.back() == "Serial Runtime Configuration") {
                 meta_map[query_keys.back()]["Serial"] = "yes";
             }
         } else {
-            if (query_keys.size() > 7 &&
-                is_substr("Runtime Configuration", query_keys.back())) {
+            if (query_keys.size() > 7) {
 
-                std::string backend = meta_map["Backend"]["Parallel"];
-
-                if (backend == "OpenMP") {
+                if (query_keys.back() == "OpenMP Runtime Configuration") {
                     meta_map[query_keys.back()]["OpenMP"] = tmp_str;
-                } else {
-
-                    if (is_substr("KOKKOS_ENABLE_", tmp_str)) {
+                } else if (query_keys.back() == "Cuda Runtime Configuration" ||
+                           query_keys.back() == "Runtime Configuration") {
+                    std::string backend = meta_map["Backend"]["Parallel"];
+                    if (is_substr("KOKKOS_ENABLE_" + backend, tmp_str)) {
                         meta_map[query_keys.back()]
                                 ["KOKKOS_ENABLE_" + backend] = "defined";
-                    } else if (is_substr("_VERSION", tmp_str)) {
-                        const auto tmp_str_list0 = string_split(tmp_str, " ");
+                    } else if (is_substr(backend + "_VERSION", tmp_str)) {
                         meta_map[query_keys.back()][backend + "_VERSION"] =
-                            tmp_str.back();
-                    } else { //(is_substr("Kokkos", tmp_str)) {
+                            string_split(tmp_str_list_equal.back(), " ").back();
+                    } else {
                         std::string device_id = std::to_string(num_devices);
                         device_id.append("th device");
                         meta_map[query_keys.back()][device_id] = tmp_str;
@@ -130,6 +127,8 @@ auto getConfig() {
                     if (sub == "Serial") {
                         meta_map["Backend"]["Serial"] = "yes";
                     } else {
+                        std::transform(sub.begin(), sub.end(), sub.begin(),
+                                       ::toupper);
                         meta_map["Backend"]["Parallel"] = sub;
                     }
                 }

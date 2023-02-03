@@ -115,7 +115,7 @@ TEMPLATE_TEST_CASE("Bindings::getConfig", "[Backend Info]", float) {
                             CHECK(config_info[category][key] == "yes");
                         } else if (key == "Parallel") {
                             std::vector<std::string> backend_list = {
-                                "OpenMP", "HIP", "CUDA"};
+                                "OPENMP", "HIP", "CUDA"};
                             bool is_found =
                                 std::find(backend_list.begin(),
                                           backend_list.end(),

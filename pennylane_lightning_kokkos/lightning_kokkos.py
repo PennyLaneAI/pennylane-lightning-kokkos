@@ -62,10 +62,8 @@ def _kokkos_configuration():
     config_info = kokkos_config_info()
     for key in config_info.keys():
         if "Runtime Configuration" in key:
-            for sub_key in config_info[key].keys():
-                value = config_info[key][sub_key]
-                res = re.sub("\x00", ":", value)
-                config_info[key][sub_key] = res
+            for sub_key, value in config_info[key].items():
+                config_info[key][sub_key] = re.sub("\x00", ":", value)
     return config_info
 
 

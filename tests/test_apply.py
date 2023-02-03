@@ -378,7 +378,7 @@ class TestLightningKokkosIntegration:
                             assert config_info[category][key] == "yes"
                         elif key == "Parallel":
                             assert config_info[category][key] in [
-                                "OpenMP",
+                                "OPENMP",
                                 "HIP",
                                 "CUDA",
                             ]  # Need check for HIP & CUDA
