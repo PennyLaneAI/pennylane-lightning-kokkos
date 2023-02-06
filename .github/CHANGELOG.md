@@ -29,6 +29,9 @@
 
 ### Bug fixes
 
+* Fix the CI X86-64 Linux wheels building.
+[(#36)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/36)
+
 ### Contributors
 
 This release contains contributions from (in alphabetical order):
