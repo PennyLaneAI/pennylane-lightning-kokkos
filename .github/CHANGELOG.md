@@ -32,6 +32,9 @@
 
 ### Bug fixes
 
+* Fix the CI environment variables for building wheels with the OpenMP backend.
+[(#36)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/36)
+
 ### Contributors
 
 This release contains contributions from (in alphabetical order):
