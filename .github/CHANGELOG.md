@@ -25,6 +25,9 @@
 * Remove explicit Numpy requirement.
 [(#35)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/35)
 
+* Add Kokkos::InitArguments support.
+[(#17)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/17)
+
 ### Documentation
 
 ### Bug fixes
@@ -33,10 +36,9 @@
 
 This release contains contributions from (in alphabetical order):
 
-Amintor Dusko, Shuli Shu
+Amintor Dusko, Vincent Michaud-Rioux, Shuli Shu
 
 ---
-
 
 # Release 0.28.0
 
@@ -72,6 +74,7 @@ This release contains contributions from (in alphabetical order):
 Amintor Dusko, Lee J. O'Riordan, Shuli Shu, Matthew Silverman
 
 --
+
 # Release 0.27.0
 
 ### New features since last release

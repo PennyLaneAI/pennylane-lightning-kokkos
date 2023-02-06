@@ -43,6 +43,7 @@ import pennylane as qml
 from ._version import __version__
 
 # try:
+from .lightning_kokkos_qubit_ops import InitArguments
 from .lightning_kokkos_qubit_ops import LightningKokkos_C128
 from .lightning_kokkos_qubit_ops import LightningKokkos_C64
 from .lightning_kokkos_qubit_ops import AdjointJacobianKokkos_C128
@@ -74,6 +75,7 @@ class LightningKokkos(LightningQubit):
         wires (int): the number of wires to initialize the device with
         sync (bool): immediately sync with host-sv after applying operations
         c_dtype: Datatypes for statevector representation. Must be one of ``np.complex64`` or ``np.complex128``.
+        kokkos_args (InitArguments): binding for Kokkos::InitArguments (threading parameters).
     """
 
     name = "PennyLane plugin for Kokkos-backed Lightning device"
@@ -94,9 +96,23 @@ class LightningKokkos(LightningQubit):
         "Identity",
     }
 
-    def __init__(self, wires, *, sync=True, c_dtype=np.complex128, shots=None, batch_obs=False):
+    def __init__(
+        self,
+        wires,
+        *,
+        sync=True,
+        c_dtype=np.complex128,
+        shots=None,
+        batch_obs=False,
+        kokkos_args=None,
+    ):
         super().__init__(wires, c_dtype=c_dtype, shots=shots)
-        self._kokkos_state = _kokkos_dtype(self._state.dtype)(self._state)
+        if kokkos_args is None:
+            self._kokkos_state = _kokkos_dtype(self._state.dtype)(self._state)
+        elif isinstance(kokkos_args, InitArguments):
+            self._kokkos_state = _kokkos_dtype(self._state.dtype)(self._state, kokkos_args)
+        else:
+            raise TypeError("Argument kokkos_args must be of type InitArguments.")
         self._sync = sync
         if not LightningKokkos.kokkos_config:
             LightningKokkos.kokkos_config = _kokkos_configuration()
