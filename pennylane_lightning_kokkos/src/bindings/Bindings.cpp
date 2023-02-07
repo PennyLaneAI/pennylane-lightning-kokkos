@@ -59,6 +59,9 @@ void StateVectorKokkos_class_bindings(py::module &m) {
     std::string class_name = "LightningKokkos_C" + bitsize;
 
     py::class_<StateVectorKokkos<PrecisionT>>(m, class_name.c_str())
+        .def(py::init([](std::size_t num_qubits) {
+            return new StateVectorKokkos<PrecisionT>(num_qubits);
+        }))
         .def(py::init([](std::size_t num_qubits,
                          const Kokkos::InitArguments &kokkos_args) {
             return new StateVectorKokkos<PrecisionT>(num_qubits, kokkos_args);
