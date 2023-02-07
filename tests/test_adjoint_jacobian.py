@@ -22,6 +22,7 @@ from pennylane import numpy as np
 from pennylane import QNode, qnode
 from scipy.stats import unitary_group
 import pennylane_lightning_kokkos as plk
+from pennylane_lightning_kokkos.lightning_kokkos_qubit_ops import InitArguments
 
 from pennylane import (
     QuantumFunctionError,
@@ -75,9 +76,12 @@ class TestAdjointJacobian:
     from pennylane_lightning_kokkos import LightningKokkos as lg
     from pennylane_lightning import LightningQubit as lq
 
-    @pytest.fixture
-    def dev_kokkos(self):
-        return qml.device("lightning.kokkos", wires=3)
+    @pytest.fixture(params=[None, InitArguments(2)])
+    def dev_kokkos(self, request):
+        if request.param is None:
+            return qml.device("lightning.kokkos", wires=3)
+        else:
+            return qml.device("lightning.kokkos", wires=3, kokkos_args=request.param)
 
     @pytest.fixture
     def dev_cpu(self):

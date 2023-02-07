@@ -59,8 +59,9 @@ void StateVectorKokkos_class_bindings(py::module &m) {
     std::string class_name = "LightningKokkos_C" + bitsize;
 
     py::class_<StateVectorKokkos<PrecisionT>>(m, class_name.c_str())
-        .def(py::init([](std::size_t num_qubits) {
-            return new StateVectorKokkos<PrecisionT>(num_qubits);
+        .def(py::init([](std::size_t num_qubits,
+                         const Kokkos::InitArguments &kokkos_args) {
+            return new StateVectorKokkos<PrecisionT>(num_qubits, kokkos_args);
         }))
         .def(py::init([](const np_arr_c &arr) {
             py::buffer_info numpyArrayInfo = arr.request();
@@ -68,6 +69,14 @@ void StateVectorKokkos_class_bindings(py::module &m) {
                 static_cast<Kokkos::complex<PrecisionT> *>(numpyArrayInfo.ptr);
             return new StateVectorKokkos<PrecisionT>(
                 data_ptr, static_cast<std::size_t>(arr.size()));
+        }))
+        .def(py::init([](const np_arr_c &arr,
+                         const Kokkos::InitArguments &kokkos_args) {
+            py::buffer_info numpyArrayInfo = arr.request();
+            auto *data_ptr =
+                static_cast<Kokkos::complex<PrecisionT> *>(numpyArrayInfo.ptr);
+            return new StateVectorKokkos<PrecisionT>(
+                data_ptr, static_cast<std::size_t>(arr.size()), kokkos_args);
         }))
         .def(
             "setBasisState",
@@ -760,6 +769,23 @@ PYBIND11_MODULE(lightning_kokkos_qubit_ops, // NOLINT: No control over
     m.def("kokkos_start", []() { Kokkos::initialize(); });
     m.def("kokkos_end", []() { Kokkos::finalize(); });
     m.def("kokkos_config_info", &getConfig, "Kokkos configurations query.");
+
+    py::class_<Kokkos::InitArguments>(m, "InitArguments")
+        .def(py::init<>())
+        .def(py::init<const int &>())
+        .def_readwrite("num_threads", &Kokkos::InitArguments::num_threads)
+        .def_readwrite("num_numa", &Kokkos::InitArguments::num_numa)
+        .def_readwrite("device_id", &Kokkos::InitArguments::device_id)
+        .def_readwrite("ndevices", &Kokkos::InitArguments::ndevices)
+        .def_readwrite("skip_device", &Kokkos::InitArguments::skip_device)
+        .def_readwrite("disable_warnings",
+                       &Kokkos::InitArguments::disable_warnings)
+        .def("__repr__", [](const Kokkos::InitArguments &args) {
+            using namespace Pennylane::Util;
+            std::ostringstream args_stream;
+            args_stream << args;
+            return args_stream.str();
+        });
 }
 }
 

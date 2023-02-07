@@ -48,6 +48,7 @@ from ._version import __version__
 
 try:
     from .lightning_kokkos_qubit_ops import (
+        InitArguments,
         LightningKokkos_C128,
         LightningKokkos_C64,
         AdjointJacobianKokkos_C128,
@@ -146,6 +147,7 @@ if CPP_BINARY_AVAILABLE:
             wires (int): the number of wires to initialize the device with
             sync (bool): immediately sync with host-sv after applying operations
             c_dtype: Datatypes for statevector representation. Must be one of ``np.complex64`` or ``np.complex128``.
+            kokkos_args (InitArguments): binding for Kokkos::InitArguments (threading parameters).
         """
 
         name = "PennyLane plugin for Kokkos-backed Lightning device"
@@ -167,7 +169,16 @@ if CPP_BINARY_AVAILABLE:
             "Identity",
         }
 
-        def __init__(self, wires, *, sync=True, c_dtype=np.complex128, shots=None, batch_obs=False):
+        def __init__(
+            self,
+            wires,
+            *,
+            sync=True,
+            c_dtype=np.complex128,
+            shots=None,
+            batch_obs=False,
+            kokkos_args=None,
+        ):
             if c_dtype is np.complex64:
                 r_dtype = np.float32
                 self.use_csingle = True
@@ -177,8 +188,12 @@ if CPP_BINARY_AVAILABLE:
             else:
                 raise TypeError(f"Unsupported complex Type: {c_dtype}")
             super().__init__(wires, shots=shots, r_dtype=r_dtype, c_dtype=c_dtype)
-
-            self._kokkos_state = _kokkos_dtype(c_dtype)(self.num_wires)
+            if kokkos_args is None:
+                self._kokkos_state = _kokkos_dtype(c_dtype)(self.num_wires)
+            elif isinstance(kokkos_args, InitArguments):
+                self._kokkos_state = _kokkos_dtype(c_dtype)(self.num_wires, kokkos_args)
+            else:
+                raise TypeError("Argument kokkos_args must be of type InitArguments.")
             self._sync = sync
 
             if not LightningKokkos.kokkos_config:

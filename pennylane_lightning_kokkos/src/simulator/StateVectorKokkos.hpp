@@ -126,7 +126,7 @@ template <class Precision> class StateVectorKokkos {
                      Kokkos::MemoryTraits<Kokkos::Unmanaged>>;
 
     StateVectorKokkos() = delete;
-    StateVectorKokkos(size_t num_qubits)
+    StateVectorKokkos(size_t num_qubits, const Kokkos::InitArguments &kokkos_args = {})
         : gates_{
                 //Identity
                  {"PauliX", 
@@ -485,7 +485,7 @@ template <class Precision> class StateVectorKokkos {
         {
             const std::lock_guard<std::mutex> lock(counts_mutex_);
             if (counts_ == 0 and !Kokkos::is_initialized()) {
-                Kokkos::initialize();
+                Kokkos::initialize(kokkos_args);
             }
             counts_++;
         }
@@ -608,8 +608,9 @@ template <class Precision> class StateVectorKokkos {
      *
      * @param num_qubits Number of qubits
      */
-    StateVectorKokkos(Kokkos::complex<Precision> *hostdata_, size_t length)
-        : StateVectorKokkos(Util::log2(length)) {
+    StateVectorKokkos(Kokkos::complex<Precision> *hostdata_, size_t length,
+                      const Kokkos::InitArguments &kokkos_args = {})
+        : StateVectorKokkos(Util::log2(length), kokkos_args) {
         HostToDevice(hostdata_, length);
     }
 
@@ -618,8 +619,9 @@ template <class Precision> class StateVectorKokkos {
      *
      * @param other Another state vector
      */
-    StateVectorKokkos(const StateVectorKokkos &other)
-        : StateVectorKokkos(other.getNumQubits()) {
+    StateVectorKokkos(const StateVectorKokkos &other,
+                      const Kokkos::InitArguments &kokkos_args = {})
+        : StateVectorKokkos(other.getNumQubits(), kokkos_args) {
         this->DeviceToDevice(other.getData());
     }
 
