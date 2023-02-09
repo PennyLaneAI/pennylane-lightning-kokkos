@@ -26,6 +26,7 @@ from pennylane import (
 )
 from pennylane.grouping import is_pauli_word
 from pennylane.operation import Observable, Tensor
+from pennylane.ops.op_math.adjoint import Adjoint
 from pennylane.tape import QuantumTape
 
 # Remove after the next release of PL
@@ -153,7 +154,7 @@ def _serialize_ops(
             op_list = [o]
 
         for single_op in op_list:
-            is_inverse = single_op.inverse
+            is_inverse = isinstance(single_op, Adjoint)
 
             name = single_op.name if not is_inverse else single_op.name[:-4]
             names.append(name)
