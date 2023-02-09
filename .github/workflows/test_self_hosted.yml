@@ -1,0 +1,17 @@
+name: Test Self-Hosted
+on:
+  push:
+    branches:
+      - self-hosted-test
+
+jobs:
+  test:
+    runs-on:
+      - self-hosted
+      - ubuntu-22.04
+      - gpu
+
+    steps:
+      - run: |
+          nvidia-smi
+          echo "Hello World!"
