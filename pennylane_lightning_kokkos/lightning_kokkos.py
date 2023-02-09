@@ -37,6 +37,7 @@ from pennylane import (
 )
 from pennylane_lightning import LightningQubit
 from pennylane.operation import Tensor, Operation
+from pennylane.ops.op_math import Adjoint
 from pennylane.measurements import Expectation
 from pennylane.wires import Wires
 
@@ -364,15 +365,19 @@ if CPP_BINARY_AVAILABLE:
         def _apply_unitary():
             pass
 
-        def apply_cq(self, operations, **kwargs):
+        def apply_kokkos(self, operations, **kwargs):
             # Skip over identity operations instead of performing
             # matrix multiplication with the identity.
             skipped_ops = ["Identity"]
+            invert_param = False
 
             for o in operations:
                 if o.base_name in skipped_ops:
                     continue
-                name = o.name.split(".")[0]  # The split is because inverse gates have .inv appended
+                name = o.name
+                if isinstance(o, Adjoint):
+                    name = o.base.name
+                    invert_param = True
                 method = getattr(self._kokkos_state, name, None)
 
                 wires = self.wires.indices(o.wires)
@@ -396,9 +401,8 @@ if CPP_BINARY_AVAILABLE:
                     )  # Parameters can be ignored for explicit matrices; F-order for cuQuantum
 
                 else:
-                    inv = o.inverse
                     param = o.parameters
-                    method(wires, inv, param)
+                    method(wires, invert_param, param)
 
         def apply(self, operations, **kwargs):
             # State preparation is currently done in Python
@@ -419,7 +423,7 @@ if CPP_BINARY_AVAILABLE:
                         "applied on a {} device.".format(operation.name, self.short_name)
                     )
 
-            self.apply_cq(operations)
+            self.apply_kokkos(operations)
 
         def generate_samples(self):
             """Generate samples
