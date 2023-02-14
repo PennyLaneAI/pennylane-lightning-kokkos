@@ -38,23 +38,21 @@ jobs:
         run: |
           sudo apt-get update && sudo apt-get -y -q install gcc-${{ env.GCC_VERSION }} g++-${{ env.GCC_VERSION }} gcovr lcov
           python -m pip install ninja cmake~=3.24.3
-      - name: Checkout pennyLane-lightning-kokkos
+      - name: Checkout PennyLane-Lightning-Kokkos
         uses: actions/checkout@v3
 
       - name: Validate GPU version and installed compiler
         run: |
           nvidia-smi
-          /usr/local/cuda/bin/nvcc --version
+          /usr/local/cuda-11.8/bin/nvcc --version
       - name: Build and run unit tests
         run: |
+            export PATH=/usr/local/cuda-11.8/bin:$PATH
+            export LD_LIBRARY_PATH=/usr/local/cuda-11.8/lib64:$LD_LIBRARY_PATH
             cmake . -BBuild \
               -DKokkos_ENABLE_CUDA=ON \
-              -DKokkos_ARCH_AMPERE86=ON \ 
+              -DKokkos_ENABLE_SERIAL=ON \
               -DPLKOKKOS_BUILD_TESTS=ON \
-              -DPLKOKKOS_ENABLE_SANITIZER=ON \
-              -DCMAKE_CXX_COMPILER="$(which g++-${{ env.GCC_VERSION }})" \
-              -DCMAKE_CUDA_COMPILER="/usr/local/cuda/bin/nvcc" \
-              -DCMAKE_CUDA_ARCHITECTURES="86" \
               -G Ninja
             cmake --build ./Build
             ./Build/pennylane_lightning_kokkos/src/tests/runner_kokkos
@@ -93,13 +91,13 @@ jobs:
 
       - name: Build and install package
         run: |
-          python setup.py build_ext -i --define="CMAKE_CXX_COMPILER=$(which g++-${{ env.GCC_VERSION }});LIGHTNING_RELEASE_TAG=master;CMAKE_CUDA_COMPILER=/usr/local/cuda/bin/nvcc;CMAKE_CUDA_ARCHITECTURES=${{ env.CI_CUDA_ARCH }}"
-          python -m pip install -e .
+          export PATH=/usr/local/cuda-11.8/bin:$PATH
+          export LD_LIBRARY_PATH=/usr/local/cuda-11.8/lib64:$LD_LIBRARY_PATH
+          BACKEND="CUDA" python -m pip install -e .
       - name: Run PennyLane-Lightning-Kokkos unit tests
         run: |
           pytest ./tests/
           pl-device-test --device lightning.kokkos
-
       - name: Cleanup
         if: always()
         run: |
