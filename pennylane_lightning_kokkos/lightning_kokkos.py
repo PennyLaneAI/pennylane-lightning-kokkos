@@ -289,7 +289,7 @@ class LightningKokkos(LightningQubit):
 
     def sample(self, observable, shot_range=None, bin_size=None, counts=False):
         if observable.name != "PauliZ":
-            self.apply_cq(observable.diagonalizing_gates())
+            self.apply_kokkos(observable.diagonalizing_gates())
             self._samples = self.generate_samples()
         return super().sample(observable, shot_range=shot_range, bin_size=bin_size, counts=counts)
 
