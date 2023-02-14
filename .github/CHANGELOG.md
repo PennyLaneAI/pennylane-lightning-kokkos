@@ -31,6 +31,9 @@
 * Add Kokkos::InitArguments support.
 [(#17)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/17)
 
+* Add support for CI checks.
+[(#37)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/37)
+
 ### Documentation
 
 ### Bug fixes
