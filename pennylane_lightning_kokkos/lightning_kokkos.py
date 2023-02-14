@@ -291,9 +291,7 @@ class LightningKokkos(LightningQubit):
         if observable.name != "PauliZ":
             self.apply_cq(observable.diagonalizing_gates())
             self._samples = self.generate_samples()
-        return super().sample(
-            observable, shot_range=shot_range, bin_size=bin_size, counts=counts
-        )
+        return super().sample(observable, shot_range=shot_range, bin_size=bin_size, counts=counts)
 
     def expval(self, observable, shot_range=None, bin_size=None):
         if observable.name in [
