@@ -53,6 +53,7 @@ jobs:
               -DKokkos_ENABLE_CUDA=ON \
               -DKokkos_ENABLE_SERIAL=ON \
               -DPLKOKKOS_BUILD_TESTS=ON \
+              -DPLKOKKOS_ENABLE_SANITIZER=ON \
               -G Ninja
             cmake --build ./Build
             ./Build/pennylane_lightning_kokkos/src/tests/runner_kokkos
