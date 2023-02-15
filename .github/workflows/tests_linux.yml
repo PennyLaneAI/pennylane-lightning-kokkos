@@ -81,7 +81,7 @@ jobs:
           cd main/
           pytest tests/
           pl-device-test --device lightning.kokkos --skip-ops --shots=20000
-          pl-device-test --device lightning.kokkos --shots=None --skip-ops
+          pl-device-test --device lightning.kokkos --skip-ops --shots=None
   cpptests_serial:
     name: C++ tests (Linux) for Serial Kokkos backend
     runs-on: ${{ matrix.os }}
@@ -149,4 +149,4 @@ jobs:
           cd main/
           pytest tests/
           pl-device-test --device lightning.kokkos --skip-ops --shots=20000
-          pl-device-test --device lightning.kokkos --shots=None --skip-ops
+          pl-device-test --device lightning.kokkos --skip-ops --shots=None
