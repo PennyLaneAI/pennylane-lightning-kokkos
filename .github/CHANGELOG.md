@@ -37,7 +37,6 @@
 * Added native support for expval(H) in adjoint method.
 [(#32)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/32)
 
-
 ### Documentation
 
 ### Bug fixes
