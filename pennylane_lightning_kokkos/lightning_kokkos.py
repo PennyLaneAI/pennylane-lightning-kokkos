@@ -75,7 +75,6 @@ except (ModuleNotFoundError, ImportError, ValueError, PLException) as e:
     CPP_BINARY_AVAILABLE = False
 
 
-
 def _kokkos_dtype(dtype):
     if dtype not in [np.complex128, np.complex64]:
         raise ValueError(f"Data type is not supported for state-vector computation: {dtype}")
@@ -161,6 +160,7 @@ if CPP_BINARY_AVAILABLE:
             c_dtype: Datatypes for statevector representation. Must be one of ``np.complex64`` or ``np.complex128``.
             kokkos_args (InitArguments): binding for Kokkos::InitArguments (threading parameters).
         """
+
         name = "PennyLane plugin for Kokkos-backed Lightning device"
         short_name = "lightning.kokkos"
         pennylane_requires = ">=0.26"
