@@ -1,4 +1,5 @@
 #pragma once
+#include "ObservablesKokkos.hpp"
 #include "StateVectorKokkos.hpp"
 #include <Kokkos_Core.hpp>
 #include <variant>
@@ -10,7 +11,6 @@ template <class Precision> struct getImagOfComplexInnerProductFunctor {
 
     Kokkos::View<Kokkos::complex<Precision> *> sv1;
     Kokkos::View<Kokkos::complex<Precision> *> sv2;
-    using value_type = Precision;
 
     getImagOfComplexInnerProductFunctor(
         Kokkos::View<Kokkos::complex<Precision> *> sv1_,
@@ -199,76 +199,6 @@ template <class T> class OpsData {
 };
 
 /**
- * @brief Utility struct for observable operations used by AdjointJacobianKokkos
- * class.
- *
- */
-template <class T = double> class ObsDatum {
-  public:
-    /**
-     * @brief Variant type of stored parameter data.
-     */
-    using param_var_t = std::variant<std::monostate, std::vector<T>,
-                                     std::vector<std::complex<T>>>;
-
-    /**
-     * @brief Copy constructor for an ObsDatum object, representing a given
-     * observable.
-     *
-     * @param obs_name Name of each operation of the observable. Tensor product
-     * observables have more than one operation.
-     * @param obs_params Parameters for a given observable operation ({} if
-     * optional).
-     * @param obs_wires Wires upon which to apply operation. Each observable
-     * operation will be a separate nested list.
-     */
-    ObsDatum(std::vector<std::string> obs_name,
-             std::vector<param_var_t> obs_params,
-             std::vector<std::vector<size_t>> obs_wires)
-        : obs_name_{std::move(obs_name)},
-          obs_params_(std::move(obs_params)), obs_wires_{
-                                                  std::move(obs_wires)} {};
-
-    /**
-     * @brief Get the number of operations in observable.
-     *
-     * @return size_t
-     */
-    [[nodiscard]] auto getSize() const -> size_t { return obs_name_.size(); }
-    /**
-     * @brief Get the name of the observable operations.
-     *
-     * @return const std::vector<std::string>&
-     */
-    [[nodiscard]] auto getObsName() const -> const std::vector<std::string> & {
-        return obs_name_;
-    }
-    /**
-     * @brief Get the parameters for the observable operations.
-     *
-     * @return const std::vector<std::vector<T>>&
-     */
-    [[nodiscard]] auto getObsParams() const
-        -> const std::vector<param_var_t> & {
-        return obs_params_;
-    }
-    /**
-     * @brief Get the wires for each observable operation.
-     *
-     * @return const std::vector<std::vector<size_t>>&
-     */
-    [[nodiscard]] auto getObsWires() const
-        -> const std::vector<std::vector<size_t>> & {
-        return obs_wires_;
-    }
-
-  private:
-    const std::vector<std::string> obs_name_;
-    const std::vector<param_var_t> obs_params_;
-    const std::vector<std::vector<size_t>> obs_wires_;
-};
-
-/**
  * @brief Kokkos-enabled adjoint Jacobian evaluator following the method of
  * arXiV:2009.02823
  *
@@ -297,7 +227,7 @@ template <class T = double> class AdjointJacobianKokkos {
                                size_t param_index) {
         jac[obs_index][param_index] =
             -2 * scaling_coeff *
-            getImagOfComplexInnerProduct(sv1.getData(), sv2.getData());
+            getImagOfComplexInnerProduct<T>(sv1.getData(), sv2.getData());
     }
 
     /**
@@ -350,40 +280,9 @@ template <class T = double> class AdjointJacobianKokkos {
      * @param observable Observable to apply.
      */
     inline void applyObservable(StateVectorKokkos<T> &state,
-                                const ObsDatum<T> &observable) {
+                                const ObservableKokkos<T> &observable) {
         using namespace Pennylane::Util;
-        for (size_t j = 0; j < observable.getSize(); j++) {
-            if (!observable.getObsParams().empty()) {
-                std::visit(
-                    [&](const auto &param) {
-                        using p_t = std::decay_t<decltype(param)>;
-                        using cucomplex_t =
-                            std::decay_t<decltype(state.getData())>;
-
-                        // Apply supported gate with given params
-                        if constexpr (std::is_same_v<p_t, std::vector<T>>) {
-                            state.applyOperation(observable.getObsName()[j],
-                                                 observable.getObsWires()[j],
-                                                 false, param);
-                        }
-                        // Apply provided matrix
-                        else if constexpr (std::is_same_v<
-                                               p_t, std::vector<cucomplex_t>>) {
-                            state.applyOperation(observable.getObsName()[j],
-                                                 observable.getObsWires()[j],
-                                                 false, {}, param);
-                        } else {
-                            state.applyOperation(observable.getObsName()[j],
-                                                 observable.getObsWires()[j],
-                                                 false);
-                        }
-                    },
-                    observable.getObsParams()[j]);
-            } else { // Offloat to SV dispatcher if no parameters provided
-                state.applyOperation(observable.getObsName()[j],
-                                     observable.getObsWires()[j], false);
-            }
-        }
+        observable.applyInPlace(state);
     }
 
     /**
@@ -394,9 +293,10 @@ template <class T = double> class AdjointJacobianKokkos {
      * @param reference_state Reference statevector
      * @param observables Vector of observables to apply to each statevector.
      */
-    inline void applyObservables(std::vector<StateVectorKokkos<T>> &states,
-                                 const StateVectorKokkos<T> &reference_state,
-                                 const std::vector<ObsDatum<T>> &observables) {
+    inline void applyObservables(
+        std::vector<StateVectorKokkos<T>> &states,
+        const StateVectorKokkos<T> &reference_state,
+        const std::vector<std::shared_ptr<ObservableKokkos<T>>> &observables) {
         // clang-format off
         // Globally scoped exception value to be captured within OpenMP block.
         // See the following for OpenMP design decisions:
@@ -406,7 +306,7 @@ template <class T = double> class AdjointJacobianKokkos {
             for (size_t h_i = 0; h_i < num_observables; h_i++) {
                 try {
                     states[h_i].updateData(reference_state);
-                    applyObservable(states[h_i], observables[h_i]);
+                    applyObservable(states[h_i], *observables[h_i]);
                 } catch (...) {
                     ex = std::current_exception();
                 }
@@ -519,20 +419,19 @@ template <class T = double> class AdjointJacobianKokkos {
      * @param ref_data Pointer to the statevector data.
      * @param length Length of the statevector data.
      * @param jac Preallocated vector for Jacobian data results.
-     * @param obs Observables for which to calculate Jacobian.
+     * @param obs ObservableKokkos for which to calculate Jacobian.
      * @param ops Operations used to create given state.
      * @param trainableParams List of parameters participating in Jacobian
      * calculation.
      * @param apply_operations Indicate whether to apply operations to psi prior
      * to calculation.
      */
-    void
-    adjointJacobian(const StateVectorKokkos<T> &ref_data,
-                    std::vector<std::vector<T>> &jac,
-                    const std::vector<Pennylane::Algorithms::ObsDatum<T>> &obs,
-                    const Pennylane::Algorithms::OpsData<T> &ops,
-                    const std::vector<size_t> &trainableParams,
-                    bool apply_operations = false) {
+    void adjointJacobian(
+        const StateVectorKokkos<T> &ref_data, std::vector<std::vector<T>> &jac,
+        const std::vector<std::shared_ptr<ObservableKokkos<T>>> &obs,
+        const Pennylane::Algorithms::OpsData<T> &ops,
+        const std::vector<size_t> &trainableParams,
+        bool apply_operations = false) {
         PL_ABORT_IF(trainableParams.empty(),
                     "No trainable parameters provided.");
 

@@ -26,6 +26,8 @@ from pennylane import (
 )
 from pennylane.grouping import is_pauli_word
 from pennylane.operation import Observable, Tensor
+from pennylane.ops.qubit.observables import Hermitian
+from pennylane.ops.op_math import Adjoint
 from pennylane.tape import QuantumTape
 
 # Remove after the next release of PL
@@ -36,8 +38,16 @@ try:
     from pennylane_lightning_kokkos.lightning_kokkos_qubit_ops import (
         LightningKokkos_C128,
         LightningKokkos_C64,
-        ObsStructKokkos_C64,
-        ObsStructKokkos_C128,
+        NamedObsKokkos_C64,
+        NamedObsKokkos_C128,
+        TensorProdObsKokkos_C64,
+        TensorProdObsKokkos_C128,
+        HamiltonianKokkos_C64,
+        HamiltonianKokkos_C128,
+        SparseHamiltonianKokkos_C64,
+        SparseHamiltonianKokkos_C128,
+        HermitianObsKokkos_C64,
+        HermitianObsKokkos_C128,
     )
 except ImportError as e:
     print(e)
@@ -61,59 +71,109 @@ def _obs_has_kernel(obs: Observable) -> bool:
     return False
 
 
-def _serialize_obs(tape: QuantumTape, wires_map: dict, use_csingle: bool = False) -> List:
-    """Serializes the observables of an input tape.
+def _serialize_named_ob(o, wires_map: dict, use_csingle: bool):
+    """Serializes an observable (Named)"""
+    assert not isinstance(o, Tensor)
 
+    if use_csingle:
+        ctype = np.complex64
+        named_obs = NamedObsKokkos_C64
+    else:
+        ctype = np.complex128
+        named_obs = NamedObsKokkos_C128
+
+    wires_list = o.wires.tolist()
+    wires = [wires_map[w] for w in wires_list]
+    if _obs_has_kernel(o):
+        return named_obs(o.name, wires)
+
+
+def _serialize_tensor_ob(ob, wires_map: dict, use_csingle: bool):
+    """Serialize a tensor observable"""
+    assert isinstance(ob, Tensor)
+
+    if use_csingle:
+        tensor_obs = TensorProdObsKokkos_C64
+    else:
+        tensor_obs = TensorProdObsKokkos_C128
+    return tensor_obs([_serialize_ob(o, wires_map, use_csingle) for o in ob.obs])
+
+
+def _serialize_hamiltonian(ob, wires_map: dict, use_csingle: bool):
+    if use_csingle:
+        rtype = np.float32
+        hamiltonian_obs = HamiltonianKokkos_C64
+    else:
+        rtype = np.float64
+        hamiltonian_obs = HamiltonianKokkos_C128
+
+    coeffs = np.array(ob.coeffs).astype(rtype)
+    terms = [_serialize_ob(t, wires_map, use_csingle) for t in ob.ops]
+    return hamiltonian_obs(coeffs, terms)
+
+
+def _serialize_sparsehamiltonian(ob, wires_map: dict, use_csingle: bool):
+    if use_csingle:
+        ctype = np.complex64
+        rtype = np.int32
+        sparsehamiltonian_obs = SparseHamiltonianKokkos_C64
+    else:
+        ctype = np.complex128
+        rtype = np.int64
+        sparsehamiltonian_obs = SparseHamiltonianKokkos_C128
+
+    spm = ob.sparse_matrix()
+    data = np.array(spm.data).astype(ctype)
+    indices = np.array(spm.indices).astype(rtype)
+    offsets = np.array(spm.indptr).astype(rtype)
+
+    wires = []
+    wires_list = ob.wires.tolist()
+    wires.extend([wires_map[w] for w in wires_list])
+
+    return sparsehamiltonian_obs(data, indices, offsets, wires)
+
+
+def _serialize_hermitian(ob, wires_map: dict, use_csingle: bool):
+    if use_csingle:
+        rtype = np.float32
+        hermitian_obs = HermitianObsKokkos_C64
+    else:
+        rtype = np.float64
+        hermitian_obs = HermitianObsKokkos_C128
+
+    data = qml.matrix(ob).astype(rtype).ravel(order="C")
+    return hermitian_obs(data, ob.wires.tolist())
+
+
+def _serialize_ob(ob, wires_map, use_csingle):
+    if isinstance(ob, Tensor):
+        return _serialize_tensor_ob(ob, wires_map, use_csingle)
+    elif ob.name == "Hamiltonian":
+        return _serialize_hamiltonian(ob, wires_map, use_csingle)
+    elif ob.name == "SparseHamiltonian":
+        raise TypeError(
+            f"SparseHamiltonian observables are not currently supported for adjoint differentiation. Please use `qml.Hamiltonian`."
+        )
+    elif ob.name == "Hermitian":
+        raise TypeError(
+            f"Hermitian observables are not currently supported for adjoint differentiation. Please use Pauli-words only."
+        )
+    else:
+        return _serialize_named_ob(ob, wires_map, use_csingle)
+
+
+def _serialize_observables(tape: QuantumTape, wires_map: dict, use_csingle: bool = False) -> List:
+    """Serializes the observables of an input tape.
     Args:
         tape (QuantumTape): the input quantum tape
         wires_map (dict): a dictionary mapping input wires to the device's backend wires
         use_csingle (bool): whether to use np.complex64 instead of np.complex128
-
     Returns:
-        list(ObsStructKokkos_C128 or ObsStructKokkos_C64): A list of observable objects compatible with the C++ backend
+        list(ObservableKokkos_C64 or ObservableKokkos_C128): A list of observable objects compatible with the C++ backend
     """
-    obs = []
 
-    if use_csingle:
-        ctype = np.complex64
-        obs_py = ObsStructKokkos_C64
-    else:
-        ctype = np.complex128
-        obs_py = ObsStructKokkos_C128
-
-    for o in tape.observables:
-        is_tensor = isinstance(o, Tensor)
-
-        wires = []
-
-        if is_tensor:
-            for o_ in o.obs:
-                wires_list = o_.wires.tolist()
-                w = [wires_map[w] for w in wires_list]
-                wires.append(w)
-        else:
-            wires_list = o.wires.tolist()
-            w = [wires_map[w] for w in wires_list]
-            wires.append(w)
-
-        name = o.name if is_tensor else [o.name]
-
-        params = []
-
-        if not _obs_has_kernel(o):
-            if is_tensor:
-                for o_ in o.obs:
-                    if not _obs_has_kernel(o_):
-                        params.append(qml.matrix(o_).ravel().astype(ctype))
-                    else:
-                        params.append([])
-            else:
-                params.append(qml.matrix(o).ravel().astype(ctype))
-
-        ob = obs_py(name, params, wires)
-        obs.append(ob)
-
-    return obs
+    return [_serialize_ob(ob, wires_map, use_csingle) for ob in tape.observables]
 
 
 def _serialize_ops(
@@ -153,7 +213,7 @@ def _serialize_ops(
             op_list = [o]
 
         for single_op in op_list:
-            is_inverse = single_op.inverse
+            is_inverse = isinstance(single_op, Adjoint)
 
             name = single_op.name if not is_inverse else single_op.name[:-4]
             names.append(name)

@@ -52,7 +52,6 @@ class TestHamiltonianExpval:
         assert np.allclose(circuit(), res, atol=tol, rtol=0)
 
     def test_hamiltonan_expectation(self, qubit_device_3_wires, tol):
-
         dev = qubit_device_3_wires
 
         obs = qml.PauliX(1) @ qml.PauliY(2)
@@ -60,7 +59,7 @@ class TestHamiltonianExpval:
 
         H = qml.Hamiltonian([3.1415, 9.6], [obs1, obs])
 
-        dev._state = np.array(
+        state_vector = np.array(
             [
                 0.0 + 0.0j,
                 0.0 + 0.1j,
@@ -74,7 +73,7 @@ class TestHamiltonianExpval:
             dtype=np.complex128,
         )
 
-        dev.syncH2D()
+        dev.syncH2D(state_vector)
 
         res = dev.expval(H)
         expected = 3.1415

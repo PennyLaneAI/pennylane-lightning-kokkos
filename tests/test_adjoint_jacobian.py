@@ -22,6 +22,7 @@ from pennylane import numpy as np
 from pennylane import QNode, qnode
 from scipy.stats import unitary_group
 import pennylane_lightning_kokkos as plk
+from pennylane_lightning_kokkos.lightning_kokkos_qubit_ops import InitArguments
 
 from pennylane import (
     QuantumFunctionError,
@@ -75,9 +76,12 @@ class TestAdjointJacobian:
     from pennylane_lightning_kokkos import LightningKokkos as lg
     from pennylane_lightning import LightningQubit as lq
 
-    @pytest.fixture
-    def dev_kokkos(self):
-        return qml.device("lightning.kokkos", wires=3)
+    @pytest.fixture(params=[None, InitArguments(2)])
+    def dev_kokkos(self, request):
+        if request.param is None:
+            return qml.device("lightning.kokkos", wires=3)
+        else:
+            return qml.device("lightning.kokkos", wires=3, kokkos_args=request.param)
 
     @pytest.fixture
     def dev_cpu(self):
@@ -288,7 +292,7 @@ class TestAdjointJacobian:
 
             qml.Rot(1.3, -2.3, 0.5, wires=[0])
             qml.RZ(-0.5, wires=0)
-            qml.RY(0.5, wires=1).inv()
+            qml.adjoint(qml.RY(0.5, wires=1), lazy=False)
             qml.CNOT(wires=[0, 1])
 
             qml.expval(obs(wires=0))
@@ -360,7 +364,9 @@ class TestAdjointJacobian:
         dM1 = dev_kokkos.adjoint_jacobian(tape)
 
         qml.execute([tape], dev_kokkos, None)
-        dM2 = dev_kokkos.adjoint_jacobian(tape, starting_state=dev_kokkos._pre_rotated_state)
+        state_vector = np.zeros(2**dev_kokkos.num_wires).astype(dev_kokkos.C_DTYPE)
+        dev_kokkos.syncD2H(state_vector)
+        dM2 = dev_kokkos.adjoint_jacobian(tape, starting_state=state_vector)
 
         assert np.allclose(dM1, dM2, atol=tol, rtol=0)
 
@@ -375,8 +381,8 @@ class TestAdjointJacobianQNode:
     def test_finite_shots_warning(self):
         """Tests that a warning is raised when computing the adjoint diff on a device with finite shots"""
 
+        param = qml.numpy.array(0.1)
         dev = qml.device("lightning.kokkos", wires=1, shots=1)
-
         with pytest.warns(
             UserWarning,
             match="Requested adjoint differentiation to be computed with finite shots.",
@@ -391,7 +397,7 @@ class TestAdjointJacobianQNode:
             UserWarning,
             match="Requested adjoint differentiation to be computed with finite shots.",
         ):
-            qml.grad(circ)(0.1)
+            qml.grad(circ)(param)
 
     def test_qnode(self, mocker, tol, dev_kokkos):
         """Test that specifying diff_method allows the adjoint method to be selected"""
@@ -627,13 +633,13 @@ def circuit_ansatz(params, wires):
     qml.QubitStateVector(unitary_group.rvs(2**4, random_state=0)[0], wires=wires)
     qml.RX(params[0], wires=wires[0])
     qml.RY(params[1], wires=wires[1])
-    qml.RX(params[2], wires=wires[2]).inv()
+    qml.adjoint(qml.RX(params[2], wires=wires[2]))
     qml.RZ(params[0], wires=wires[3])
     qml.CRX(params[3], wires=[wires[3], wires[0]])
     qml.PhaseShift(params[4], wires=wires[2])
     qml.CRY(params[5], wires=[wires[2], wires[1]])
-    qml.CRZ(params[5], wires=[wires[0], wires[3]]).inv()
-    qml.PhaseShift(params[6], wires=wires[0]).inv()
+    qml.adjoint(qml.CRZ(params[5], wires=[wires[0], wires[3]]))
+    qml.adjoint(qml.PhaseShift(params[6], wires=wires[0]))
     qml.Rot(params[6], params[7], params[8], wires=wires[0])
     qml.MultiRZ(params[11], wires=[wires[0], wires[1]])
     qml.CPhase(params[12], wires=[wires[3], wires[2]])
@@ -647,7 +653,7 @@ def circuit_ansatz(params, wires):
     qml.DoubleExcitationMinus(params[27], wires=[wires[2], wires[0], wires[1], wires[3]])
     qml.RX(params[28], wires=wires[0])
     qml.RX(params[29], wires=wires[1])
-    qml.Rot(params[8], params[8], params[9], wires=wires[1]).inv()
+    qml.adjoint(qml.Rot(params[8], params[8], params[9], wires=wires[1]))
     qml.DoubleExcitationPlus(params[27], wires=[wires[2], wires[0], wires[1], wires[3]])
 
 

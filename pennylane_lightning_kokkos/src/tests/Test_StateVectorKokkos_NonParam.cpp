@@ -1106,3 +1106,96 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyCSWAP",
         }
     }
 }
+
+TEMPLATE_TEST_CASE("StateVectorKokkos::SetStateVector",
+                   "[StateVectorKokkos_Nonparam]", float, double) {
+    using PrecisionT = TestType;
+    using cp_t = Kokkos::complex<TestType>;
+    const std::size_t num_qubits = 3;
+
+    //`values[i]` on the host will be copy the `indices[i]`th element of the
+    // state vector on the device.
+    SECTION("Set state vector with values and their corresponding indices on "
+            "the host") {
+        std::vector<cp_t> init_state{
+            cp_t{0.267462849617, 0.010768564418},
+            cp_t{0.228575125337, 0.010564590804},
+            cp_t{0.099492751062, 0.260849833488},
+            cp_t{0.093690201640, 0.189847111702},
+            cp_t{0.015641822883, 0.225092900621},
+            cp_t{0.205574608177, 0.082808663337},
+            cp_t{0.006827173322, 0.211631480575},
+            cp_t{0.255280800811, 0.161572331669},
+        };
+        auto expected_state = init_state;
+
+        for (size_t i = 0; i < Pennylane::Util::exp2(num_qubits - 1); i++) {
+            std::swap(expected_state[i * 2], expected_state[i * 2 + 1]);
+        }
+
+        StateVectorKokkos<PrecisionT> kokkos_sv{num_qubits};
+        std::vector<cp_t> result_sv(kokkos_sv.getLength(), {0, 0});
+        kokkos_sv.HostToDevice(init_state.data(), init_state.size());
+
+        // The setStates will shuffle the state vector values on the device with
+        // the following indices and values setting on host. For example, the
+        // values[i] is used to set the indices[i] th element of state vector on
+        // the device. For example, values[2] (init_state[5]) will be copied to
+        // indices[2]th or (4th) element of the state vector.
+        std::vector<std::size_t> indices = {0, 2, 4, 6, 1, 3, 5, 7};
+
+        std::vector<Kokkos::complex<PrecisionT>> values = {
+            init_state[1], init_state[3], init_state[5], init_state[7],
+            init_state[0], init_state[2], init_state[4], init_state[6]};
+
+        kokkos_sv.setStateVector(indices, values);
+
+        kokkos_sv.DeviceToHost(result_sv.data(), result_sv.size());
+
+        for (std::size_t j = 0; j < Util::exp2(num_qubits); j++) {
+            CHECK(imag(expected_state[j]) == Approx(imag(result_sv[j])));
+            CHECK(real(expected_state[j]) == Approx(real(result_sv[j])));
+        }
+    }
+}
+
+TEMPLATE_TEST_CASE("StateVectorKokkos::SetIthStates",
+                   "[StateVectorKokkos_Nonparam]", float, double) {
+    using PrecisionT = TestType;
+    using cp_t = Kokkos::complex<TestType>;
+    const std::size_t num_qubits = 3;
+
+    SECTION(
+        "Set Ith element of the state state on device with data on the host") {
+        std::vector<cp_t> init_state{
+            cp_t{0.267462849617, 0.010768564418},
+            cp_t{0.228575125337, 0.010564590804},
+            cp_t{0.099492751062, 0.260849833488},
+            cp_t{0.093690201640, 0.189847111702},
+            cp_t{0.015641822883, 0.225092900621},
+            cp_t{0.205574608177, 0.082808663337},
+            cp_t{0.006827173322, 0.211631480575},
+            cp_t{0.255280800811, 0.161572331669},
+        };
+
+        std::vector<cp_t> expected_state{
+            cp_t{0.0, 0.0}, cp_t{0.0, 0.0}, cp_t{0.0, 0.0}, cp_t{1.0, 0.0},
+            cp_t{0.0, 0.0}, cp_t{0.0, 0.0}, cp_t{0.0, 0.0}, cp_t{0.0, 0.0},
+        };
+
+        StateVectorKokkos<PrecisionT> kokkos_sv{num_qubits};
+        std::vector<cp_t> result_sv(kokkos_sv.getLength(), {0, 0});
+        kokkos_sv.HostToDevice(init_state.data(), init_state.size());
+
+        size_t index = 3;
+
+        kokkos_sv.setBasisState(index);
+
+        kokkos_sv.DeviceToHost(result_sv.data(), result_sv.size());
+
+        for (std::size_t j = 0; j < Util::exp2(num_qubits); j++) {
+            CHECK(imag(expected_state[j]) == Approx(imag(result_sv[j])));
+            CHECK(real(expected_state[j]) == Approx(real(result_sv[j])));
+        }
+    }
+}

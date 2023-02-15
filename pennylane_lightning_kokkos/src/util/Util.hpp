@@ -44,6 +44,35 @@
 #endif
 
 namespace Pennylane::Util {
+template <typename T> struct remove_complex { using type = T; };
+template <typename T> struct remove_complex<std::complex<T>> {
+    using type = T;
+};
+template <typename T> using remove_complex_t = typename remove_complex<T>::type;
+
+template <typename T> struct is_complex : std::false_type {};
+
+template <typename T> struct is_complex<std::complex<T>> : std::true_type {};
+
+template <typename T> constexpr bool is_complex_v = is_complex<T>::value;
+} // namespace Pennylane::Util
+
+namespace Pennylane::Util {
+/**
+ * Utility hash function for complex vectors representing matrices.
+ */
+struct MatrixHasher {
+    template <class Precision = double>
+    std::size_t
+    operator()(const std::vector<std::complex<Precision>> &matrix) const {
+        std::size_t hash_val = matrix.size();
+        for (const auto &c_val : matrix) {
+            hash_val ^= std::hash<Precision>()(c_val.real()) ^
+                        std::hash<Precision>()(c_val.imag());
+        }
+        return hash_val;
+    }
+};
 
 struct BitSwapFunctor {
     BitSwapFunctor() = default;
@@ -556,6 +585,25 @@ inline auto generateBitsPatterns(const std::vector<size_t> &qubitIndices,
         }
     }
     return indices;
+}
+
+/**
+ * @brief Streaming operator for Kokkos::InitArguments structs.
+ *
+ * @param os Output stream.
+ * @param args Kokkos::InitArguments struct.
+ * @return std::ostream&
+ */
+inline auto operator<<(std::ostream &os, const Kokkos::InitArguments &args)
+    -> std::ostream & {
+    os << "<InitArguments with\n";
+    os << "num_threads = " << args.num_threads << '\n';
+    os << "num_numa = " << args.num_numa << '\n';
+    os << "device_id = " << args.device_id << '\n';
+    os << "ndevices = " << args.ndevices << '\n';
+    os << "skip_device = " << args.skip_device << '\n';
+    os << "disable_warnings = " << args.disable_warnings << ">";
+    return os;
 }
 
 } // namespace Pennylane::Util
