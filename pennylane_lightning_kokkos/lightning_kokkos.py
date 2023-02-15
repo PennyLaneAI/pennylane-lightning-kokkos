@@ -489,6 +489,12 @@ if CPP_BINARY_AVAILABLE:
             device_wires = self.map_wires(wires)
 
             return self._kokkos_state.probs(device_wires)
+        
+        def sample(self, observable, shot_range=None, bin_size=None, counts=False):
+            if observable.name != "PauliZ":
+                self.apply_kokkos(observable.diagonalizing_gates())
+                self._samples = self.generate_samples()
+            return super().sample(observable, shot_range=shot_range, bin_size=bin_size, counts=counts)
 
         def expval(self, observable, shot_range=None, bin_size=None):
             if observable.name in [
