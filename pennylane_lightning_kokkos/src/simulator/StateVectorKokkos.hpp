@@ -78,328 +78,360 @@ template <class Precision> class StateVectorKokkos {
 
     StateVectorKokkos() = delete;
     StateVectorKokkos(size_t num_qubits, const Kokkos::InitArguments &kokkos_args = {})
-        : gates_{
-                //Identity
-                 {"PauliX", 
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyPauliX(std::forward<decltype(wires)>(wires),
-                                  std::forward<decltype(adjoint)>(adjoint),
-                                  std::forward<decltype(params)>(params));
-                  }},
-                 {"PauliY",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyPauliY(std::forward<decltype(wires)>(wires),
-                                  std::forward<decltype(adjoint)>(adjoint),
-                                  std::forward<decltype(params)>(params));
-                  }},
-                 {"PauliZ",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyPauliZ(std::forward<decltype(wires)>(wires),
-                                  std::forward<decltype(adjoint)>(adjoint),
-                                  std::forward<decltype(params)>(params));
-                  }},
-                 {"Hadamard",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyHadamard(std::forward<decltype(wires)>(wires),
+            : gates_{
+                  // Identity
+                  {"PauliX",
+                   [&](auto &&wires, auto &&adjoint, auto &&params)
+                   {
+                       applyPauliX(std::forward<decltype(wires)>(wires),
+                                   std::forward<decltype(adjoint)>(adjoint),
+                                   std::forward<decltype(params)>(params));
+                   }},
+                  {"PauliY",
+                   [&](auto &&wires, auto &&adjoint, auto &&params)
+                   {
+                       applyPauliY(std::forward<decltype(wires)>(wires),
+                                   std::forward<decltype(adjoint)>(adjoint),
+                                   std::forward<decltype(params)>(params));
+                   }},
+                  {"PauliZ",
+                   [&](auto &&wires, auto &&adjoint, auto &&params)
+                   {
+                       applyPauliZ(std::forward<decltype(wires)>(wires),
+                                   std::forward<decltype(adjoint)>(adjoint),
+                                   std::forward<decltype(params)>(params));
+                   }},
+                  {"Hadamard",
+                   [&](auto &&wires, auto &&adjoint, auto &&params)
+                   {
+                       applyHadamard(std::forward<decltype(wires)>(wires),
+                                     std::forward<decltype(adjoint)>(adjoint),
+                                     std::forward<decltype(params)>(params));
+                   }},
+                  {"S",
+                   [&](auto &&wires, auto &&adjoint, auto &&params)
+                   {
+                       applyS(std::forward<decltype(wires)>(wires),
+                              std::forward<decltype(adjoint)>(adjoint),
+                              std::forward<decltype(params)>(params));
+                   }},
+                  {"T",
+                   [&](auto &&wires, auto &&adjoint, auto &&params)
+                   {
+                       applyT(std::forward<decltype(wires)>(wires),
+                              std::forward<decltype(adjoint)>(adjoint),
+                              std::forward<decltype(params)>(params));
+                   }},
+                  {"RX",
+                   [&](auto &&wires, auto &&adjoint, auto &&params)
+                   {
+                       applyRX(std::forward<decltype(wires)>(wires),
+                               std::forward<decltype(adjoint)>(adjoint),
+                               std::forward<decltype(params)>(params));
+                   }},
+                  {"RY",
+                   [&](auto &&wires, auto &&adjoint, auto &&params)
+                   {
+                       applyRY(std::forward<decltype(wires)>(wires),
+                               std::forward<decltype(adjoint)>(adjoint),
+                               std::forward<decltype(params)>(params));
+                   }},
+                  {"RZ",
+                   [&](auto &&wires, auto &&adjoint, auto &&params)
+                   {
+                       applyRZ(std::forward<decltype(wires)>(wires),
+                               std::forward<decltype(adjoint)>(adjoint),
+                               std::forward<decltype(params)>(params));
+                   }},
+                  {"PhaseShift",
+                   [&](auto &&wires, auto &&adjoint, auto &&params)
+                   {
+                       applyPhaseShift(std::forward<decltype(wires)>(wires),
+                                       std::forward<decltype(adjoint)>(adjoint),
+                                       std::forward<decltype(params)>(params));
+                   }},
+                  {"Rot",
+                   [&](auto &&wires, auto &&adjoint, auto &&params)
+                   {
+                       applyRot(std::forward<decltype(wires)>(wires),
+                                std::forward<decltype(adjoint)>(adjoint),
+                                std::forward<decltype(params)>(params));
+                   }},
+                  {"CY",
+                   [&](auto &&wires, auto &&adjoint, auto &&params)
+                   {
+                       applyCY(std::forward<decltype(wires)>(wires),
+                               std::forward<decltype(adjoint)>(adjoint),
+                               std::forward<decltype(params)>(params));
+                   }},
+                  {"CZ",
+                   [&](auto &&wires, auto &&adjoint, auto &&params)
+                   {
+                       applyCZ(std::forward<decltype(wires)>(wires),
+                               std::forward<decltype(adjoint)>(adjoint),
+                               std::forward<decltype(params)>(params));
+                   }},
+                  {"CNOT",
+                   [&](auto &&wires, auto &&adjoint, auto &&params)
+                   {
+                       applyCNOT(std::forward<decltype(wires)>(wires),
+                                 std::forward<decltype(adjoint)>(adjoint),
+                                 std::forward<decltype(params)>(params));
+                   }},
+                  {"SWAP",
+                   [&](auto &&wires, auto &&adjoint, auto &&params)
+                   {
+                       applySWAP(std::forward<decltype(wires)>(wires),
+                                 std::forward<decltype(adjoint)>(adjoint),
+                                 std::forward<decltype(params)>(params));
+                   }},
+                  {"ControlledPhaseShift",
+                   [&](auto &&wires, auto &&adjoint, auto &&params)
+                   {
+                       applyControlledPhaseShift(
+                           std::forward<decltype(wires)>(wires),
+                           std::forward<decltype(adjoint)>(adjoint),
+                           std::forward<decltype(params)>(params));
+                   }},
+                  {"CRX",
+                   [&](auto &&wires, auto &&adjoint, auto &&params)
+                   {
+                       applyCRX(std::forward<decltype(wires)>(wires),
+                                std::forward<decltype(adjoint)>(adjoint),
+                                std::forward<decltype(params)>(params));
+                   }},
+                  {"CRY",
+                   [&](auto &&wires, auto &&adjoint, auto &&params)
+                   {
+                       applyCRY(std::forward<decltype(wires)>(wires),
+                                std::forward<decltype(adjoint)>(adjoint),
+                                std::forward<decltype(params)>(params));
+                   }},
+                  {"CRZ",
+                   [&](auto &&wires, auto &&adjoint, auto &&params)
+                   {
+                       applyCRZ(std::forward<decltype(wires)>(wires),
+                                std::forward<decltype(adjoint)>(adjoint),
+                                std::forward<decltype(params)>(params));
+                   }},
+                  {"CRot",
+                   [&](auto &&wires, auto &&adjoint, auto &&params)
+                   {
+                       applyCRot(std::forward<decltype(wires)>(wires),
+                                 std::forward<decltype(adjoint)>(adjoint),
+                                 std::forward<decltype(params)>(params));
+                   }},
+                  {"IsingXX",
+                   [&](auto &&wires, auto &&adjoint, auto &&params)
+                   {
+                       applyIsingXX(std::forward<decltype(wires)>(wires),
                                     std::forward<decltype(adjoint)>(adjoint),
                                     std::forward<decltype(params)>(params));
-                  }},
-                 {"S",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyS(std::forward<decltype(wires)>(wires),
-                             std::forward<decltype(adjoint)>(adjoint),
-                             std::forward<decltype(params)>(params));
-                 }},
-                 {"T",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyT(std::forward<decltype(wires)>(wires),
-                             std::forward<decltype(adjoint)>(adjoint),
-                             std::forward<decltype(params)>(params));
-                  }},
-                 {"RX",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyRX(std::forward<decltype(wires)>(wires),
-                              std::forward<decltype(adjoint)>(adjoint),
-                              std::forward<decltype(params)>(params));
-                  }},
-                 {"RY",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyRY(std::forward<decltype(wires)>(wires),
-                              std::forward<decltype(adjoint)>(adjoint),
-                              std::forward<decltype(params)>(params));
-                  }},
-                 {"RZ",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyRZ(std::forward<decltype(wires)>(wires),
-                              std::forward<decltype(adjoint)>(adjoint),
-                              std::forward<decltype(params)>(params));
-                  }},
-                 {"PhaseShift",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyPhaseShift(std::forward<decltype(wires)>(wires),
-                                      std::forward<decltype(adjoint)>(adjoint),
-                                      std::forward<decltype(params)>(params));
-                  }},
-                 {"Rot",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyRot(std::forward<decltype(wires)>(wires),
-                               std::forward<decltype(adjoint)>(adjoint),
-                               std::forward<decltype(params)>(params));
-                  }},
-                 {"CY",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyCY(std::forward<decltype(wires)>(wires),
-                              std::forward<decltype(adjoint)>(adjoint),
-                              std::forward<decltype(params)>(params));
-                  }},
-                 {"CZ",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyCZ(std::forward<decltype(wires)>(wires),
-                              std::forward<decltype(adjoint)>(adjoint),
-                              std::forward<decltype(params)>(params));
-                  }},
-                 {"CNOT",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyCNOT(std::forward<decltype(wires)>(wires),
-                                std::forward<decltype(adjoint)>(adjoint),
-                                std::forward<decltype(params)>(params));
-                  }},
-                 {"SWAP",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applySWAP(std::forward<decltype(wires)>(wires),
-                                std::forward<decltype(adjoint)>(adjoint),
-                                std::forward<decltype(params)>(params));
-                  }},
-                 {"ControlledPhaseShift",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyControlledPhaseShift(
-                          std::forward<decltype(wires)>(wires),
-                          std::forward<decltype(adjoint)>(adjoint),
-                          std::forward<decltype(params)>(params));
-                  }},
-                 {"CRX",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyCRX(std::forward<decltype(wires)>(wires),
-                               std::forward<decltype(adjoint)>(adjoint),
-                               std::forward<decltype(params)>(params));
-                  }},
-                 {"CRY",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyCRY(std::forward<decltype(wires)>(wires),
-                               std::forward<decltype(adjoint)>(adjoint),
-                               std::forward<decltype(params)>(params));
-                  }},
-                 {"CRZ",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyCRZ(std::forward<decltype(wires)>(wires),
-                               std::forward<decltype(adjoint)>(adjoint),
-                               std::forward<decltype(params)>(params));
-                  }},
-                 {"CRot",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyCRot(std::forward<decltype(wires)>(wires),
-                               std::forward<decltype(adjoint)>(adjoint),
-                               std::forward<decltype(params)>(params));
-                  }},                  
-                  {"IsingXX",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyIsingXX(std::forward<decltype(wires)>(wires),
-                                   std::forward<decltype(adjoint)>(adjoint),
-                                   std::forward<decltype(params)>(params));
-                  }},
+                   }},
                   {"IsingXY",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyIsingXY(std::forward<decltype(wires)>(wires),
-                                   std::forward<decltype(adjoint)>(adjoint),
-                                   std::forward<decltype(params)>(params));
-                  }},
+                   [&](auto &&wires, auto &&adjoint, auto &&params)
+                   {
+                       applyIsingXY(std::forward<decltype(wires)>(wires),
+                                    std::forward<decltype(adjoint)>(adjoint),
+                                    std::forward<decltype(params)>(params));
+                   }},
 
                   {"IsingYY",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyIsingYY(std::forward<decltype(wires)>(wires),
-                                   std::forward<decltype(adjoint)>(adjoint),
-                                   std::forward<decltype(params)>(params));
-                  }},
+                   [&](auto &&wires, auto &&adjoint, auto &&params)
+                   {
+                       applyIsingYY(std::forward<decltype(wires)>(wires),
+                                    std::forward<decltype(adjoint)>(adjoint),
+                                    std::forward<decltype(params)>(params));
+                   }},
 
                   {"IsingZZ",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyIsingZZ(std::forward<decltype(wires)>(wires),
-                                   std::forward<decltype(adjoint)>(adjoint),
-                                   std::forward<decltype(params)>(params));
-                  }},
-                 {"SingleExcitation",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applySingleExcitation(std::forward<decltype(wires)>(wires),
-                                   std::forward<decltype(adjoint)>(adjoint),
-                                   std::forward<decltype(params)>(params));
-                  }},
-                 {"SingleExcitationMinus",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applySingleExcitationMinus(std::forward<decltype(wires)>(wires),
-                                   std::forward<decltype(adjoint)>(adjoint),
-                                   std::forward<decltype(params)>(params));
-                  }},
-                 {"SingleExcitationPlus",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applySingleExcitationPlus(std::forward<decltype(wires)>(wires),
-                                   std::forward<decltype(adjoint)>(adjoint),
-                                   std::forward<decltype(params)>(params));
-                  }},
-                 {"DoubleExcitation",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyDoubleExcitation(std::forward<decltype(wires)>(wires),
-                                   std::forward<decltype(adjoint)>(adjoint),
-                                   std::forward<decltype(params)>(params));
-                  }},
-                 {"DoubleExcitationMinus",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyDoubleExcitationMinus(std::forward<decltype(wires)>(wires),
-                                   std::forward<decltype(adjoint)>(adjoint),
-                                   std::forward<decltype(params)>(params));
-                  }},
-                 {"DoubleExcitationPlus",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyDoubleExcitationPlus(std::forward<decltype(wires)>(wires),
-                                   std::forward<decltype(adjoint)>(adjoint),
-                                   std::forward<decltype(params)>(params));
-                  }},
-                 {"MultiRZ",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyMultiRZ(std::forward<decltype(wires)>(wires),
-                                 std::forward<decltype(adjoint)>(adjoint),
-                                 std::forward<decltype(params)>(params));
-                  }},
-                 {"CSWAP",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyCSWAP(std::forward<decltype(wires)>(wires),
-                                 std::forward<decltype(adjoint)>(adjoint),
-                                 std::forward<decltype(params)>(params));
-                  }},
-                 {"Toffoli",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      applyToffoli(std::forward<decltype(wires)>(wires),
-                                   std::forward<decltype(adjoint)>(adjoint),
-                                   std::forward<decltype(params)>(params));
-                  }}
-                 },
-            generator_{
-                {"RX",
-                  [&](auto &&wires, auto &&adjoint, auto &&params){
-                      return applyGeneratorRX(std::forward<decltype(wires)>(wires),
-                              std::forward<decltype(adjoint)>(adjoint),
-                              std::forward<decltype(params)>(params));
-                  }},
-                {"RY",
-                  [&](auto &&wires, auto &&adjoint, auto &&params){
-                      return applyGeneratorRY(std::forward<decltype(wires)>(wires),
-                              std::forward<decltype(adjoint)>(adjoint),
-                              std::forward<decltype(params)>(params));
-                  }},
-                {"RZ",
-                  [&](auto &&wires, auto &&adjoint, auto &&params){
-                      return applyGeneratorRZ(std::forward<decltype(wires)>(wires),
-                              std::forward<decltype(adjoint)>(adjoint),
-                              std::forward<decltype(params)>(params));
-                  }},
-		{"ControlledPhaseShift",
-                  [&](auto &&wires, auto &&adjoint, auto &&params) {
-                      return applyGeneratorControlledPhaseShift(
-                          std::forward<decltype(wires)>(wires),
-                          std::forward<decltype(adjoint)>(adjoint),
-                          std::forward<decltype(params)>(params));
-                  }},
-                {"CRX",
-                  [&](auto &&wires, auto &&adjoint, auto &&params){
-                      return applyGeneratorCRX(std::forward<decltype(wires)>(wires),
-                              std::forward<decltype(adjoint)>(adjoint),
-                              std::forward<decltype(params)>(params));
-                  }},
-                 {"CRY",
-                  [&](auto &&wires, auto &&adjoint, auto &&params){
-                      return applyGeneratorCRY(std::forward<decltype(wires)>(wires),
-                              std::forward<decltype(adjoint)>(adjoint),
-                              std::forward<decltype(params)>(params));
-                  }},
-                 {"CRZ",
-                  [&](auto &&wires, auto &&adjoint, auto &&params){
-                      return applyGeneratorCRZ(std::forward<decltype(wires)>(wires),
-                              std::forward<decltype(adjoint)>(adjoint),
-                              std::forward<decltype(params)>(params));
-                  }},
-                  {"IsingXX",
-                  [&](auto &&wires, auto &&adjoint, auto &&params){
-                      return applyGeneratorIsingXX(std::forward<decltype(wires)>(wires),
-                              std::forward<decltype(adjoint)>(adjoint),
-                              std::forward<decltype(params)>(params));
-                  }},
-                  {"IsingXY",
-                  [&](auto &&wires, auto &&adjoint, auto &&params){
-                      return applyGeneratorIsingXY(std::forward<decltype(wires)>(wires),
-                              std::forward<decltype(adjoint)>(adjoint),
-                              std::forward<decltype(params)>(params));
-                  }},
-                  {"IsingYY",
-                  [&](auto &&wires, auto &&adjoint, auto &&params){
-                      return applyGeneratorIsingYY(std::forward<decltype(wires)>(wires),
-                              std::forward<decltype(adjoint)>(adjoint),
-                              std::forward<decltype(params)>(params));
-                  }},
-                  {"IsingZZ",
-                  [&](auto &&wires, auto &&adjoint, auto &&params){
-                      return applyGeneratorIsingZZ(std::forward<decltype(wires)>(wires),
-                              std::forward<decltype(adjoint)>(adjoint),
-                              std::forward<decltype(params)>(params));
-                  }},
+                   [&](auto &&wires, auto &&adjoint, auto &&params)
+                   {
+                       applyIsingZZ(std::forward<decltype(wires)>(wires),
+                                    std::forward<decltype(adjoint)>(adjoint),
+                                    std::forward<decltype(params)>(params));
+                   }},
                   {"SingleExcitation",
-                  [&](auto &&wires, auto &&adjoint, auto &&params){
-                      return applyGeneratorSingleExcitation(std::forward<decltype(wires)>(wires),
-                              std::forward<decltype(adjoint)>(adjoint),
-                              std::forward<decltype(params)>(params));
-                  }},
+                   [&](auto &&wires, auto &&adjoint, auto &&params)
+                   {
+                       applySingleExcitation(std::forward<decltype(wires)>(wires),
+                                             std::forward<decltype(adjoint)>(adjoint),
+                                             std::forward<decltype(params)>(params));
+                   }},
                   {"SingleExcitationMinus",
-                  [&](auto &&wires, auto &&adjoint, auto &&params){
-                      return applyGeneratorSingleExcitationMinus(std::forward<decltype(wires)>(wires),
-                              std::forward<decltype(adjoint)>(adjoint),
-                              std::forward<decltype(params)>(params));
-                  }},
+                   [&](auto &&wires, auto &&adjoint, auto &&params)
+                   {
+                       applySingleExcitationMinus(std::forward<decltype(wires)>(wires),
+                                                  std::forward<decltype(adjoint)>(adjoint),
+                                                  std::forward<decltype(params)>(params));
+                   }},
                   {"SingleExcitationPlus",
-                  [&](auto &&wires, auto &&adjoint, auto &&params){
-                      return applyGeneratorSingleExcitationPlus(std::forward<decltype(wires)>(wires),
-                              std::forward<decltype(adjoint)>(adjoint),
-                              std::forward<decltype(params)>(params));
-                  }},
+                   [&](auto &&wires, auto &&adjoint, auto &&params)
+                   {
+                       applySingleExcitationPlus(std::forward<decltype(wires)>(wires),
+                                                 std::forward<decltype(adjoint)>(adjoint),
+                                                 std::forward<decltype(params)>(params));
+                   }},
                   {"DoubleExcitation",
-                  [&](auto &&wires, auto &&adjoint, auto &&params){
-                      return applyGeneratorDoubleExcitation(std::forward<decltype(wires)>(wires),
-                              std::forward<decltype(adjoint)>(adjoint),
-                              std::forward<decltype(params)>(params));
-                  }},
+                   [&](auto &&wires, auto &&adjoint, auto &&params)
+                   {
+                       applyDoubleExcitation(std::forward<decltype(wires)>(wires),
+                                             std::forward<decltype(adjoint)>(adjoint),
+                                             std::forward<decltype(params)>(params));
+                   }},
                   {"DoubleExcitationMinus",
-                  [&](auto &&wires, auto &&adjoint, auto &&params){
-                      return applyGeneratorDoubleExcitationMinus(std::forward<decltype(wires)>(wires),
-                              std::forward<decltype(adjoint)>(adjoint),
-                              std::forward<decltype(params)>(params));
-                  }},
+                   [&](auto &&wires, auto &&adjoint, auto &&params)
+                   {
+                       applyDoubleExcitationMinus(std::forward<decltype(wires)>(wires),
+                                                  std::forward<decltype(adjoint)>(adjoint),
+                                                  std::forward<decltype(params)>(params));
+                   }},
                   {"DoubleExcitationPlus",
-                  [&](auto &&wires, auto &&adjoint, auto &&params){
-                      return applyGeneratorDoubleExcitationPlus(std::forward<decltype(wires)>(wires),
-                              std::forward<decltype(adjoint)>(adjoint),
-                              std::forward<decltype(params)>(params));
-                  }},
-                  {"PhaseShift",
-                  [&](auto &&wires, auto &&adjoint, auto &&params){
-                      return applyGeneratorPhaseShift(std::forward<decltype(wires)>(wires),
-                              std::forward<decltype(adjoint)>(adjoint),
-                              std::forward<decltype(params)>(params));
-                  }},
+                   [&](auto &&wires, auto &&adjoint, auto &&params)
+                   {
+                       applyDoubleExcitationPlus(std::forward<decltype(wires)>(wires),
+                                                 std::forward<decltype(adjoint)>(adjoint),
+                                                 std::forward<decltype(params)>(params));
+                   }},
                   {"MultiRZ",
-                  [&](auto &&wires, auto &&adjoint, auto &&params){
-                      return applyGeneratorMultiRZ(std::forward<decltype(wires)>(wires),
-                              std::forward<decltype(adjoint)>(adjoint),
-                              std::forward<decltype(params)>(params));
-                  }},
-            }
-    {
+                   [&](auto &&wires, auto &&adjoint, auto &&params)
+                   {
+                       applyMultiRZ(std::forward<decltype(wires)>(wires),
+                                    std::forward<decltype(adjoint)>(adjoint),
+                                    std::forward<decltype(params)>(params));
+                   }},
+                  {"CSWAP",
+                   [&](auto &&wires, auto &&adjoint, auto &&params)
+                   {
+                       applyCSWAP(std::forward<decltype(wires)>(wires),
+                                  std::forward<decltype(adjoint)>(adjoint),
+                                  std::forward<decltype(params)>(params));
+                   }},
+                  {"Toffoli",
+                   [&](auto &&wires, auto &&adjoint, auto &&params)
+                   {
+                       applyToffoli(std::forward<decltype(wires)>(wires),
+                                    std::forward<decltype(adjoint)>(adjoint),
+                                    std::forward<decltype(params)>(params));
+                   }}},
+              generator_{
+                  {"RX", [&](auto &&wires, auto &&adjoint, auto &&params)
+                   {
+                       return applyGeneratorRX(std::forward<decltype(wires)>(wires),
+                                               std::forward<decltype(adjoint)>(adjoint),
+                                               std::forward<decltype(params)>(params));
+                   }},
+                  {"RY", [&](auto &&wires, auto &&adjoint, auto &&params)
+                   {
+                       return applyGeneratorRY(std::forward<decltype(wires)>(wires),
+                                               std::forward<decltype(adjoint)>(adjoint),
+                                               std::forward<decltype(params)>(params));
+                   }},
+                  {"RZ", [&](auto &&wires, auto &&adjoint, auto &&params)
+                   {
+                       return applyGeneratorRZ(std::forward<decltype(wires)>(wires),
+                                               std::forward<decltype(adjoint)>(adjoint),
+                                               std::forward<decltype(params)>(params));
+                   }},
+                  {"ControlledPhaseShift", [&](auto &&wires, auto &&adjoint, auto &&params)
+                   {
+                       return applyGeneratorControlledPhaseShift(
+                           std::forward<decltype(wires)>(wires),
+                           std::forward<decltype(adjoint)>(adjoint),
+                           std::forward<decltype(params)>(params));
+                   }},
+                  {"CRX", [&](auto &&wires, auto &&adjoint, auto &&params)
+                   {
+                       return applyGeneratorCRX(std::forward<decltype(wires)>(wires),
+                                                std::forward<decltype(adjoint)>(adjoint),
+                                                std::forward<decltype(params)>(params));
+                   }},
+                  {"CRY", [&](auto &&wires, auto &&adjoint, auto &&params)
+                   {
+                       return applyGeneratorCRY(std::forward<decltype(wires)>(wires),
+                                                std::forward<decltype(adjoint)>(adjoint),
+                                                std::forward<decltype(params)>(params));
+                   }},
+                  {"CRZ", [&](auto &&wires, auto &&adjoint, auto &&params)
+                   {
+                       return applyGeneratorCRZ(std::forward<decltype(wires)>(wires),
+                                                std::forward<decltype(adjoint)>(adjoint),
+                                                std::forward<decltype(params)>(params));
+                   }},
+                  {"IsingXX", [&](auto &&wires, auto &&adjoint, auto &&params)
+                   {
+                       return applyGeneratorIsingXX(std::forward<decltype(wires)>(wires),
+                                                    std::forward<decltype(adjoint)>(adjoint),
+                                                    std::forward<decltype(params)>(params));
+                   }},
+                  {"IsingXY", [&](auto &&wires, auto &&adjoint, auto &&params)
+                   {
+                       return applyGeneratorIsingXY(std::forward<decltype(wires)>(wires),
+                                                    std::forward<decltype(adjoint)>(adjoint),
+                                                    std::forward<decltype(params)>(params));
+                   }},
+                  {"IsingYY", [&](auto &&wires, auto &&adjoint, auto &&params)
+                   {
+                       return applyGeneratorIsingYY(std::forward<decltype(wires)>(wires),
+                                                    std::forward<decltype(adjoint)>(adjoint),
+                                                    std::forward<decltype(params)>(params));
+                   }},
+                  {"IsingZZ", [&](auto &&wires, auto &&adjoint, auto &&params)
+                   {
+                       return applyGeneratorIsingZZ(std::forward<decltype(wires)>(wires),
+                                                    std::forward<decltype(adjoint)>(adjoint),
+                                                    std::forward<decltype(params)>(params));
+                   }},
+                  {"SingleExcitation", [&](auto &&wires, auto &&adjoint, auto &&params)
+                   {
+                       return applyGeneratorSingleExcitation(std::forward<decltype(wires)>(wires),
+                                                             std::forward<decltype(adjoint)>(adjoint),
+                                                             std::forward<decltype(params)>(params));
+                   }},
+                  {"SingleExcitationMinus", [&](auto &&wires, auto &&adjoint, auto &&params)
+                   {
+                       return applyGeneratorSingleExcitationMinus(std::forward<decltype(wires)>(wires),
+                                                                  std::forward<decltype(adjoint)>(adjoint),
+                                                                  std::forward<decltype(params)>(params));
+                   }},
+                  {"SingleExcitationPlus", [&](auto &&wires, auto &&adjoint, auto &&params)
+                   {
+                       return applyGeneratorSingleExcitationPlus(std::forward<decltype(wires)>(wires),
+                                                                 std::forward<decltype(adjoint)>(adjoint),
+                                                                 std::forward<decltype(params)>(params));
+                   }},
+                  {"DoubleExcitation", [&](auto &&wires, auto &&adjoint, auto &&params)
+                   {
+                       return applyGeneratorDoubleExcitation(std::forward<decltype(wires)>(wires),
+                                                             std::forward<decltype(adjoint)>(adjoint),
+                                                             std::forward<decltype(params)>(params));
+                   }},
+                  {"DoubleExcitationMinus", [&](auto &&wires, auto &&adjoint, auto &&params)
+                   {
+                       return applyGeneratorDoubleExcitationMinus(std::forward<decltype(wires)>(wires),
+                                                                  std::forward<decltype(adjoint)>(adjoint),
+                                                                  std::forward<decltype(params)>(params));
+                   }},
+                  {"DoubleExcitationPlus", [&](auto &&wires, auto &&adjoint, auto &&params)
+                   {
+                       return applyGeneratorDoubleExcitationPlus(std::forward<decltype(wires)>(wires),
+                                                                 std::forward<decltype(adjoint)>(adjoint),
+                                                                 std::forward<decltype(params)>(params));
+                   }},
+                  {"PhaseShift", [&](auto &&wires, auto &&adjoint, auto &&params)
+                   {
+                       return applyGeneratorPhaseShift(std::forward<decltype(wires)>(wires),
+                                                       std::forward<decltype(adjoint)>(adjoint),
+                                                       std::forward<decltype(params)>(params));
+                   }},
+                  {"MultiRZ", [&](auto &&wires, auto &&adjoint, auto &&params)
+                   {
+                       return applyGeneratorMultiRZ(std::forward<decltype(wires)>(wires),
+                                                    std::forward<decltype(adjoint)>(adjoint),
+                                                    std::forward<decltype(params)>(params));
+                   }},
+              }
+        {
         expval_funcs_["Identity"] = [&](auto &&wires, auto &&params) {
             return getExpectationValueIdentity(
                 std::forward<decltype(wires)>(wires),
@@ -903,6 +935,32 @@ template <class Precision> class StateVectorKokkos {
     }
 
     /**
+     * @brief Templated method that applies special n-qbit gates.
+     *
+     * @param wires Wires to apply gate to.
+     * @param inverse Indicates whether to use adjoint of gate.
+     * @param params parameters for this gate
+     */
+    template <template <class, bool> class functor_t, int nqbits>
+    void applySpecialQubitGate(
+        const std::vector<size_t> &wires, bool inverse = false,
+        [[maybe_unused]] const std::vector<Precision> &params = {}) {
+        auto &&num_qubits = getNumQubits();
+        assert(wires.size() == nqbits);
+        if (!inverse) {
+            Kokkos::parallel_for(
+                Kokkos::RangePolicy<KokkosExecSpace>(
+                    0, Util::exp2(num_qubits - nqbits)),
+                functor_t<Precision, false>(*data_, num_qubits, wires, params));
+        } else {
+            Kokkos::parallel_for(
+                Kokkos::RangePolicy<KokkosExecSpace>(
+                    0, Util::exp2(num_qubits - nqbits)),
+                functor_t<Precision, true>(*data_, num_qubits, wires, params));
+        }
+    }
+
+    /**
      * @brief Apply a PauliX operator to the state vector using a matrix
      *
      * @param wires Wires to apply gate to.
@@ -912,19 +970,7 @@ template <class Precision> class StateVectorKokkos {
     void
     applyPauliX(const std::vector<size_t> &wires, bool inverse = false,
                 [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 1);
-        if (!inverse) {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 1)),
-                                 applyPauliXFunctor<Precision, false>(
-                                     *data_, num_qubits, wires));
-        } else {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 1)),
-                applyPauliXFunctor<Precision, true>(*data_, num_qubits, wires));
-        }
+        applySpecialQubitGate<applyPauliXFunctor, 1>(wires, inverse, params);
     }
 
     /**
@@ -937,19 +983,7 @@ template <class Precision> class StateVectorKokkos {
     void
     applyPauliY(const std::vector<size_t> &wires, bool inverse = false,
                 [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 1);
-        if (!inverse) {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 1)),
-                                 applyPauliYFunctor<Precision, false>(
-                                     *data_, num_qubits, wires));
-        } else {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 1)),
-                applyPauliYFunctor<Precision, true>(*data_, num_qubits, wires));
-        }
+        applySpecialQubitGate<applyPauliYFunctor, 1>(wires, inverse, params);
     }
 
     /**
@@ -963,19 +997,7 @@ template <class Precision> class StateVectorKokkos {
     void
     applyPauliZ(const std::vector<size_t> &wires, bool inverse = false,
                 [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 1);
-        if (!inverse) {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 1)),
-                                 applyPauliZFunctor<Precision, false>(
-                                     *data_, num_qubits, wires));
-        } else {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 1)),
-                applyPauliZFunctor<Precision, true>(*data_, num_qubits, wires));
-        }
+        applySpecialQubitGate<applyPauliZFunctor, 1>(wires, inverse, params);
     }
 
     /**
@@ -1259,19 +1281,7 @@ template <class Precision> class StateVectorKokkos {
     void
     applyHadamard(const std::vector<size_t> &wires, bool inverse = false,
                   [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 1);
-        if (!inverse) {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 1)),
-                                 applyHadamardFunctor<Precision, false>(
-                                     *data_, num_qubits, wires));
-        } else {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 1)),
-                                 applyHadamardFunctor<Precision, true>(
-                                     *data_, num_qubits, wires));
-        }
+        applySpecialQubitGate<applyHadamardFunctor, 1>(wires, inverse, params);
     }
 
     /**
@@ -1283,19 +1293,7 @@ template <class Precision> class StateVectorKokkos {
      */
     void applyS(const std::vector<size_t> &wires, bool inverse = false,
                 [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 1);
-        if (!inverse) {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 1)),
-                applySFunctor<Precision, false>(*data_, num_qubits, wires));
-        } else {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 1)),
-                applySFunctor<Precision, true>(*data_, num_qubits, wires));
-        }
+        applySpecialQubitGate<applySFunctor, 1>(wires, inverse, params);
     }
 
     /**
@@ -1307,19 +1305,7 @@ template <class Precision> class StateVectorKokkos {
      */
     void applyT(const std::vector<size_t> &wires, bool inverse = false,
                 [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 1);
-        if (!inverse) {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 1)),
-                applyTFunctor<Precision, false>(*data_, num_qubits, wires));
-        } else {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 1)),
-                applyTFunctor<Precision, true>(*data_, num_qubits, wires));
-        }
+        applySpecialQubitGate<applyTFunctor, 1>(wires, inverse, params);
     }
 
     /**
@@ -1331,20 +1317,7 @@ template <class Precision> class StateVectorKokkos {
      */
     void applyRX(const std::vector<size_t> &wires, bool inverse,
                  [[maybe_unused]] const std::vector<Precision> &params) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 1);
-
-        if (!inverse) {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 1)),
-                                 applyRXFunctor<Precision, false>(
-                                     *data_, num_qubits, wires, params));
-        } else {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 1)),
-                                 applyRXFunctor<Precision, true>(
-                                     *data_, num_qubits, wires, params));
-        }
+        applySpecialQubitGate<applyRXFunctor, 1>(wires, inverse, params);
     }
 
     /**
@@ -1356,19 +1329,7 @@ template <class Precision> class StateVectorKokkos {
      */
     void applyRY(const std::vector<size_t> &wires, bool inverse,
                  [[maybe_unused]] const std::vector<Precision> &params) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 1);
-        if (!inverse) {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 1)),
-                                 applyRYFunctor<Precision, false>(
-                                     *data_, num_qubits, wires, params));
-        } else {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 1)),
-                                 applyRYFunctor<Precision, true>(
-                                     *data_, num_qubits, wires, params));
-        }
+        applySpecialQubitGate<applyRYFunctor, 1>(wires, inverse, params);
     }
 
     /**
@@ -1380,19 +1341,7 @@ template <class Precision> class StateVectorKokkos {
      */
     void applyRZ(const std::vector<size_t> &wires, bool inverse = false,
                  [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 1);
-        if (!inverse) {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 1)),
-                                 applyRZFunctor<Precision, false>(
-                                     *data_, num_qubits, wires, params));
-        } else {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 1)),
-                                 applyRZFunctor<Precision, true>(
-                                     *data_, num_qubits, wires, params));
-        }
+        applySpecialQubitGate<applyRZFunctor, 1>(wires, inverse, params);
     }
 
     /**
@@ -1405,20 +1354,8 @@ template <class Precision> class StateVectorKokkos {
     void applyPhaseShift(
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 1);
-
-        if (!inverse) {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 1)),
-                                 applyPhaseShiftFunctor<Precision, false>(
-                                     *data_, num_qubits, wires, params[0]));
-        } else {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 1)),
-                                 applyPhaseShiftFunctor<Precision, true>(
-                                     *data_, num_qubits, wires, params[0]));
-        }
+        applySpecialQubitGate<applyPhaseShiftFunctor, 1>(wires, inverse,
+                                                         params);
     }
 
     /**
@@ -1430,19 +1367,7 @@ template <class Precision> class StateVectorKokkos {
      */
     void applyRot(const std::vector<size_t> &wires, bool inverse,
                   const std::vector<Precision> &params) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 1);
-        if (!inverse) {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 1)),
-                                 applyRotFunctor<Precision, false>(
-                                     *data_, num_qubits, wires, params));
-        } else {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 1)),
-                                 applyRotFunctor<Precision, true>(
-                                     *data_, num_qubits, wires, params));
-        }
+        applySpecialQubitGate<applyRotFunctor, 1>(wires, inverse, params);
     }
 
     /**
@@ -1453,20 +1378,8 @@ template <class Precision> class StateVectorKokkos {
      * @param params parameters for this gate
      */
     void applyCY(const std::vector<size_t> &wires, bool inverse = false,
-                 [[maybe_unused]] const std::vector<Precision> &param = {}) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 2);
-        if (!inverse) {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 2)),
-                applyCYFunctor<Precision, false>(*data_, num_qubits, wires));
-        } else {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 2)),
-                applyCYFunctor<Precision, true>(*data_, num_qubits, wires));
-        }
+                 [[maybe_unused]] const std::vector<Precision> &params = {}) {
+        applySpecialQubitGate<applyCYFunctor, 2>(wires, inverse, params);
     }
 
     /**
@@ -1478,19 +1391,7 @@ template <class Precision> class StateVectorKokkos {
      */
     void applyCZ(const std::vector<size_t> &wires, bool inverse = false,
                  [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 2);
-        if (!inverse) {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 2)),
-                applyCZFunctor<Precision, false>(*data_, num_qubits, wires));
-        } else {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 2)),
-                applyCZFunctor<Precision, true>(*data_, num_qubits, wires));
-        }
+        applySpecialQubitGate<applyCZFunctor, 2>(wires, inverse, params);
     }
 
     /**
@@ -1502,19 +1403,7 @@ template <class Precision> class StateVectorKokkos {
      */
     void applyCNOT(const std::vector<size_t> &wires, bool inverse = false,
                    [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 2);
-        if (!inverse) {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 2)),
-                applyCNOTFunctor<Precision, false>(*data_, num_qubits, wires));
-        } else {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 2)),
-                applyCNOTFunctor<Precision, true>(*data_, num_qubits, wires));
-        }
+        applySpecialQubitGate<applyCNOTFunctor, 2>(wires, inverse, params);
     }
 
     /**
@@ -1526,19 +1415,7 @@ template <class Precision> class StateVectorKokkos {
      */
     void applySWAP(const std::vector<size_t> &wires, bool inverse = false,
                    [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 2);
-        if (!inverse) {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 2)),
-                applySWAPFunctor<Precision, false>(*data_, num_qubits, wires));
-        } else {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 2)),
-                applySWAPFunctor<Precision, true>(*data_, num_qubits, wires));
-        }
+        applySpecialQubitGate<applySWAPFunctor, 2>(wires, inverse, params);
     }
 
     /**
@@ -1552,22 +1429,8 @@ template <class Precision> class StateVectorKokkos {
     void applyControlledPhaseShift(
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 2);
-
-        if (!inverse) {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 2)),
-                applyControlledPhaseShiftFunctor<Precision, false>(
-                    *data_, num_qubits, wires, params));
-        } else {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 2)),
-                applyControlledPhaseShiftFunctor<Precision, true>(
-                    *data_, num_qubits, wires, params));
-        }
+        applySpecialQubitGate<applyControlledPhaseShiftFunctor, 2>(
+            wires, inverse, params);
     }
 
     /**
@@ -1579,19 +1442,7 @@ template <class Precision> class StateVectorKokkos {
      */
     void applyCRX(const std::vector<size_t> &wires, bool inverse = false,
                   [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 2);
-        if (!inverse) {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applyCRXFunctor<Precision, false>(
-                                     *data_, num_qubits, wires, params));
-        } else {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applyCRXFunctor<Precision, true>(
-                                     *data_, num_qubits, wires, params));
-        }
+        applySpecialQubitGate<applyCRXFunctor, 2>(wires, inverse, params);
     }
 
     /**
@@ -1603,19 +1454,7 @@ template <class Precision> class StateVectorKokkos {
      */
     void applyCRY(const std::vector<size_t> &wires, bool inverse = false,
                   [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 2);
-        if (!inverse) {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applyCRYFunctor<Precision, false>(
-                                     *data_, num_qubits, wires, params));
-        } else {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applyCRYFunctor<Precision, true>(
-                                     *data_, num_qubits, wires, params));
-        }
+        applySpecialQubitGate<applyCRYFunctor, 2>(wires, inverse, params);
     }
 
     /**
@@ -1627,20 +1466,7 @@ template <class Precision> class StateVectorKokkos {
      */
     void applyCRZ(const std::vector<size_t> &wires, bool inverse = false,
                   [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 2);
-
-        if (!inverse) {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applyCRZFunctor<Precision, false>(
-                                     *data_, num_qubits, wires, params));
-        } else {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applyCRZFunctor<Precision, true>(
-                                     *data_, num_qubits, wires, params));
-        }
+        applySpecialQubitGate<applyCRZFunctor, 2>(wires, inverse, params);
     }
 
     /**
@@ -1652,20 +1478,7 @@ template <class Precision> class StateVectorKokkos {
      */
     void applyCRot(const std::vector<size_t> &wires, bool inverse,
                    [[maybe_unused]] const std::vector<Precision> &params) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 2);
-
-        if (!inverse) {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applyCRotFunctor<Precision, false>(
-                                     *data_, num_qubits, wires, params));
-        } else {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applyCRotFunctor<Precision, true>(
-                                     *data_, num_qubits, wires, params));
-        }
+        applySpecialQubitGate<applyCRotFunctor, 2>(wires, inverse, params);
     }
 
     /**
@@ -1678,19 +1491,7 @@ template <class Precision> class StateVectorKokkos {
     void
     applyIsingXX(const std::vector<size_t> &wires, bool inverse = false,
                  [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 2);
-        if (!inverse) {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applyIsingXXFunctor<Precision, false>(
-                                     *data_, num_qubits, wires, params));
-        } else {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applyIsingXXFunctor<Precision, true>(
-                                     *data_, num_qubits, wires, params));
-        }
+        applySpecialQubitGate<applyIsingXXFunctor, 2>(wires, inverse, params);
     }
 
     /**
@@ -1703,19 +1504,7 @@ template <class Precision> class StateVectorKokkos {
     void
     applyIsingXY(const std::vector<size_t> &wires, bool inverse = false,
                  [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 2);
-        if (!inverse) {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applyIsingXYFunctor<Precision, false>(
-                                     *data_, num_qubits, wires, params));
-        } else {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applyIsingXYFunctor<Precision, true>(
-                                     *data_, num_qubits, wires, params));
-        }
+        applySpecialQubitGate<applyIsingXYFunctor, 2>(wires, inverse, params);
     }
 
     /**
@@ -1728,19 +1517,7 @@ template <class Precision> class StateVectorKokkos {
     void
     applyIsingYY(const std::vector<size_t> &wires, bool inverse = false,
                  [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 2);
-        if (!inverse) {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applyIsingYYFunctor<Precision, false>(
-                                     *data_, num_qubits, wires, params));
-        } else {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applyIsingYYFunctor<Precision, true>(
-                                     *data_, num_qubits, wires, params));
-        }
+        applySpecialQubitGate<applyIsingYYFunctor, 2>(wires, inverse, params);
     }
 
     /**
@@ -1753,20 +1530,7 @@ template <class Precision> class StateVectorKokkos {
     void
     applyIsingZZ(const std::vector<size_t> &wires, bool inverse = false,
                  [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 2);
-
-        if (!inverse) {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applyIsingZZFunctor<Precision, false>(
-                                     *data_, num_qubits, wires, params));
-        } else {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applyIsingZZFunctor<Precision, true>(
-                                     *data_, num_qubits, wires, params));
-        }
+        applySpecialQubitGate<applyIsingZZFunctor, 2>(wires, inverse, params);
     }
 
     /**
@@ -1780,20 +1544,8 @@ template <class Precision> class StateVectorKokkos {
     void applySingleExcitation(
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 2);
-
-        if (!inverse) {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applySingleExcitationFunctor<Precision, false>(
-                                     *data_, num_qubits, wires, params));
-        } else {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applySingleExcitationFunctor<Precision, true>(
-                                     *data_, num_qubits, wires, params));
-        }
+        applySpecialQubitGate<applySingleExcitationFunctor, 2>(wires, inverse,
+                                                               params);
     }
 
     /**
@@ -1807,22 +1559,8 @@ template <class Precision> class StateVectorKokkos {
     void applySingleExcitationMinus(
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 2);
-
-        if (!inverse) {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 2)),
-                applySingleExcitationMinusFunctor<Precision, false>(
-                    *data_, num_qubits, wires, params));
-        } else {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 2)),
-                applySingleExcitationMinusFunctor<Precision, true>(
-                    *data_, num_qubits, wires, params));
-        }
+        applySpecialQubitGate<applySingleExcitationMinusFunctor, 2>(
+            wires, inverse, params);
     }
 
     /**
@@ -1836,22 +1574,8 @@ template <class Precision> class StateVectorKokkos {
     void applySingleExcitationPlus(
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 2);
-
-        if (!inverse) {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 2)),
-                applySingleExcitationPlusFunctor<Precision, false>(
-                    *data_, num_qubits, wires, params));
-        } else {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 2)),
-                applySingleExcitationPlusFunctor<Precision, true>(
-                    *data_, num_qubits, wires, params));
-        }
+        applySpecialQubitGate<applySingleExcitationPlusFunctor, 2>(
+            wires, inverse, params);
     }
 
     /**
@@ -1865,20 +1589,8 @@ template <class Precision> class StateVectorKokkos {
     void applyDoubleExcitation(
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 4);
-
-        if (!inverse) {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 4)),
-                                 applyDoubleExcitationFunctor<Precision, false>(
-                                     *data_, num_qubits, wires, params));
-        } else {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 4)),
-                                 applyDoubleExcitationFunctor<Precision, true>(
-                                     *data_, num_qubits, wires, params));
-        }
+        applySpecialQubitGate<applyDoubleExcitationFunctor, 4>(wires, inverse,
+                                                               params);
     }
 
     /**
@@ -1892,22 +1604,8 @@ template <class Precision> class StateVectorKokkos {
     void applyDoubleExcitationMinus(
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 4);
-
-        if (!inverse) {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 4)),
-                applyDoubleExcitationMinusFunctor<Precision, false>(
-                    *data_, num_qubits, wires, params));
-        } else {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 4)),
-                applyDoubleExcitationMinusFunctor<Precision, true>(
-                    *data_, num_qubits, wires, params));
-        }
+        applySpecialQubitGate<applyDoubleExcitationMinusFunctor, 4>(
+            wires, inverse, params);
     }
 
     /**
@@ -1921,22 +1619,8 @@ template <class Precision> class StateVectorKokkos {
     void applyDoubleExcitationPlus(
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 4);
-
-        if (!inverse) {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 4)),
-                applyDoubleExcitationPlusFunctor<Precision, false>(
-                    *data_, num_qubits, wires, params));
-        } else {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 4)),
-                applyDoubleExcitationPlusFunctor<Precision, true>(
-                    *data_, num_qubits, wires, params));
-        }
+        applySpecialQubitGate<applyDoubleExcitationPlusFunctor, 4>(
+            wires, inverse, params);
     }
 
     /**
@@ -1974,20 +1658,7 @@ template <class Precision> class StateVectorKokkos {
     void
     applyCSWAP(const std::vector<size_t> &wires, bool inverse = false,
                [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 3);
-
-        if (!inverse) {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 3)),
-                applyCSWAPFunctor<Precision, false>(*data_, num_qubits, wires));
-        } else {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 3)),
-                applyCSWAPFunctor<Precision, true>(*data_, num_qubits, wires));
-        }
+        applySpecialQubitGate<applyCSWAPFunctor, 3>(wires, inverse, params);
     }
 
     /**
@@ -2000,20 +1671,7 @@ template <class Precision> class StateVectorKokkos {
     void
     applyToffoli(const std::vector<size_t> &wires, bool inverse = false,
                  [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 3);
-
-        if (!inverse) {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 3)),
-                                 applyToffoliFunctor<Precision, false>(
-                                     *data_, num_qubits, wires));
-        } else {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 3)),
-                                 applyToffoliFunctor<Precision, true>(
-                                     *data_, num_qubits, wires));
-        }
+        applySpecialQubitGate<applyToffoliFunctor, 3>(wires, inverse, params);
     }
 
     /**
@@ -2027,22 +1685,8 @@ template <class Precision> class StateVectorKokkos {
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {})
         -> Precision {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 1);
-
-        if (!inverse) {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 1)),
-                applyGeneratorPhaseShiftFunctor<Precision, false>(
-                    *data_, num_qubits, wires));
-        } else {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 1)),
-                applyGeneratorPhaseShiftFunctor<Precision, true>(
-                    *data_, num_qubits, wires));
-        }
+        applySpecialQubitGate<applyGeneratorPhaseShiftFunctor, 1>(
+            wires, inverse, params);
         return static_cast<Precision>(1.0);
     }
 
@@ -2057,20 +1701,8 @@ template <class Precision> class StateVectorKokkos {
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {})
         -> Precision {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 2);
-
-        if (inverse == false) {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applyGeneratorIsingXXFunctor<Precision, false>(
-                                     *data_, num_qubits, wires));
-        } else {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applyGeneratorIsingXXFunctor<Precision, true>(
-                                     *data_, num_qubits, wires));
-        }
+        applySpecialQubitGate<applyGeneratorIsingXXFunctor, 2>(wires, inverse,
+                                                               params);
         return -static_cast<Precision>(0.5);
     }
 
@@ -2085,20 +1717,8 @@ template <class Precision> class StateVectorKokkos {
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {})
         -> Precision {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 2);
-
-        if (inverse == false) {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applyGeneratorIsingXYFunctor<Precision, false>(
-                                     *data_, num_qubits, wires));
-        } else {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applyGeneratorIsingXYFunctor<Precision, true>(
-                                     *data_, num_qubits, wires));
-        }
+        applySpecialQubitGate<applyGeneratorIsingXYFunctor, 2>(wires, inverse,
+                                                               params);
         return static_cast<Precision>(0.5);
     }
 
@@ -2113,20 +1733,8 @@ template <class Precision> class StateVectorKokkos {
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {})
         -> Precision {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 2);
-
-        if (!inverse) {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applyGeneratorIsingYYFunctor<Precision, false>(
-                                     *data_, num_qubits, wires));
-        } else {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applyGeneratorIsingYYFunctor<Precision, true>(
-                                     *data_, num_qubits, wires));
-        }
+        applySpecialQubitGate<applyGeneratorIsingYYFunctor, 2>(wires, inverse,
+                                                               params);
         return -static_cast<Precision>(0.5);
     }
 
@@ -2141,20 +1749,8 @@ template <class Precision> class StateVectorKokkos {
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {})
         -> Precision {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 2);
-
-        if (inverse == false) {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applyGeneratorIsingZZFunctor<Precision, false>(
-                                     *data_, num_qubits, wires));
-        } else {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applyGeneratorIsingZZFunctor<Precision, true>(
-                                     *data_, num_qubits, wires));
-        }
+        applySpecialQubitGate<applyGeneratorIsingZZFunctor, 2>(wires, inverse,
+                                                               params);
         return -static_cast<Precision>(0.5);
     }
 
@@ -2170,22 +1766,8 @@ template <class Precision> class StateVectorKokkos {
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {})
         -> Precision {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 2);
-
-        if (inverse == false) {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 2)),
-                applyGeneratorSingleExcitationFunctor<Precision, false>(
-                    *data_, num_qubits, wires));
-        } else {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 2)),
-                applyGeneratorSingleExcitationFunctor<Precision, true>(
-                    *data_, num_qubits, wires));
-        }
+        applySpecialQubitGate<applyGeneratorSingleExcitationFunctor, 2>(
+            wires, inverse, params);
         return -static_cast<Precision>(0.5);
     }
 
@@ -2201,22 +1783,8 @@ template <class Precision> class StateVectorKokkos {
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {})
         -> Precision {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 2);
-
-        if (inverse == false) {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 2)),
-                applyGeneratorSingleExcitationMinusFunctor<Precision, false>(
-                    *data_, num_qubits, wires));
-        } else {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 2)),
-                applyGeneratorSingleExcitationMinusFunctor<Precision, true>(
-                    *data_, num_qubits, wires));
-        }
+        applySpecialQubitGate<applyGeneratorSingleExcitationMinusFunctor, 2>(
+            wires, inverse, params);
         return -static_cast<Precision>(0.5);
     }
 
@@ -2232,22 +1800,8 @@ template <class Precision> class StateVectorKokkos {
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {})
         -> Precision {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 2);
-
-        if (inverse == false) {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 2)),
-                applyGeneratorSingleExcitationPlusFunctor<Precision, false>(
-                    *data_, num_qubits, wires));
-        } else {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 2)),
-                applyGeneratorSingleExcitationPlusFunctor<Precision, true>(
-                    *data_, num_qubits, wires));
-        }
+        applySpecialQubitGate<applyGeneratorSingleExcitationPlusFunctor, 2>(
+            wires, inverse, params);
         return -static_cast<Precision>(0.5);
     }
 
@@ -2263,22 +1817,8 @@ template <class Precision> class StateVectorKokkos {
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {})
         -> Precision {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 4);
-
-        if (inverse == false) {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 4)),
-                applyGeneratorDoubleExcitationFunctor<Precision, false>(
-                    *data_, num_qubits, wires));
-        } else {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 4)),
-                applyGeneratorDoubleExcitationFunctor<Precision, true>(
-                    *data_, num_qubits, wires));
-        }
+        applySpecialQubitGate<applyGeneratorDoubleExcitationFunctor, 4>(
+            wires, inverse, params);
         return -static_cast<Precision>(0.5);
     }
 
@@ -2294,22 +1834,8 @@ template <class Precision> class StateVectorKokkos {
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {})
         -> Precision {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 4);
-
-        if (inverse == false) {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 4)),
-                applyGeneratorDoubleExcitationMinusFunctor<Precision, false>(
-                    *data_, num_qubits, wires));
-        } else {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 4)),
-                applyGeneratorDoubleExcitationMinusFunctor<Precision, true>(
-                    *data_, num_qubits, wires));
-        }
+        applySpecialQubitGate<applyGeneratorDoubleExcitationMinusFunctor, 4>(
+            wires, inverse, params);
         return -static_cast<Precision>(0.5);
     }
 
@@ -2325,22 +1851,8 @@ template <class Precision> class StateVectorKokkos {
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {})
         -> Precision {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 4);
-
-        if (inverse == false) {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 4)),
-                applyGeneratorDoubleExcitationPlusFunctor<Precision, false>(
-                    *data_, num_qubits, wires));
-        } else {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 4)),
-                applyGeneratorDoubleExcitationPlusFunctor<Precision, true>(
-                    *data_, num_qubits, wires));
-        }
+        applySpecialQubitGate<applyGeneratorDoubleExcitationPlusFunctor, 4>(
+            wires, inverse, params);
         return static_cast<Precision>(0.5);
     }
 
@@ -2355,20 +1867,7 @@ template <class Precision> class StateVectorKokkos {
     applyGeneratorRX(const std::vector<size_t> &wires, bool inverse = false,
                      [[maybe_unused]] const std::vector<Precision> &params = {})
         -> Precision {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 1);
-
-        if (!inverse) {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 1)),
-                                 applyPauliXFunctor<Precision, false>(
-                                     *data_, num_qubits, wires));
-        } else {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 1)),
-                applyPauliXFunctor<Precision, true>(*data_, num_qubits, wires));
-        }
+        applyPauliX(wires, inverse, params);
         return -static_cast<Precision>(0.5);
     }
 
@@ -2383,20 +1882,7 @@ template <class Precision> class StateVectorKokkos {
     applyGeneratorRY(const std::vector<size_t> &wires, bool inverse = false,
                      [[maybe_unused]] const std::vector<Precision> &params = {})
         -> Precision {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 1);
-
-        if (!inverse) {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 1)),
-                                 applyPauliYFunctor<Precision, false>(
-                                     *data_, num_qubits, wires));
-        } else {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 1)),
-                applyPauliYFunctor<Precision, true>(*data_, num_qubits, wires));
-        }
+        applyPauliY(wires, inverse, params);
         return -static_cast<Precision>(0.5);
     }
 
@@ -2411,20 +1897,7 @@ template <class Precision> class StateVectorKokkos {
     applyGeneratorRZ(const std::vector<size_t> &wires, bool inverse = false,
                      [[maybe_unused]] const std::vector<Precision> &params = {})
         -> Precision {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 1);
-
-        if (!inverse) {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 1)),
-                                 applyPauliZFunctor<Precision, false>(
-                                     *data_, num_qubits, wires));
-        } else {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 1)),
-                applyPauliZFunctor<Precision, true>(*data_, num_qubits, wires));
-        }
+        applyPauliZ(wires, inverse, params);
         return -static_cast<Precision>(0.5);
     }
 
@@ -2440,22 +1913,8 @@ template <class Precision> class StateVectorKokkos {
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {})
         -> Precision {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 2);
-
-        if (!inverse) {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 2)),
-                applyGeneratorControlledPhaseShiftFunctor<Precision, false>(
-                    *data_, num_qubits, wires));
-        } else {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 2)),
-                applyGeneratorControlledPhaseShiftFunctor<Precision, true>(
-                    *data_, num_qubits, wires));
-        }
+        applySpecialQubitGate<applyGeneratorControlledPhaseShiftFunctor, 2>(
+            wires, inverse, params);
         return static_cast<Precision>(1);
     }
 
@@ -2471,20 +1930,8 @@ template <class Precision> class StateVectorKokkos {
         [[maybe_unused]] const std::vector<Precision> &params = {})
 
         -> Precision {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 2);
-
-        if (!inverse) {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applyGeneratorCRXFunctor<Precision, false>(
-                                     *data_, num_qubits, wires));
-        } else {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applyGeneratorCRXFunctor<Precision, true>(
-                                     *data_, num_qubits, wires));
-        }
+        applySpecialQubitGate<applyGeneratorCRXFunctor, 2>(wires, inverse,
+                                                           params);
         return -static_cast<Precision>(0.5);
     }
 
@@ -2499,20 +1946,8 @@ template <class Precision> class StateVectorKokkos {
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {})
         -> Precision {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 2);
-
-        if (inverse == false) {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applyGeneratorCRYFunctor<Precision, false>(
-                                     *data_, num_qubits, wires));
-        } else {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applyGeneratorCRYFunctor<Precision, true>(
-                                     *data_, num_qubits, wires));
-        }
+        applySpecialQubitGate<applyGeneratorCRYFunctor, 2>(wires, inverse,
+                                                           params);
         return -static_cast<Precision>(0.5);
     }
 
@@ -2527,20 +1962,8 @@ template <class Precision> class StateVectorKokkos {
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {})
         -> Precision {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 2);
-
-        if (inverse == false) {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applyGeneratorCRZFunctor<Precision, false>(
-                                     *data_, num_qubits, wires));
-        } else {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applyGeneratorCRZFunctor<Precision, true>(
-                                     *data_, num_qubits, wires));
-        }
+        applySpecialQubitGate<applyGeneratorCRZFunctor, 2>(wires, inverse,
+                                                           params);
         return -static_cast<Precision>(0.5);
     }
 
