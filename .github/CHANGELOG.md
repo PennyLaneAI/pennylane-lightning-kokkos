@@ -48,7 +48,7 @@
 
 This release contains contributions from (in alphabetical order):
 
-Amintor Dusko, Vincent Michaud-Rioux, Shuli Shu
+Amintor Dusko, Vincent Michaud-Rioux, Lee James O'Riordan, Shuli Shu
 
 ---
 
