@@ -276,10 +276,6 @@ class LightningKokkos(LightningQubit):
         Returns:
             array[float]: list of the probabilities
         """
-        if wires and len(wires) > 1 and (not np.all(list(wires)[:-1] <= list(wires)[1:])):
-            raise RuntimeError(
-                "Lightning does not currently support out-of-order indices for probabilities"
-            )
 
         if self.shots is not None:
             return self.estimate_probability(wires=wires, shot_range=shot_range, bin_size=bin_size)
@@ -289,6 +285,15 @@ class LightningKokkos(LightningQubit):
 
         # translate to wire labels used by device
         device_wires = self.map_wires(wires)
+
+        if (
+            device_wires
+            and len(device_wires) > 1
+            and (not np.all(list(device_wires)[:-1] <= list(device_wires)[1:]))
+        ):
+            raise RuntimeError(
+                "Lightning does not currently support out-of-order indices for probabilities"
+            )
 
         return self._kokkos_state.probs(device_wires)
 
