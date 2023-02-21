@@ -78,360 +78,328 @@ template <class Precision> class StateVectorKokkos {
 
     StateVectorKokkos() = delete;
     StateVectorKokkos(size_t num_qubits, const Kokkos::InitArguments &kokkos_args = {})
-            : gates_{
-                  // Identity
-                  {"PauliX",
-                   [&](auto &&wires, auto &&adjoint, auto &&params)
-                   {
-                       applyPauliX(std::forward<decltype(wires)>(wires),
-                                   std::forward<decltype(adjoint)>(adjoint),
-                                   std::forward<decltype(params)>(params));
-                   }},
-                  {"PauliY",
-                   [&](auto &&wires, auto &&adjoint, auto &&params)
-                   {
-                       applyPauliY(std::forward<decltype(wires)>(wires),
-                                   std::forward<decltype(adjoint)>(adjoint),
-                                   std::forward<decltype(params)>(params));
-                   }},
-                  {"PauliZ",
-                   [&](auto &&wires, auto &&adjoint, auto &&params)
-                   {
-                       applyPauliZ(std::forward<decltype(wires)>(wires),
-                                   std::forward<decltype(adjoint)>(adjoint),
-                                   std::forward<decltype(params)>(params));
-                   }},
-                  {"Hadamard",
-                   [&](auto &&wires, auto &&adjoint, auto &&params)
-                   {
-                       applyHadamard(std::forward<decltype(wires)>(wires),
-                                     std::forward<decltype(adjoint)>(adjoint),
-                                     std::forward<decltype(params)>(params));
-                   }},
-                  {"S",
-                   [&](auto &&wires, auto &&adjoint, auto &&params)
-                   {
-                       applyS(std::forward<decltype(wires)>(wires),
-                              std::forward<decltype(adjoint)>(adjoint),
-                              std::forward<decltype(params)>(params));
-                   }},
-                  {"T",
-                   [&](auto &&wires, auto &&adjoint, auto &&params)
-                   {
-                       applyT(std::forward<decltype(wires)>(wires),
-                              std::forward<decltype(adjoint)>(adjoint),
-                              std::forward<decltype(params)>(params));
-                   }},
-                  {"RX",
-                   [&](auto &&wires, auto &&adjoint, auto &&params)
-                   {
-                       applyRX(std::forward<decltype(wires)>(wires),
-                               std::forward<decltype(adjoint)>(adjoint),
-                               std::forward<decltype(params)>(params));
-                   }},
-                  {"RY",
-                   [&](auto &&wires, auto &&adjoint, auto &&params)
-                   {
-                       applyRY(std::forward<decltype(wires)>(wires),
-                               std::forward<decltype(adjoint)>(adjoint),
-                               std::forward<decltype(params)>(params));
-                   }},
-                  {"RZ",
-                   [&](auto &&wires, auto &&adjoint, auto &&params)
-                   {
-                       applyRZ(std::forward<decltype(wires)>(wires),
-                               std::forward<decltype(adjoint)>(adjoint),
-                               std::forward<decltype(params)>(params));
-                   }},
-                  {"PhaseShift",
-                   [&](auto &&wires, auto &&adjoint, auto &&params)
-                   {
-                       applyPhaseShift(std::forward<decltype(wires)>(wires),
-                                       std::forward<decltype(adjoint)>(adjoint),
-                                       std::forward<decltype(params)>(params));
-                   }},
-                  {"Rot",
-                   [&](auto &&wires, auto &&adjoint, auto &&params)
-                   {
-                       applyRot(std::forward<decltype(wires)>(wires),
-                                std::forward<decltype(adjoint)>(adjoint),
-                                std::forward<decltype(params)>(params));
-                   }},
-                  {"CY",
-                   [&](auto &&wires, auto &&adjoint, auto &&params)
-                   {
-                       applyCY(std::forward<decltype(wires)>(wires),
-                               std::forward<decltype(adjoint)>(adjoint),
-                               std::forward<decltype(params)>(params));
-                   }},
-                  {"CZ",
-                   [&](auto &&wires, auto &&adjoint, auto &&params)
-                   {
-                       applyCZ(std::forward<decltype(wires)>(wires),
-                               std::forward<decltype(adjoint)>(adjoint),
-                               std::forward<decltype(params)>(params));
-                   }},
-                  {"CNOT",
-                   [&](auto &&wires, auto &&adjoint, auto &&params)
-                   {
-                       applyCNOT(std::forward<decltype(wires)>(wires),
-                                 std::forward<decltype(adjoint)>(adjoint),
-                                 std::forward<decltype(params)>(params));
-                   }},
-                  {"SWAP",
-                   [&](auto &&wires, auto &&adjoint, auto &&params)
-                   {
-                       applySWAP(std::forward<decltype(wires)>(wires),
-                                 std::forward<decltype(adjoint)>(adjoint),
-                                 std::forward<decltype(params)>(params));
-                   }},
-                  {"ControlledPhaseShift",
-                   [&](auto &&wires, auto &&adjoint, auto &&params)
-                   {
-                       applyControlledPhaseShift(
-                           std::forward<decltype(wires)>(wires),
-                           std::forward<decltype(adjoint)>(adjoint),
-                           std::forward<decltype(params)>(params));
-                   }},
-                  {"CRX",
-                   [&](auto &&wires, auto &&adjoint, auto &&params)
-                   {
-                       applyCRX(std::forward<decltype(wires)>(wires),
-                                std::forward<decltype(adjoint)>(adjoint),
-                                std::forward<decltype(params)>(params));
-                   }},
-                  {"CRY",
-                   [&](auto &&wires, auto &&adjoint, auto &&params)
-                   {
-                       applyCRY(std::forward<decltype(wires)>(wires),
-                                std::forward<decltype(adjoint)>(adjoint),
-                                std::forward<decltype(params)>(params));
-                   }},
-                  {"CRZ",
-                   [&](auto &&wires, auto &&adjoint, auto &&params)
-                   {
-                       applyCRZ(std::forward<decltype(wires)>(wires),
-                                std::forward<decltype(adjoint)>(adjoint),
-                                std::forward<decltype(params)>(params));
-                   }},
-                  {"CRot",
-                   [&](auto &&wires, auto &&adjoint, auto &&params)
-                   {
-                       applyCRot(std::forward<decltype(wires)>(wires),
-                                 std::forward<decltype(adjoint)>(adjoint),
-                                 std::forward<decltype(params)>(params));
-                   }},
-                  {"IsingXX",
-                   [&](auto &&wires, auto &&adjoint, auto &&params)
-                   {
-                       applyIsingXX(std::forward<decltype(wires)>(wires),
-                                    std::forward<decltype(adjoint)>(adjoint),
-                                    std::forward<decltype(params)>(params));
-                   }},
-                  {"IsingXY",
-                   [&](auto &&wires, auto &&adjoint, auto &&params)
-                   {
-                       applyIsingXY(std::forward<decltype(wires)>(wires),
-                                    std::forward<decltype(adjoint)>(adjoint),
-                                    std::forward<decltype(params)>(params));
-                   }},
-
-                  {"IsingYY",
-                   [&](auto &&wires, auto &&adjoint, auto &&params)
-                   {
-                       applyIsingYY(std::forward<decltype(wires)>(wires),
-                                    std::forward<decltype(adjoint)>(adjoint),
-                                    std::forward<decltype(params)>(params));
-                   }},
-
-                  {"IsingZZ",
-                   [&](auto &&wires, auto &&adjoint, auto &&params)
-                   {
-                       applyIsingZZ(std::forward<decltype(wires)>(wires),
-                                    std::forward<decltype(adjoint)>(adjoint),
-                                    std::forward<decltype(params)>(params));
-                   }},
-                  {"SingleExcitation",
-                   [&](auto &&wires, auto &&adjoint, auto &&params)
-                   {
-                       applySingleExcitation(std::forward<decltype(wires)>(wires),
-                                             std::forward<decltype(adjoint)>(adjoint),
-                                             std::forward<decltype(params)>(params));
-                   }},
-                  {"SingleExcitationMinus",
-                   [&](auto &&wires, auto &&adjoint, auto &&params)
-                   {
-                       applySingleExcitationMinus(std::forward<decltype(wires)>(wires),
-                                                  std::forward<decltype(adjoint)>(adjoint),
-                                                  std::forward<decltype(params)>(params));
-                   }},
-                  {"SingleExcitationPlus",
-                   [&](auto &&wires, auto &&adjoint, auto &&params)
-                   {
-                       applySingleExcitationPlus(std::forward<decltype(wires)>(wires),
-                                                 std::forward<decltype(adjoint)>(adjoint),
-                                                 std::forward<decltype(params)>(params));
-                   }},
-                  {"DoubleExcitation",
-                   [&](auto &&wires, auto &&adjoint, auto &&params)
-                   {
-                       applyDoubleExcitation(std::forward<decltype(wires)>(wires),
-                                             std::forward<decltype(adjoint)>(adjoint),
-                                             std::forward<decltype(params)>(params));
-                   }},
-                  {"DoubleExcitationMinus",
-                   [&](auto &&wires, auto &&adjoint, auto &&params)
-                   {
-                       applyDoubleExcitationMinus(std::forward<decltype(wires)>(wires),
-                                                  std::forward<decltype(adjoint)>(adjoint),
-                                                  std::forward<decltype(params)>(params));
-                   }},
-                  {"DoubleExcitationPlus",
-                   [&](auto &&wires, auto &&adjoint, auto &&params)
-                   {
-                       applyDoubleExcitationPlus(std::forward<decltype(wires)>(wires),
-                                                 std::forward<decltype(adjoint)>(adjoint),
-                                                 std::forward<decltype(params)>(params));
-                   }},
-                  {"MultiRZ",
-                   [&](auto &&wires, auto &&adjoint, auto &&params)
-                   {
-                       applyMultiRZ(std::forward<decltype(wires)>(wires),
-                                    std::forward<decltype(adjoint)>(adjoint),
-                                    std::forward<decltype(params)>(params));
-                   }},
-                  {"CSWAP",
-                   [&](auto &&wires, auto &&adjoint, auto &&params)
-                   {
-                       applyCSWAP(std::forward<decltype(wires)>(wires),
+        : gates_{
+                //Identity
+                 {"PauliX", 
+                  [&](auto &&wires, auto &&adjoint, auto &&params) {
+                      applyPauliX(std::forward<decltype(wires)>(wires),
                                   std::forward<decltype(adjoint)>(adjoint),
                                   std::forward<decltype(params)>(params));
-                   }},
-                  {"Toffoli",
-                   [&](auto &&wires, auto &&adjoint, auto &&params)
-                   {
-                       applyToffoli(std::forward<decltype(wires)>(wires),
+                  }},
+                 {"PauliY",
+                  [&](auto &&wires, auto &&adjoint, auto &&params) {
+                      applyPauliY(std::forward<decltype(wires)>(wires),
+                                  std::forward<decltype(adjoint)>(adjoint),
+                                  std::forward<decltype(params)>(params));
+                  }},
+                 {"PauliZ",
+                  [&](auto &&wires, auto &&adjoint, auto &&params) {
+                      applyPauliZ(std::forward<decltype(wires)>(wires),
+                                  std::forward<decltype(adjoint)>(adjoint),
+                                  std::forward<decltype(params)>(params));
+                  }},
+                 {"Hadamard",
+                  [&](auto &&wires, auto &&adjoint, auto &&params) {
+                      applyHadamard(std::forward<decltype(wires)>(wires),
                                     std::forward<decltype(adjoint)>(adjoint),
                                     std::forward<decltype(params)>(params));
-                   }}},
-              generator_{
-                  {"RX", [&](auto &&wires, auto &&adjoint, auto &&params)
-                   {
-                       return applyGeneratorRX(std::forward<decltype(wires)>(wires),
-                                               std::forward<decltype(adjoint)>(adjoint),
-                                               std::forward<decltype(params)>(params));
-                   }},
-                  {"RY", [&](auto &&wires, auto &&adjoint, auto &&params)
-                   {
-                       return applyGeneratorRY(std::forward<decltype(wires)>(wires),
-                                               std::forward<decltype(adjoint)>(adjoint),
-                                               std::forward<decltype(params)>(params));
-                   }},
-                  {"RZ", [&](auto &&wires, auto &&adjoint, auto &&params)
-                   {
-                       return applyGeneratorRZ(std::forward<decltype(wires)>(wires),
-                                               std::forward<decltype(adjoint)>(adjoint),
-                                               std::forward<decltype(params)>(params));
-                   }},
-                  {"ControlledPhaseShift", [&](auto &&wires, auto &&adjoint, auto &&params)
-                   {
-                       return applyGeneratorControlledPhaseShift(
-                           std::forward<decltype(wires)>(wires),
-                           std::forward<decltype(adjoint)>(adjoint),
-                           std::forward<decltype(params)>(params));
-                   }},
-                  {"CRX", [&](auto &&wires, auto &&adjoint, auto &&params)
-                   {
-                       return applyGeneratorCRX(std::forward<decltype(wires)>(wires),
-                                                std::forward<decltype(adjoint)>(adjoint),
-                                                std::forward<decltype(params)>(params));
-                   }},
-                  {"CRY", [&](auto &&wires, auto &&adjoint, auto &&params)
-                   {
-                       return applyGeneratorCRY(std::forward<decltype(wires)>(wires),
-                                                std::forward<decltype(adjoint)>(adjoint),
-                                                std::forward<decltype(params)>(params));
-                   }},
-                  {"CRZ", [&](auto &&wires, auto &&adjoint, auto &&params)
-                   {
-                       return applyGeneratorCRZ(std::forward<decltype(wires)>(wires),
-                                                std::forward<decltype(adjoint)>(adjoint),
-                                                std::forward<decltype(params)>(params));
-                   }},
-                  {"IsingXX", [&](auto &&wires, auto &&adjoint, auto &&params)
-                   {
-                       return applyGeneratorIsingXX(std::forward<decltype(wires)>(wires),
-                                                    std::forward<decltype(adjoint)>(adjoint),
-                                                    std::forward<decltype(params)>(params));
-                   }},
-                  {"IsingXY", [&](auto &&wires, auto &&adjoint, auto &&params)
-                   {
-                       return applyGeneratorIsingXY(std::forward<decltype(wires)>(wires),
-                                                    std::forward<decltype(adjoint)>(adjoint),
-                                                    std::forward<decltype(params)>(params));
-                   }},
-                  {"IsingYY", [&](auto &&wires, auto &&adjoint, auto &&params)
-                   {
-                       return applyGeneratorIsingYY(std::forward<decltype(wires)>(wires),
-                                                    std::forward<decltype(adjoint)>(adjoint),
-                                                    std::forward<decltype(params)>(params));
-                   }},
-                  {"IsingZZ", [&](auto &&wires, auto &&adjoint, auto &&params)
-                   {
-                       return applyGeneratorIsingZZ(std::forward<decltype(wires)>(wires),
-                                                    std::forward<decltype(adjoint)>(adjoint),
-                                                    std::forward<decltype(params)>(params));
-                   }},
-                  {"SingleExcitation", [&](auto &&wires, auto &&adjoint, auto &&params)
-                   {
-                       return applyGeneratorSingleExcitation(std::forward<decltype(wires)>(wires),
-                                                             std::forward<decltype(adjoint)>(adjoint),
-                                                             std::forward<decltype(params)>(params));
-                   }},
-                  {"SingleExcitationMinus", [&](auto &&wires, auto &&adjoint, auto &&params)
-                   {
-                       return applyGeneratorSingleExcitationMinus(std::forward<decltype(wires)>(wires),
-                                                                  std::forward<decltype(adjoint)>(adjoint),
-                                                                  std::forward<decltype(params)>(params));
-                   }},
-                  {"SingleExcitationPlus", [&](auto &&wires, auto &&adjoint, auto &&params)
-                   {
-                       return applyGeneratorSingleExcitationPlus(std::forward<decltype(wires)>(wires),
-                                                                 std::forward<decltype(adjoint)>(adjoint),
-                                                                 std::forward<decltype(params)>(params));
-                   }},
-                  {"DoubleExcitation", [&](auto &&wires, auto &&adjoint, auto &&params)
-                   {
-                       return applyGeneratorDoubleExcitation(std::forward<decltype(wires)>(wires),
-                                                             std::forward<decltype(adjoint)>(adjoint),
-                                                             std::forward<decltype(params)>(params));
-                   }},
-                  {"DoubleExcitationMinus", [&](auto &&wires, auto &&adjoint, auto &&params)
-                   {
-                       return applyGeneratorDoubleExcitationMinus(std::forward<decltype(wires)>(wires),
-                                                                  std::forward<decltype(adjoint)>(adjoint),
-                                                                  std::forward<decltype(params)>(params));
-                   }},
-                  {"DoubleExcitationPlus", [&](auto &&wires, auto &&adjoint, auto &&params)
-                   {
-                       return applyGeneratorDoubleExcitationPlus(std::forward<decltype(wires)>(wires),
-                                                                 std::forward<decltype(adjoint)>(adjoint),
-                                                                 std::forward<decltype(params)>(params));
-                   }},
-                  {"PhaseShift", [&](auto &&wires, auto &&adjoint, auto &&params)
-                   {
-                       return applyGeneratorPhaseShift(std::forward<decltype(wires)>(wires),
-                                                       std::forward<decltype(adjoint)>(adjoint),
-                                                       std::forward<decltype(params)>(params));
-                   }},
-                  {"MultiRZ", [&](auto &&wires, auto &&adjoint, auto &&params)
-                   {
-                       return applyGeneratorMultiRZ(std::forward<decltype(wires)>(wires),
-                                                    std::forward<decltype(adjoint)>(adjoint),
-                                                    std::forward<decltype(params)>(params));
-                   }},
-              }
-        {
+                  }},
+                 {"S",
+                  [&](auto &&wires, auto &&adjoint, auto &&params) {
+                      applyS(std::forward<decltype(wires)>(wires),
+                             std::forward<decltype(adjoint)>(adjoint),
+                             std::forward<decltype(params)>(params));
+                 }},
+                 {"T",
+                  [&](auto &&wires, auto &&adjoint, auto &&params) {
+                      applyT(std::forward<decltype(wires)>(wires),
+                             std::forward<decltype(adjoint)>(adjoint),
+                             std::forward<decltype(params)>(params));
+                  }},
+                 {"RX",
+                  [&](auto &&wires, auto &&adjoint, auto &&params) {
+                      applyRX(std::forward<decltype(wires)>(wires),
+                              std::forward<decltype(adjoint)>(adjoint),
+                              std::forward<decltype(params)>(params));
+                  }},
+                 {"RY",
+                  [&](auto &&wires, auto &&adjoint, auto &&params) {
+                      applyRY(std::forward<decltype(wires)>(wires),
+                              std::forward<decltype(adjoint)>(adjoint),
+                              std::forward<decltype(params)>(params));
+                  }},
+                 {"RZ",
+                  [&](auto &&wires, auto &&adjoint, auto &&params) {
+                      applyRZ(std::forward<decltype(wires)>(wires),
+                              std::forward<decltype(adjoint)>(adjoint),
+                              std::forward<decltype(params)>(params));
+                  }},
+                 {"PhaseShift",
+                  [&](auto &&wires, auto &&adjoint, auto &&params) {
+                      applyPhaseShift(std::forward<decltype(wires)>(wires),
+                                      std::forward<decltype(adjoint)>(adjoint),
+                                      std::forward<decltype(params)>(params));
+                  }},
+                 {"Rot",
+                  [&](auto &&wires, auto &&adjoint, auto &&params) {
+                      applyRot(std::forward<decltype(wires)>(wires),
+                               std::forward<decltype(adjoint)>(adjoint),
+                               std::forward<decltype(params)>(params));
+                  }},
+                 {"CY",
+                  [&](auto &&wires, auto &&adjoint, auto &&params) {
+                      applyCY(std::forward<decltype(wires)>(wires),
+                              std::forward<decltype(adjoint)>(adjoint),
+                              std::forward<decltype(params)>(params));
+                  }},
+                 {"CZ",
+                  [&](auto &&wires, auto &&adjoint, auto &&params) {
+                      applyCZ(std::forward<decltype(wires)>(wires),
+                              std::forward<decltype(adjoint)>(adjoint),
+                              std::forward<decltype(params)>(params));
+                  }},
+                 {"CNOT",
+                  [&](auto &&wires, auto &&adjoint, auto &&params) {
+                      applyCNOT(std::forward<decltype(wires)>(wires),
+                                std::forward<decltype(adjoint)>(adjoint),
+                                std::forward<decltype(params)>(params));
+                  }},
+                 {"SWAP",
+                  [&](auto &&wires, auto &&adjoint, auto &&params) {
+                      applySWAP(std::forward<decltype(wires)>(wires),
+                                std::forward<decltype(adjoint)>(adjoint),
+                                std::forward<decltype(params)>(params));
+                  }},
+                 {"ControlledPhaseShift",
+                  [&](auto &&wires, auto &&adjoint, auto &&params) {
+                      applyControlledPhaseShift(
+                          std::forward<decltype(wires)>(wires),
+                          std::forward<decltype(adjoint)>(adjoint),
+                          std::forward<decltype(params)>(params));
+                  }},
+                 {"CRX",
+                  [&](auto &&wires, auto &&adjoint, auto &&params) {
+                      applyCRX(std::forward<decltype(wires)>(wires),
+                               std::forward<decltype(adjoint)>(adjoint),
+                               std::forward<decltype(params)>(params));
+                  }},
+                 {"CRY",
+                  [&](auto &&wires, auto &&adjoint, auto &&params) {
+                      applyCRY(std::forward<decltype(wires)>(wires),
+                               std::forward<decltype(adjoint)>(adjoint),
+                               std::forward<decltype(params)>(params));
+                  }},
+                 {"CRZ",
+                  [&](auto &&wires, auto &&adjoint, auto &&params) {
+                      applyCRZ(std::forward<decltype(wires)>(wires),
+                               std::forward<decltype(adjoint)>(adjoint),
+                               std::forward<decltype(params)>(params));
+                  }},
+                 {"CRot",
+                  [&](auto &&wires, auto &&adjoint, auto &&params) {
+                      applyCRot(std::forward<decltype(wires)>(wires),
+                               std::forward<decltype(adjoint)>(adjoint),
+                               std::forward<decltype(params)>(params));
+                  }},                  
+                  {"IsingXX",
+                  [&](auto &&wires, auto &&adjoint, auto &&params) {
+                      applyIsingXX(std::forward<decltype(wires)>(wires),
+                                   std::forward<decltype(adjoint)>(adjoint),
+                                   std::forward<decltype(params)>(params));
+                  }},
+                  {"IsingXY",
+                  [&](auto &&wires, auto &&adjoint, auto &&params) {
+                      applyIsingXY(std::forward<decltype(wires)>(wires),
+                                   std::forward<decltype(adjoint)>(adjoint),
+                                   std::forward<decltype(params)>(params));
+                  }},
+
+                  {"IsingYY",
+                  [&](auto &&wires, auto &&adjoint, auto &&params) {
+                      applyIsingYY(std::forward<decltype(wires)>(wires),
+                                   std::forward<decltype(adjoint)>(adjoint),
+                                   std::forward<decltype(params)>(params));
+                  }},
+
+                  {"IsingZZ",
+                  [&](auto &&wires, auto &&adjoint, auto &&params) {
+                      applyIsingZZ(std::forward<decltype(wires)>(wires),
+                                   std::forward<decltype(adjoint)>(adjoint),
+                                   std::forward<decltype(params)>(params));
+                  }},
+                 {"SingleExcitation",
+                  [&](auto &&wires, auto &&adjoint, auto &&params) {
+                      applySingleExcitation(std::forward<decltype(wires)>(wires),
+                                   std::forward<decltype(adjoint)>(adjoint),
+                                   std::forward<decltype(params)>(params));
+                  }},
+                 {"SingleExcitationMinus",
+                  [&](auto &&wires, auto &&adjoint, auto &&params) {
+                      applySingleExcitationMinus(std::forward<decltype(wires)>(wires),
+                                   std::forward<decltype(adjoint)>(adjoint),
+                                   std::forward<decltype(params)>(params));
+                  }},
+                 {"SingleExcitationPlus",
+                  [&](auto &&wires, auto &&adjoint, auto &&params) {
+                      applySingleExcitationPlus(std::forward<decltype(wires)>(wires),
+                                   std::forward<decltype(adjoint)>(adjoint),
+                                   std::forward<decltype(params)>(params));
+                  }},
+                 {"DoubleExcitation",
+                  [&](auto &&wires, auto &&adjoint, auto &&params) {
+                      applyDoubleExcitation(std::forward<decltype(wires)>(wires),
+                                   std::forward<decltype(adjoint)>(adjoint),
+                                   std::forward<decltype(params)>(params));
+                  }},
+                 {"DoubleExcitationMinus",
+                  [&](auto &&wires, auto &&adjoint, auto &&params) {
+                      applyDoubleExcitationMinus(std::forward<decltype(wires)>(wires),
+                                   std::forward<decltype(adjoint)>(adjoint),
+                                   std::forward<decltype(params)>(params));
+                  }},
+                 {"DoubleExcitationPlus",
+                  [&](auto &&wires, auto &&adjoint, auto &&params) {
+                      applyDoubleExcitationPlus(std::forward<decltype(wires)>(wires),
+                                   std::forward<decltype(adjoint)>(adjoint),
+                                   std::forward<decltype(params)>(params));
+                  }},
+                 {"MultiRZ",
+                  [&](auto &&wires, auto &&adjoint, auto &&params) {
+                      applyMultiRZ(std::forward<decltype(wires)>(wires),
+                                 std::forward<decltype(adjoint)>(adjoint),
+                                 std::forward<decltype(params)>(params));
+                  }},
+                 {"CSWAP",
+                  [&](auto &&wires, auto &&adjoint, auto &&params) {
+                      applyCSWAP(std::forward<decltype(wires)>(wires),
+                                 std::forward<decltype(adjoint)>(adjoint),
+                                 std::forward<decltype(params)>(params));
+                  }},
+                 {"Toffoli",
+                  [&](auto &&wires, auto &&adjoint, auto &&params) {
+                      applyToffoli(std::forward<decltype(wires)>(wires),
+                                   std::forward<decltype(adjoint)>(adjoint),
+                                   std::forward<decltype(params)>(params));
+                  }}
+                 },
+            generator_{
+                {"RX",
+                  [&](auto &&wires, auto &&adjoint, auto &&params){
+                      return applyGeneratorRX(std::forward<decltype(wires)>(wires),
+                              std::forward<decltype(adjoint)>(adjoint),
+                              std::forward<decltype(params)>(params));
+                  }},
+                {"RY",
+                  [&](auto &&wires, auto &&adjoint, auto &&params){
+                      return applyGeneratorRY(std::forward<decltype(wires)>(wires),
+                              std::forward<decltype(adjoint)>(adjoint),
+                              std::forward<decltype(params)>(params));
+                  }},
+                {"RZ",
+                  [&](auto &&wires, auto &&adjoint, auto &&params){
+                      return applyGeneratorRZ(std::forward<decltype(wires)>(wires),
+                              std::forward<decltype(adjoint)>(adjoint),
+                              std::forward<decltype(params)>(params));
+                  }},
+		{"ControlledPhaseShift",
+                  [&](auto &&wires, auto &&adjoint, auto &&params) {
+                      return applyGeneratorControlledPhaseShift(
+                          std::forward<decltype(wires)>(wires),
+                          std::forward<decltype(adjoint)>(adjoint),
+                          std::forward<decltype(params)>(params));
+                  }},
+                {"CRX",
+                  [&](auto &&wires, auto &&adjoint, auto &&params){
+                      return applyGeneratorCRX(std::forward<decltype(wires)>(wires),
+                              std::forward<decltype(adjoint)>(adjoint),
+                              std::forward<decltype(params)>(params));
+                  }},
+                 {"CRY",
+                  [&](auto &&wires, auto &&adjoint, auto &&params){
+                      return applyGeneratorCRY(std::forward<decltype(wires)>(wires),
+                              std::forward<decltype(adjoint)>(adjoint),
+                              std::forward<decltype(params)>(params));
+                  }},
+                 {"CRZ",
+                  [&](auto &&wires, auto &&adjoint, auto &&params){
+                      return applyGeneratorCRZ(std::forward<decltype(wires)>(wires),
+                              std::forward<decltype(adjoint)>(adjoint),
+                              std::forward<decltype(params)>(params));
+                  }},
+                  {"IsingXX",
+                  [&](auto &&wires, auto &&adjoint, auto &&params){
+                      return applyGeneratorIsingXX(std::forward<decltype(wires)>(wires),
+                              std::forward<decltype(adjoint)>(adjoint),
+                              std::forward<decltype(params)>(params));
+                  }},
+                  {"IsingXY",
+                  [&](auto &&wires, auto &&adjoint, auto &&params){
+                      return applyGeneratorIsingXY(std::forward<decltype(wires)>(wires),
+                              std::forward<decltype(adjoint)>(adjoint),
+                              std::forward<decltype(params)>(params));
+                  }},
+                  {"IsingYY",
+                  [&](auto &&wires, auto &&adjoint, auto &&params){
+                      return applyGeneratorIsingYY(std::forward<decltype(wires)>(wires),
+                              std::forward<decltype(adjoint)>(adjoint),
+                              std::forward<decltype(params)>(params));
+                  }},
+                  {"IsingZZ",
+                  [&](auto &&wires, auto &&adjoint, auto &&params){
+                      return applyGeneratorIsingZZ(std::forward<decltype(wires)>(wires),
+                              std::forward<decltype(adjoint)>(adjoint),
+                              std::forward<decltype(params)>(params));
+                  }},
+                  {"SingleExcitation",
+                  [&](auto &&wires, auto &&adjoint, auto &&params){
+                      return applyGeneratorSingleExcitation(std::forward<decltype(wires)>(wires),
+                              std::forward<decltype(adjoint)>(adjoint),
+                              std::forward<decltype(params)>(params));
+                  }},
+                  {"SingleExcitationMinus",
+                  [&](auto &&wires, auto &&adjoint, auto &&params){
+                      return applyGeneratorSingleExcitationMinus(std::forward<decltype(wires)>(wires),
+                              std::forward<decltype(adjoint)>(adjoint),
+                              std::forward<decltype(params)>(params));
+                  }},
+                  {"SingleExcitationPlus",
+                  [&](auto &&wires, auto &&adjoint, auto &&params){
+                      return applyGeneratorSingleExcitationPlus(std::forward<decltype(wires)>(wires),
+                              std::forward<decltype(adjoint)>(adjoint),
+                              std::forward<decltype(params)>(params));
+                  }},
+                  {"DoubleExcitation",
+                  [&](auto &&wires, auto &&adjoint, auto &&params){
+                      return applyGeneratorDoubleExcitation(std::forward<decltype(wires)>(wires),
+                              std::forward<decltype(adjoint)>(adjoint),
+                              std::forward<decltype(params)>(params));
+                  }},
+                  {"DoubleExcitationMinus",
+                  [&](auto &&wires, auto &&adjoint, auto &&params){
+                      return applyGeneratorDoubleExcitationMinus(std::forward<decltype(wires)>(wires),
+                              std::forward<decltype(adjoint)>(adjoint),
+                              std::forward<decltype(params)>(params));
+                  }},
+                  {"DoubleExcitationPlus",
+                  [&](auto &&wires, auto &&adjoint, auto &&params){
+                      return applyGeneratorDoubleExcitationPlus(std::forward<decltype(wires)>(wires),
+                              std::forward<decltype(adjoint)>(adjoint),
+                              std::forward<decltype(params)>(params));
+                  }},
+                  {"PhaseShift",
+                  [&](auto &&wires, auto &&adjoint, auto &&params){
+                      return applyGeneratorPhaseShift(std::forward<decltype(wires)>(wires),
+                              std::forward<decltype(adjoint)>(adjoint),
+                              std::forward<decltype(params)>(params));
+                  }},
+                  {"MultiRZ",
+                  [&](auto &&wires, auto &&adjoint, auto &&params){
+                      return applyGeneratorMultiRZ(std::forward<decltype(wires)>(wires),
+                              std::forward<decltype(adjoint)>(adjoint),
+                              std::forward<decltype(params)>(params));
+                  }},
+            }
+    {
         expval_funcs_["Identity"] = [&](auto &&wires, auto &&params) {
             return getExpectationValueIdentity(
                 std::forward<decltype(wires)>(wires),
