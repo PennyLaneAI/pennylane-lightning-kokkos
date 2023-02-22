@@ -28,18 +28,32 @@
 * Remove explicit Numpy requirement.
 [(#35)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/35)
 
+* Add Kokkos::InitArguments support.
+[(#17)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/17)
+
+* Add support for CI checks.
+[(#37)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/37)
+
 ### Documentation
 
 ### Bug fixes
+
+* Ensure early-failure rather than return of incorrect results from out of order probs wires.
+[(#41)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/41)
+
+* Fix the CI environment variables for building wheels with the OpenMP backend.
+[(#36)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/36)
+
+* Fix the failures of pl_device_test tests with shots set.
+[(#38)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/38)
 
 ### Contributors
 
 This release contains contributions from (in alphabetical order):
 
-Amintor Dusko, Shuli Shu
+Amintor Dusko, Vincent Michaud-Rioux, Lee James O'Riordan, Shuli Shu
 
 ---
-
 
 # Release 0.28.0
 
@@ -75,6 +89,7 @@ This release contains contributions from (in alphabetical order):
 Amintor Dusko, Lee J. O'Riordan, Shuli Shu, Matthew Silverman
 
 --
+
 # Release 0.27.0
 
 ### New features since last release

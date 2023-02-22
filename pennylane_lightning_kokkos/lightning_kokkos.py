@@ -34,6 +34,7 @@ from pennylane import (
 )
 from pennylane_lightning import LightningQubit
 from pennylane.operation import Tensor, Operation
+from pennylane.ops.op_math import Adjoint
 from pennylane.measurements import Expectation
 from pennylane.wires import Wires
 
@@ -43,6 +44,7 @@ import pennylane as qml
 from ._version import __version__
 
 # try:
+from .lightning_kokkos_qubit_ops import InitArguments
 from .lightning_kokkos_qubit_ops import LightningKokkos_C128
 from .lightning_kokkos_qubit_ops import LightningKokkos_C64
 from .lightning_kokkos_qubit_ops import AdjointJacobianKokkos_C128
@@ -74,6 +76,7 @@ class LightningKokkos(LightningQubit):
         wires (int): the number of wires to initialize the device with
         sync (bool): immediately sync with host-sv after applying operations
         c_dtype: Datatypes for statevector representation. Must be one of ``np.complex64`` or ``np.complex128``.
+        kokkos_args (InitArguments): binding for Kokkos::InitArguments (threading parameters).
     """
 
     name = "PennyLane plugin for Kokkos-backed Lightning device"
@@ -94,9 +97,23 @@ class LightningKokkos(LightningQubit):
         "Identity",
     }
 
-    def __init__(self, wires, *, sync=True, c_dtype=np.complex128, shots=None, batch_obs=False):
+    def __init__(
+        self,
+        wires,
+        *,
+        sync=True,
+        c_dtype=np.complex128,
+        shots=None,
+        batch_obs=False,
+        kokkos_args=None,
+    ):
         super().__init__(wires, c_dtype=c_dtype, shots=shots)
-        self._kokkos_state = _kokkos_dtype(self._state.dtype)(self._state)
+        if kokkos_args is None:
+            self._kokkos_state = _kokkos_dtype(self._state.dtype)(self._state)
+        elif isinstance(kokkos_args, InitArguments):
+            self._kokkos_state = _kokkos_dtype(self._state.dtype)(self._state, kokkos_args)
+        else:
+            raise TypeError("Argument kokkos_args must be of type InitArguments.")
         self._sync = sync
         if not LightningKokkos.kokkos_config:
             LightningKokkos.kokkos_config = _kokkos_configuration()
@@ -144,15 +161,19 @@ class LightningKokkos(LightningQubit):
 
         return qml.BooleanFn(accepts_obj)
 
-    def apply_cq(self, operations, **kwargs):
+    def apply_kokkos(self, operations, **kwargs):
         # Skip over identity operations instead of performing
         # matrix multiplication with the identity.
         skipped_ops = ["Identity"]
+        invert_param = False
 
         for o in operations:
             if o.base_name in skipped_ops:
                 continue
-            name = o.name.split(".")[0]  # The split is because inverse gates have .inv appended
+            name = o.name
+            if isinstance(o, Adjoint):
+                name = o.base.name
+                invert_param = True
             method = getattr(self._kokkos_state, name, None)
 
             wires = self.wires.indices(o.wires)
@@ -176,9 +197,8 @@ class LightningKokkos(LightningQubit):
                 )  # Parameters can be ignored for explicit matrices; F-order for cuQuantum
 
             else:
-                inv = o.inverse
                 param = o.parameters
-                method(wires, inv, param)
+                method(wires, invert_param, param)
 
     def apply(self, operations, **kwargs):
         # State preparation is currently done in Python
@@ -199,7 +219,7 @@ class LightningKokkos(LightningQubit):
                     "applied on a {} device.".format(operation.name, self.short_name)
                 )
 
-        self.apply_cq(operations)
+        self.apply_kokkos(operations)
 
         if self._sync:
             self.syncD2H()
@@ -256,6 +276,7 @@ class LightningKokkos(LightningQubit):
         Returns:
             array[float]: list of the probabilities
         """
+
         if self.shots is not None:
             return self.estimate_probability(wires=wires, shot_range=shot_range, bin_size=bin_size)
 
@@ -265,7 +286,22 @@ class LightningKokkos(LightningQubit):
         # translate to wire labels used by device
         device_wires = self.map_wires(wires)
 
+        if (
+            device_wires
+            and len(device_wires) > 1
+            and (not np.all(np.array(device_wires)[:-1] <= np.array(device_wires)[1:]))
+        ):
+            raise RuntimeError(
+                "Lightning does not currently support out-of-order indices for probabilities"
+            )
+
         return self._kokkos_state.probs(device_wires)
+
+    def sample(self, observable, shot_range=None, bin_size=None, counts=False):
+        if observable.name != "PauliZ":
+            self.apply_kokkos(observable.diagonalizing_gates())
+            self._samples = self.generate_samples()
+        return super().sample(observable, shot_range=shot_range, bin_size=bin_size, counts=counts)
 
     def expval(self, observable, shot_range=None, bin_size=None):
         if observable.name in [

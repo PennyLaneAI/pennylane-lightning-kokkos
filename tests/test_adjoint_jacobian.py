@@ -22,6 +22,7 @@ from pennylane import numpy as np
 from pennylane import QNode, qnode
 from scipy.stats import unitary_group
 import pennylane_lightning_kokkos as plk
+from pennylane_lightning_kokkos.lightning_kokkos_qubit_ops import InitArguments
 
 from pennylane import (
     QuantumFunctionError,
@@ -75,9 +76,12 @@ class TestAdjointJacobian:
     from pennylane_lightning_kokkos import LightningKokkos as lg
     from pennylane_lightning import LightningQubit as lq
 
-    @pytest.fixture
-    def dev_kokkos(self):
-        return qml.device("lightning.kokkos", wires=3)
+    @pytest.fixture(params=[None, InitArguments(2)])
+    def dev_kokkos(self, request):
+        if request.param is None:
+            return qml.device("lightning.kokkos", wires=3)
+        else:
+            return qml.device("lightning.kokkos", wires=3, kokkos_args=request.param)
 
     @pytest.fixture
     def dev_cpu(self):
@@ -375,8 +379,8 @@ class TestAdjointJacobianQNode:
     def test_finite_shots_warning(self):
         """Tests that a warning is raised when computing the adjoint diff on a device with finite shots"""
 
+        param = qml.numpy.array(0.1)
         dev = qml.device("lightning.kokkos", wires=1, shots=1)
-
         with pytest.warns(
             UserWarning,
             match="Requested adjoint differentiation to be computed with finite shots.",
@@ -391,7 +395,7 @@ class TestAdjointJacobianQNode:
             UserWarning,
             match="Requested adjoint differentiation to be computed with finite shots.",
         ):
-            qml.grad(circ)(0.1)
+            qml.grad(circ)(param)
 
     def test_qnode(self, mocker, tol, dev_kokkos):
         """Test that specifying diff_method allows the adjoint method to be selected"""
