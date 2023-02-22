@@ -84,7 +84,7 @@ class TestAdjointJacobian:
             return qml.device("lightning.kokkos", wires=3, kokkos_args=request.param)
 
     @pytest.fixture
-    def dev_cpu(self):
+    def dev_default(self):
         return qml.device("default.qubit", wires=3)
 
     def test_not_expval(self, dev_kokkos):
@@ -177,7 +177,7 @@ class TestAdjointJacobian:
 
     @pytest.mark.parametrize("theta", np.linspace(-2 * np.pi, 2 * np.pi, 7))
     @pytest.mark.parametrize("G", [qml.RX, qml.RY, qml.RZ])
-    def test_pauli_rotation_gradient(self, G, theta, tol, dev_cpu, dev_kokkos):
+    def test_pauli_rotation_gradient(self, G, theta, tol, dev_default, dev_kokkos):
         """Tests that the automatic gradients of Pauli rotations are correct."""
 
         with qml.tape.QuantumTape() as tape:
@@ -188,12 +188,12 @@ class TestAdjointJacobian:
         tape.trainable_params = {1}
 
         calculated_val = dev_kokkos.adjoint_jacobian(tape)
-        expected_val = dev_cpu.adjoint_jacobian(tape)
+        expected_val = dev_default.adjoint_jacobian(tape)
 
         assert np.allclose(calculated_val, expected_val, atol=tol, rtol=0)
 
     @pytest.mark.parametrize("theta", np.linspace(-2 * np.pi, 2 * np.pi, 7))
-    def test_Rot_gradient(self, theta, tol, dev_cpu, dev_kokkos):
+    def test_Rot_gradient(self, theta, tol, dev_default, dev_kokkos):
         """Tests that the device gradient of an arbitrary Euler-angle-parameterized gate is
         correct."""
         params = np.array([theta, theta**3, np.sqrt(2) * theta])
@@ -206,7 +206,7 @@ class TestAdjointJacobian:
         tape.trainable_params = {1, 2, 3}
 
         calculated_val = dev_kokkos.adjoint_jacobian(tape)
-        expected_val = dev_cpu.adjoint_jacobian(tape)
+        expected_val = dev_default.adjoint_jacobian(tape)
 
         assert np.allclose(calculated_val, expected_val, atol=tol, rtol=0)
 
@@ -280,7 +280,7 @@ class TestAdjointJacobian:
             qml.Rot(0.2, -0.1, 0.2, wires=0),
         ],
     )
-    def test_gradients(self, op, obs, tol, dev_cpu, dev_kokkos):
+    def test_gradients(self, op, obs, tol, dev_default, dev_kokkos):
         """Tests that the gradients of circuits match between the param-shift and device
         methods."""
 
@@ -821,7 +821,7 @@ def test_adjoint_Hamiltonian():
     params = np.random.rand(n_params)
 
     qnode_kokkos = qml.QNode(circuit, dev_kokkos, diff_method="adjoint")
-    qnode_cpu = qml.QNode(circuit, dev_cpu, diff_method="parameter-shift")
+    qnode_cpu = qml.QNode(circuit, dev_default, diff_method="parameter-shift")
 
     j_kokkos = qml.jacobian(qnode_kokkos)(params)
     j_cpu = qml.jacobian(qnode_cpu)(params)
@@ -871,7 +871,7 @@ def test_adjoint_SparseHamiltonian(returns):
     params = np.random.rand(n_params)
 
     qnode_kokkos = qml.QNode(circuit, dev_kokkos, diff_method="adjoint")
-    qnode_cpu = qml.QNode(circuit, dev_cpu, diff_method="parameter-shift")
+    qnode_cpu = qml.QNode(circuit, dev_default, diff_method="parameter-shift")
 
     j_kokkos = qml.jacobian(qnode_kokkos)(params)
     j_cpu = qml.jacobian(qnode_cpu)(params)
