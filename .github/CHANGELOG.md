@@ -34,7 +34,7 @@
 * Add Nvidia GPU support for CI checks.
 [(#37)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/37)
 
-* Added native support for expval(H) in adjoint method.
+* Add VJP support.
 [(#32)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/32)
 
 ### Documentation
