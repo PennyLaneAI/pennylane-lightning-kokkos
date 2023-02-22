@@ -499,6 +499,7 @@ template <class Precision> class StateVectorKokkos {
             Kokkos::parallel_for(length_, InitView(*data_));
         }
     };
+
     /**
      * @brief Init zeros for the state-vector on device.
      */

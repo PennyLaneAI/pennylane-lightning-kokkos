@@ -199,7 +199,6 @@ if CPP_BINARY_AVAILABLE:
             else:
                 raise TypeError(f"Unsupported complex Type: {c_dtype}")
             super().__init__(wires, shots=shots, r_dtype=r_dtype, c_dtype=c_dtype)
-
             if kokkos_args is None:
                 self._kokkos_state = _kokkos_dtype(c_dtype)(self.num_wires)
             elif isinstance(kokkos_args, InitArguments):
