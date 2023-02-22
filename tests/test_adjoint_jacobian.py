@@ -821,12 +821,12 @@ def test_adjoint_Hamiltonian():
     params = np.random.rand(n_params)
 
     qnode_kokkos = qml.QNode(circuit, dev_kokkos, diff_method="adjoint")
-    qnode_cpu = qml.QNode(circuit, dev_default, diff_method="parameter-shift")
+    qnode_default = qml.QNode(circuit, dev_default, diff_method="parameter-shift")
 
     j_kokkos = qml.jacobian(qnode_kokkos)(params)
-    j_cpu = qml.jacobian(qnode_cpu)(params)
+    j_default = qml.jacobian(qnode_default)(params)
 
-    assert np.allclose(j_kokkos, j_cpu)
+    assert np.allclose(j_kokkos, j_default)
 
 
 @pytest.mark.parametrize(
@@ -871,9 +871,9 @@ def test_adjoint_SparseHamiltonian(returns):
     params = np.random.rand(n_params)
 
     qnode_kokkos = qml.QNode(circuit, dev_kokkos, diff_method="adjoint")
-    qnode_cpu = qml.QNode(circuit, dev_default, diff_method="parameter-shift")
+    qnode_default = qml.QNode(circuit, dev_default, diff_method="parameter-shift")
 
     j_kokkos = qml.jacobian(qnode_kokkos)(params)
-    j_cpu = qml.jacobian(qnode_cpu)(params)
+    j_default = qml.jacobian(qnode_default)(params)
 
-    assert np.allclose(j_kokkos, j_cpu)
+    assert np.allclose(j_kokkos, j_default)

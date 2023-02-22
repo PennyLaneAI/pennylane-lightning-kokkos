@@ -147,7 +147,6 @@ class HermitianObsKokkos final : public ObservableKokkos<T> {
      * @param matrix Matrix in row major format.
      * @param wires Wires the observable applies to.
      */
-    // template <typename T1>
     HermitianObsKokkos(MatrixT matrix, std::vector<size_t> wires)
         : matrix_{std::move(matrix)}, wires_{std::move(wires)} {}
 
