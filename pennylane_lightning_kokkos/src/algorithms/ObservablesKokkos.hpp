@@ -5,6 +5,7 @@
 
 #include "LinearAlgebra.hpp"
 #include "StateVectorKokkos.hpp"
+#include "Error.hpp"
 
 namespace Pennylane::Algorithms {
 
@@ -325,7 +326,7 @@ class HamiltonianKokkos final : public ObservableKokkos<T> {
     template <typename T1, typename T2>
     HamiltonianKokkos(T1 &&arg1, T2 &&arg2)
         : coeffs_{std::forward<T1>(arg1)}, obs_{std::forward<T2>(arg2)} {
-        assert(coeffs_.size() == obs_.size());
+        PL_ASSERT(coeffs_.size() == obs_.size());
     }
 
     /**
@@ -435,7 +436,7 @@ class SparseHamiltonianKokkos final : public ObservableKokkos<T> {
     SparseHamiltonianKokkos(T1 &&arg1, T2 &&arg2, T3 &&arg3, T4 &&arg4)
         : data_{std::forward<T1>(arg1)}, indices_{std::forward<T2>(arg2)},
           indptr_{std::forward<T3>(arg3)}, wires_{std::forward<T4>(arg4)} {
-        assert(data_.size() == indices_.size());
+        PL_ASSERT(data_.size() == indices_.size());
     }
 
     /**
