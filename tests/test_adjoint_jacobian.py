@@ -364,7 +364,9 @@ class TestAdjointJacobian:
         dM1 = dev_kokkos.adjoint_jacobian(tape)
 
         qml.execute([tape], dev_kokkos, None)
-        dM2 = dev_kokkos.adjoint_jacobian(tape, starting_state=dev_kokkos._pre_rotated_state)
+        state_vector = np.zeros(2**dev_kokkos.num_wires).astype(dev_kokkos.C_DTYPE)
+        dev_kokkos.syncD2H(state_vector)
+        dM2 = dev_kokkos.adjoint_jacobian(tape, starting_state=state_vector)
 
         assert np.allclose(dM1, dM2, atol=tol, rtol=0)
 

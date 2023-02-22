@@ -33,7 +33,7 @@ class TestSparseHamiltonianExpval:
 
         H = qml.Hamiltonian([1.0, 1.0], [obs1, obs])
 
-        dev._state = np.array(
+        state_vector = np.array(
             [
                 0.0 + 0.0j,
                 0.0 + 0.1j,
@@ -47,7 +47,7 @@ class TestSparseHamiltonianExpval:
             dtype=np.complex64,
         )
 
-        dev.syncH2D()
+        dev.syncH2D(state_vector)
         Hmat = qml.utils.sparse_hamiltonian(H)
         H_sparse = qml.SparseHamiltonian(Hmat, wires=range(3))
 

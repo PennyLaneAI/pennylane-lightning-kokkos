@@ -62,6 +62,10 @@ void StateVectorKokkos_class_bindings(py::module &m) {
         .def(py::init([](std::size_t num_qubits) {
             return new StateVectorKokkos<PrecisionT>(num_qubits);
         }))
+        .def(py::init([](std::size_t num_qubits,
+                         const Kokkos::InitArguments &kokkos_args) {
+            return new StateVectorKokkos<PrecisionT>(num_qubits, kokkos_args);
+        }))
         .def(py::init([](const np_arr_c &arr) {
             py::buffer_info numpyArrayInfo = arr.request();
             auto *data_ptr =
@@ -77,6 +81,29 @@ void StateVectorKokkos_class_bindings(py::module &m) {
             return new StateVectorKokkos<PrecisionT>(
                 data_ptr, static_cast<std::size_t>(arr.size()), kokkos_args);
         }))
+        .def(
+            "setBasisState",
+            [](StateVectorKokkos<PrecisionT> &sv, const size_t index) {
+                sv.setBasisState(index);
+            },
+            "Create Basis State on Device.")
+        .def(
+            "setStateVector",
+            [](StateVectorKokkos<PrecisionT> &sv,
+               const std::vector<std::size_t> &indices, const np_arr_c &state) {
+                const auto buffer = state.request();
+                std::vector<Kokkos::complex<ParamT>> state_kok;
+                if (buffer.size) {
+                    const auto ptr =
+                        static_cast<const Kokkos::complex<ParamT> *>(
+                            buffer.ptr);
+                    state_kok = std::vector<Kokkos::complex<ParamT>>{
+                        ptr, ptr + buffer.size};
+                }
+                sv.setStateVector(indices, state_kok);
+            },
+            "Set State Vector on device with values and their corresponding "
+            "indices for the state vector on device")
         .def(
             "Identity",
             []([[maybe_unused]] StateVectorKokkos<PrecisionT> &sv,

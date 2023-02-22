@@ -17,6 +17,9 @@
 
 ### Breaking changes
 
+* Change LightningKokkos to inherit from QubitDevice instead of LightningQubit. Numpy data initialization is decoupled. 
+[(#31)] (https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/31)
+
 ### Improvements
 
 * Update `inv()` methods in Python unit tests with `qml.adjoint()`.
@@ -28,7 +31,7 @@
 * Add Kokkos::InitArguments support.
 [(#17)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/17)
 
-* Add support for CI checks.
+* Add Nvidia GPU support for CI checks.
 [(#37)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/37)
 
 ### Documentation
