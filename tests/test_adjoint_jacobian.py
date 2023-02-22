@@ -797,15 +797,20 @@ def test_fail_adjoint_mixed_Hamiltonian_Hermitian(returns):
         j_kokkos = qml.jacobian(qnode_kokkos)(params)
 
 
-def test_fail_adjoint_Hamiltonian():
+def test_adjoint_Hamiltonian():
     """Integration tests that compare to default.qubit for a large circuit containing parametrized
     operations and when using custom wire labels"""
 
     coeffs = [0.5, -0.25, 1.0]
-    obs = [qml.PauliX(0) @ qml.PauliX(1), qml.PauliZ(0) @ qml.PauliY(2), qml.PauliZ(3)]
+    obs = [
+        qml.PauliX(custom_wires[0]) @ qml.PauliX(custom_wires[1]),
+        qml.PauliZ(custom_wires[0]) @ qml.PauliY(custom_wires[2]),
+        qml.PauliZ(custom_wires[3]),
+    ]
     hamiltonian = qml.Hamiltonian(coeffs, obs)
 
     dev_kokkos = qml.device("lightning.kokkos", wires=custom_wires)
+    dev_cpu = qml.device("default.qubit", wires=custom_wires)
 
     def circuit(params):
         circuit_ansatz(params, wires=custom_wires)
@@ -816,9 +821,12 @@ def test_fail_adjoint_Hamiltonian():
     params = np.random.rand(n_params)
 
     qnode_kokkos = qml.QNode(circuit, dev_kokkos, diff_method="adjoint")
+    qnode_cpu = qml.QNode(circuit, dev_cpu, diff_method="parameter-shift")
 
-    with pytest.raises(Exception):
-        j_kokkos = qml.jacobian(qnode_kokkos)(params)
+    j_kokkos = qml.jacobian(qnode_kokkos)(params)
+    j_cpu = qml.jacobian(qnode_cpu)(params)
+
+    assert np.allclose(j_kokkos, j_cpu)
 
 
 @pytest.mark.parametrize(
@@ -847,11 +855,12 @@ def test_fail_adjoint_Hamiltonian():
         ),
     ],
 )
-def test_fail_adjoint_SparseHamiltonian(returns):
+def test_adjoint_SparseHamiltonian(returns):
     """Integration tests that compare to default.qubit for a large circuit containing parametrized
     operations and when using custom wire labels"""
 
     dev_kokkos = qml.device("lightning.kokkos", wires=custom_wires)
+    dev_cpu = qml.device("default.qubit", wires=custom_wires)
 
     def circuit(params):
         circuit_ansatz(params, wires=custom_wires)
@@ -862,6 +871,9 @@ def test_fail_adjoint_SparseHamiltonian(returns):
     params = np.random.rand(n_params)
 
     qnode_kokkos = qml.QNode(circuit, dev_kokkos, diff_method="adjoint")
+    qnode_cpu = qml.QNode(circuit, dev_cpu, diff_method="parameter-shift")
 
-    with pytest.raises(Exception):
-        j_kokkos = qml.jacobian(qnode_kokkos)(params)
+    j_kokkos = qml.jacobian(qnode_kokkos)(params)
+    j_cpu = qml.jacobian(qnode_cpu)(params)
+
+    assert np.allclose(j_kokkos, j_cpu)
