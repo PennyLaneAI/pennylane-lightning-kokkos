@@ -905,27 +905,27 @@ template <class Precision> class StateVectorKokkos {
     /**
      * @brief Templated method that applies special n-qubit gates.
      *
-     * @tparam Gate functor class for Kokkos dispatcher.
-     * @tparam Number of qubits.
+     * @tparam functor_t Gate functor class for Kokkos dispatcher.
+     * @tparam nqubits Number of qubits.
      * @param wires Wires to apply gate to.
      * @param inverse Indicates whether to use adjoint of gate.
      * @param params parameters for this gate
      */
-    template <template <class, bool> class functor_t, int nqbits>
+    template <template <class, bool> class functor_t, int nqubits>
     void applyGateFunctor(
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {}) {
         auto &&num_qubits = getNumQubits();
-        assert(wires.size() == nqbits);
+        assert(wires.size() == nqubits);
         if (!inverse) {
             Kokkos::parallel_for(
                 Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - nqbits)),
+                    0, Util::exp2(num_qubits - nqubits)),
                 functor_t<Precision, false>(*data_, num_qubits, wires, params));
         } else {
             Kokkos::parallel_for(
                 Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - nqbits)),
+                    0, Util::exp2(num_qubits - nqubits)),
                 functor_t<Precision, true>(*data_, num_qubits, wires, params));
         }
     }
