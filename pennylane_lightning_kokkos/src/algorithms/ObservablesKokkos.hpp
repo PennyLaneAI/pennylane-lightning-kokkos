@@ -120,8 +120,7 @@ template <typename T> class NamedObsKokkos final : public ObservableKokkos<T> {
 };
 
 /**
- * @brief Class models arbitrary Hermitian observables
- *
+ * @brief Class models arbitrary Hermitian observables.
  */
 template <typename T>
 class HermitianObsKokkos final : public ObservableKokkos<T> {
@@ -168,7 +167,10 @@ class HermitianObsKokkos final : public ObservableKokkos<T> {
         obs_stream << "Hermitian" << mh(matrix_);
         return obs_stream.str();
     }
-
+    /**
+     * @brief Update the statevector sv.
+     * @param sv The state vector to update
+     */
     void applyInPlace(StateVectorKokkos<T> &sv) const override {
         const auto *matrix_ptr =
             reinterpret_cast<const Kokkos::complex<T> *>(matrix_.data());
@@ -265,7 +267,10 @@ class TensorProdObsKokkos final : public ObservableKokkos<T> {
     [[nodiscard]] auto getWires() const -> std::vector<size_t> override {
         return all_wires_;
     }
-
+    /**
+     * @brief Update the statevector sv.
+     * @param sv The state vector to update
+     */
     void applyInPlace(StateVectorKokkos<T> &sv) const override {
         for (const auto &ob : obs_) {
             ob->applyInPlace(sv);
@@ -320,12 +325,15 @@ class HamiltonianKokkos final : public ObservableKokkos<T> {
     /**
      * @brief Create a Hamiltonian from coefficients and observables
      *
-     * @param arg1 Arguments to construct coefficients
-     * @param arg2 Arguments to construct observables
+     * @tparam T1 Floating point type
+     * @tparam T2 std::shared_ptr<ObservableKokkos<T>>> type
+     * @param coeffs_arg Arguments to construct coefficients
+     * @param obs_arg Arguments to construct observables
      */
     template <typename T1, typename T2>
-    HamiltonianKokkos(T1 &&arg1, T2 &&arg2)
-        : coeffs_{std::forward<T1>(arg1)}, obs_{std::forward<T2>(arg2)} {
+    HamiltonianKokkos(T1 &&coeffs_arg, T2 &&obs_arg)
+        : coeffs_{std::forward<T1>(coeffs_arg)}, obs_{std::forward<T2>(
+                                                     obs_arg)} {
         PL_ASSERT(coeffs_.size() == obs_.size());
     }
 
@@ -336,18 +344,21 @@ class HamiltonianKokkos final : public ObservableKokkos<T> {
      * This function is useful as std::make_shared does not handle
      * brace-enclosed initializer list correctly.
      *
-     * @param arg1 Argument to construct coefficients
-     * @param arg2 Argument to construct terms
+     * @param coeffs_arg Argument to construct coefficients
+     * @param obs_arg Argument to construct observable terms
      */
     static auto
-    create(std::initializer_list<T> arg1,
-           std::initializer_list<std::shared_ptr<ObservableKokkos<T>>> arg2)
+    create(std::initializer_list<T> coeffs_arg,
+           std::initializer_list<std::shared_ptr<ObservableKokkos<T>>> obs_arg)
         -> std::shared_ptr<HamiltonianKokkos<T>> {
-        return std::shared_ptr<HamiltonianKokkos<T>>(
-            new HamiltonianKokkos<T>{std::move(arg1), std::move(arg2)});
+        return std::shared_ptr<HamiltonianKokkos<T>>(new HamiltonianKokkos<T>{
+            std::move(coeffs_arg), std::move(obs_arg)});
     }
 
-    // to work with
+    /**
+     * @brief Updates the statevector sv:->sv'.
+     * @param sv The statevector to update
+     */
     void applyInPlace(StateVectorKokkos<T> &sv) const override {
 
         StateVectorKokkos<T> buffer(sv.getNumQubits());
@@ -425,17 +436,23 @@ class SparseHamiltonianKokkos final : public ObservableKokkos<T> {
     /**
      * @brief Create a SparseHamiltonian from data, indices and indptr in CSR
      * format.
-     *
-     * @param arg1 Arguments to construct data
-     * @param arg2 Arguments to construct indices
-     * @param arg3 Arguments to construct indptr
-     * @param arg4 Arguments to construct wires
+     * @tparam T1 Complex floating point type
+     * @tparam T2 std::vector<std::size_t> type
+     * @tparam T3 std::vector<std::size_t> type
+     * @tparam T4 std::vector<std::size_t> type
+     * @param data_arg Arguments to construct data
+     * @param indices_arg Arguments to construct indices
+     * @param indptr_arg Arguments to construct indptr
+     * @param wires_arg Arguments to construct wires
      */
     template <typename T1, typename T2, typename T3 = T2,
               typename T4 = std::vector<std::size_t>>
-    SparseHamiltonianKokkos(T1 &&arg1, T2 &&arg2, T3 &&arg3, T4 &&arg4)
-        : data_{std::forward<T1>(arg1)}, indices_{std::forward<T2>(arg2)},
-          indptr_{std::forward<T3>(arg3)}, wires_{std::forward<T4>(arg4)} {
+    SparseHamiltonianKokkos(T1 &&data_arg, T2 &&indices_arg, T3 &&indptr_arg,
+                            T4 &&wires_arg)
+        : data_{std::forward<T1>(data_arg)}, indices_{std::forward<T2>(
+                                                 indices_arg)},
+          indptr_{std::forward<T3>(indptr_arg)}, wires_{std::forward<T4>(
+                                                     wires_arg)} {
         PL_ASSERT(data_.size() == indices_.size());
     }
 
@@ -446,26 +463,25 @@ class SparseHamiltonianKokkos final : public ObservableKokkos<T> {
      * This function is useful as std::make_shared does not handle
      * brace-enclosed initializer list correctly.
      *
-     * @param arg1 Argument to construct data
-     * @param arg2 Argument to construct indices
-     * @param arg3 Argument to construct ofsets
-     * @param arg4 Argument to construct wires
+     * @param data_arg Argument to construct data
+     * @param indices_arg Argument to construct indices
+     * @param indptr_arg Argument to construct ofsets
+     * @param wires_arg Argument to construct wires
      */
-
-    static auto create(std::initializer_list<T> arg1,
-                       std::initializer_list<std::size_t> arg2,
-                       std::initializer_list<std::size_t> arg3,
-                       std::initializer_list<std::size_t> arg4)
+    static auto create(std::initializer_list<T> data_arg,
+                       std::initializer_list<std::size_t> indices_arg,
+                       std::initializer_list<std::size_t> indptr_arg,
+                       std::initializer_list<std::size_t> wires_arg)
         -> std::shared_ptr<SparseHamiltonianKokkos<T>> {
         return std::shared_ptr<SparseHamiltonianKokkos<T>>(
-            new SparseHamiltonianKokkos<T>{std::move(arg1), std::move(arg2),
-                                           std::move(arg3), std::move(arg4)});
+            new SparseHamiltonianKokkos<T>{
+                std::move(data_arg), std::move(indices_arg),
+                std::move(indptr_arg), std::move(wires_arg)});
     }
 
     /**
      * @brief Updates the statevector SV:->SV', where SV' = a*H*SV, and where H
      * is a sparse Hamiltonian.
-     *
      */
     void applyInPlace(StateVectorKokkos<T> &sv) const override {
         PL_ABORT_IF_NOT(wires_.size() == sv.getNumQubits(),

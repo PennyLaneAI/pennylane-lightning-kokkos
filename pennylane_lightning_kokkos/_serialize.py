@@ -72,7 +72,16 @@ def _obs_has_kernel(obs: Observable) -> bool:
 
 
 def _serialize_named_ob(o, wires_map: dict, use_csingle: bool):
-    """Serializes an observable (Named)"""
+    """Serializes an observable (Named)
+
+    Args:
+        o (Observable): the input observable (Named)
+        wire_map (dict): a dictionary mapping input wires to the device's backend wires
+        use_csingle (bool): whether to use np.complex64 instead of np.complex128
+
+    Returns:
+        named_obs (NamedObsKokkos_C64 or NamedObsKokkos_C128): A Named observable object compatible with the C++ backend
+    """
     assert not isinstance(o, Tensor)
 
     if use_csingle:
@@ -89,7 +98,16 @@ def _serialize_named_ob(o, wires_map: dict, use_csingle: bool):
 
 
 def _serialize_tensor_ob(ob, wires_map: dict, use_csingle: bool):
-    """Serialize a tensor observable"""
+    """Serialize an observable (Tensor)
+
+    Args:
+        o (Observable): the input observable (Tensor)
+        wire_map (dict): a dictionary mapping input wires to the device's backend wires
+        use_csingle (bool): whether to use np.complex64 instead of np.complex128
+
+    Returns:
+        tensor_obs (TensorProdObsKokkos_C64 or TensorProdObsKokkos_C128): A Tensor observable object compatible with the C++ backend
+    """
     assert isinstance(ob, Tensor)
 
     if use_csingle:
@@ -100,6 +118,16 @@ def _serialize_tensor_ob(ob, wires_map: dict, use_csingle: bool):
 
 
 def _serialize_hamiltonian(ob, wires_map: dict, use_csingle: bool):
+    """Serialize an observable (Hamiltonian)
+
+    Args:
+        o (Observable): the input observable (Hamiltonian)
+        wire_map (dict): a dictionary mapping input wires to the device's backend wires
+        use_csingle (bool): whether to use np.complex64 instead of np.complex128
+
+    Returns:
+        hamiltonian_obs (HamiltonianKokkos_C64 or HamiltonianKokkos_C128): A Hamiltonian observable object compatible with the C++ backend
+    """
     if use_csingle:
         rtype = np.float32
         hamiltonian_obs = HamiltonianKokkos_C64
@@ -113,6 +141,16 @@ def _serialize_hamiltonian(ob, wires_map: dict, use_csingle: bool):
 
 
 def _serialize_sparsehamiltonian(ob, wires_map: dict, use_csingle: bool):
+    """Serialize an observable (Sparse Hamiltonian)
+
+    Args:
+        o (Observable): the input observable (Sparse Hamiltonian)
+        wire_map (dict): a dictionary mapping input wires to the device's backend wires
+        use_csingle (bool): whether to use np.complex64 instead of np.complex128
+
+    Returns:
+        sparsehamiltonian_obs (SparseHamiltonianKokkos_C64 or SparseHamiltonianKokkos_C128): A Sparse Hamiltonian observable object compatible with the C++ backend
+    """
     if use_csingle:
         ctype = np.complex64
         rtype = np.int32
@@ -135,6 +173,16 @@ def _serialize_sparsehamiltonian(ob, wires_map: dict, use_csingle: bool):
 
 
 def _serialize_hermitian(ob, wires_map: dict, use_csingle: bool):
+    """Serialize an observable (Hermitian)
+
+    Args:
+        o (Observable): the input observable (Hermitian)
+        wire_map (dict): a dictionary mapping input wires to the device's backend wires
+        use_csingle (bool): whether to use np.complex64 instead of np.complex128
+
+    Returns:
+        hermitian_obs (HermitianObsKokkos_C64 or HermitianObsKokkos_C128): A Hermitian observable object compatible with the C++ backend
+    """
     if use_csingle:
         rtype = np.float32
         hermitian_obs = HermitianObsKokkos_C64
@@ -147,6 +195,14 @@ def _serialize_hermitian(ob, wires_map: dict, use_csingle: bool):
 
 
 def _serialize_ob(ob, wires_map, use_csingle):
+    """Serialize an observable.
+    Args:
+        ob (Observable): the input observable
+        wires_map (dict): a dictionary mapping input wires to the device's backend wires
+        use_csingle (bool): whether to use np.complex64 instead of np.complex128
+    Returns:
+        ObservableKokkos_C64 or ObservableKokkos_C128: An observable object compatible with the C++ backend
+    """
     if isinstance(ob, Tensor):
         return _serialize_tensor_ob(ob, wires_map, use_csingle)
     elif ob.name == "Hamiltonian":
@@ -162,7 +218,7 @@ def _serialize_ob(ob, wires_map, use_csingle):
 
 
 def _serialize_observables(tape: QuantumTape, wires_map: dict, use_csingle: bool = False) -> List:
-    """Serializes the observables of an input tape.
+    """Serialize the observables of an input tape.
     Args:
         tape (QuantumTape): the input quantum tape
         wires_map (dict): a dictionary mapping input wires to the device's backend wires

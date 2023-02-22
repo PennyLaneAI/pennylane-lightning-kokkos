@@ -810,7 +810,7 @@ def test_adjoint_Hamiltonian():
     hamiltonian = qml.Hamiltonian(coeffs, obs)
 
     dev_kokkos = qml.device("lightning.kokkos", wires=custom_wires)
-    dev_cpu = qml.device("default.qubit", wires=custom_wires)
+    dev_default = qml.device("default.qubit", wires=custom_wires)
 
     def circuit(params):
         circuit_ansatz(params, wires=custom_wires)
@@ -860,7 +860,7 @@ def test_adjoint_SparseHamiltonian(returns):
     operations and when using custom wire labels"""
 
     dev_kokkos = qml.device("lightning.kokkos", wires=custom_wires)
-    dev_cpu = qml.device("default.qubit", wires=custom_wires)
+    dev_default = qml.device("default.qubit", wires=custom_wires)
 
     def circuit(params):
         circuit_ansatz(params, wires=custom_wires)
