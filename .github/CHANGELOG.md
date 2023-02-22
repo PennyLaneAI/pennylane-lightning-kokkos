@@ -21,7 +21,7 @@
 
 ### Improvements
 
-* Template n-qbit gate methods.
+* Template n-qubit gate methods.
 [(#40)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/40)
 
 * Update `inv()` methods in Python unit tests with `qml.adjoint()`.
