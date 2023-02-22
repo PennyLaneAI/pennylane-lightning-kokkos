@@ -57,7 +57,7 @@ TEMPLATE_TEST_CASE("Linear Algebra::axpy_Kokkos", "[Linear Algebra]", float,
 
     std::size_t data_size = Util::exp2(num_qubits);
 
-    cp_t alpha = {2.0, 0.0};
+    cp_t alpha = {2.0, 0.5};
 
     std::vector<cp_t> v0 = {{0.0, 0.0}, {0.1, -0.1}, {0.1, 0.1}, {0.2, 0.1},
                             {0.2, 0.2}, {0.3, 0.3},  {0.4, 0.3}, {0.5, 0.4}};
@@ -65,9 +65,9 @@ TEMPLATE_TEST_CASE("Linear Algebra::axpy_Kokkos", "[Linear Algebra]", float,
     std::vector<cp_t> v1 = {{-0.1, 0.2}, {0.2, -0.1}, {0.1, 0.2}, {0.2, 0.1},
                             {-0.2, 0.7}, {0.6, -0.1}, {0.1, 0.6}, {0.7, 0.2}};
 
-    std::vector<cp_t> result_refs = {{-0.1, 0.2}, {0.4, -0.3}, {0.3, 0.4},
-                                     {0.6, 0.3},  {0.2, 1.1},  {1.2, 0.5},
-                                     {0.9, 1.2},  {1.7, 1.0}};
+    std::vector<cp_t> result_refs = {{-0.1, 0.2}, {0.45, -0.25}, {0.25, 0.45},
+                                     {0.55, 0.4}, {0.1, 1.2},    {1.05, 0.65},
+                                     {0.75, 1.4}, {1.5, 1.25}};
 
     StateVectorKokkos<TestType> kokkos_v0{num_qubits};
     StateVectorKokkos<TestType> kokkos_v1{num_qubits};

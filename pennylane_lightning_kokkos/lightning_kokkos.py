@@ -67,10 +67,10 @@ try:
         kokkos_config_info,
     )
 
-    from ._serialize import _serialize_ob, _serialize_observables, _serialize_ops
+    from ._serialize import _serialize_observables, _serialize_ops
 
     CPP_BINARY_AVAILABLE = True
-except (ModuleNotFoundError, ImportError, ValueError, PLException) as e:
+except (ImportError, ValueError, PLException) as e:
     warn(str(e), UserWarning)
     CPP_BINARY_AVAILABLE = False
 
@@ -618,10 +618,10 @@ if CPP_BINARY_AVAILABLE:
         @staticmethod
         def _check_adjdiff_supported_operations(operations):
             """Check Lightning adjoint differentiation method support for a tape.
-            Raise ``QuantumFunctionError`` if ``tape`` contains not supported measurements,
-            observables, or operations by the Lightning adjoint differentiation method.
             Args:
                 tape (.QuantumTape): quantum tape to differentiate.
+            Raise:
+                ``QuantumFunctionError`` if ``tape`` contains not supported measurements, observables, or operations by the Lightning adjoint differentiation method.
             """
             for op in operations:
                 if op.num_params > 1 and not isinstance(op, Rot):

@@ -9,6 +9,12 @@ using namespace Pennylane;
 }
 
 namespace Pennylane {
+/**
+ * @brief PLApprox class
+ *
+ * @tparam T Complex floating point type or floating point type
+ * @tparam Alloc std::allocator<T> type
+ */
 template <class T, class Alloc = std::allocator<T>> struct PLApprox {
 
     const std::vector<T, Alloc> &comp_;
