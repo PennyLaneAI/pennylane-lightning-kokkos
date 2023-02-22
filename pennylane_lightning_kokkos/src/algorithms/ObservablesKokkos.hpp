@@ -3,9 +3,9 @@
 #include <functional>
 #include <vector>
 
+#include "Error.hpp"
 #include "LinearAlgebra.hpp"
 #include "StateVectorKokkos.hpp"
-#include "Error.hpp"
 
 namespace Pennylane::Algorithms {
 
