@@ -905,6 +905,8 @@ template <class Precision> class StateVectorKokkos {
     /**
      * @brief Templated method that applies special n-qbit gates.
      *
+     * @tparam Gate functor class for Kokkos dispatcher.
+     * @tparam Number of qubits.
      * @param wires Wires to apply gate to.
      * @param inverse Indicates whether to use adjoint of gate.
      * @param params parameters for this gate
