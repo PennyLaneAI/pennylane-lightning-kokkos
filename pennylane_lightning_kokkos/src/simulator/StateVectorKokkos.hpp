@@ -684,12 +684,12 @@ template <class Precision> class StateVectorKokkos {
         if (!inverse) {
             Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
                                      0, Util::exp2(num_qubits - 1)),
-                                 applySingleQubitOpFunctor<Precision, false>(
+                                 singleQubitOpFunctor<Precision, false>(
                                      *data_, num_qubits, matrix, wires));
         } else {
             Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
                                      0, Util::exp2(num_qubits - 1)),
-                                 applySingleQubitOpFunctor<Precision, true>(
+                                 singleQubitOpFunctor<Precision, true>(
                                      *data_, num_qubits, matrix, wires));
         }
     }
@@ -709,12 +709,12 @@ template <class Precision> class StateVectorKokkos {
         if (!inverse) {
             Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
                                      0, Util::exp2(num_qubits - 2)),
-                                 applyTwoQubitOpFunctor<Precision, false>(
+                                 twoQubitOpFunctor<Precision, false>(
                                      *data_, num_qubits, matrix, wires));
         } else {
             Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
                                      0, Util::exp2(num_qubits - 2)),
-                                 applyTwoQubitOpFunctor<Precision, true>(
+                                 twoQubitOpFunctor<Precision, true>(
                                      *data_, num_qubits, matrix, wires));
         }
     }
@@ -747,14 +747,14 @@ template <class Precision> class StateVectorKokkos {
                 Kokkos::parallel_for(
                     Kokkos::RangePolicy<KokkosExecSpace>(
                         0, Util::exp2(num_qubits_ - wires.size())),
-                    applyMultiQubitOpFunctor<Precision, false>(
-                        *data_, num_qubits, matrix, wires_view));
+                    multiQubitOpFunctor<Precision, false>(*data_, num_qubits,
+                                                          matrix, wires_view));
             } else {
                 Kokkos::parallel_for(
                     Kokkos::RangePolicy<KokkosExecSpace>(
                         0, Util::exp2(num_qubits_ - wires.size())),
-                    applyMultiQubitOpFunctor<Precision, true>(
-                        *data_, num_qubits, matrix, wires_view));
+                    multiQubitOpFunctor<Precision, true>(*data_, num_qubits,
+                                                         matrix, wires_view));
             }
         }
     }
@@ -903,7 +903,7 @@ template <class Precision> class StateVectorKokkos {
     }
 
     /**
-     * @brief Templated method that applies special n-qbit gates.
+     * @brief Templated method that applies special n-qubit gates.
      *
      * @tparam Gate functor class for Kokkos dispatcher.
      * @tparam Number of qubits.
@@ -940,7 +940,7 @@ template <class Precision> class StateVectorKokkos {
     void
     applyPauliX(const std::vector<size_t> &wires, bool inverse = false,
                 [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        applySpecialQubitGate<applyPauliXFunctor, 1>(wires, inverse, params);
+        applySpecialQubitGate<pauliXFunctor, 1>(wires, inverse, params);
     }
 
     /**
@@ -953,7 +953,7 @@ template <class Precision> class StateVectorKokkos {
     void
     applyPauliY(const std::vector<size_t> &wires, bool inverse = false,
                 [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        applySpecialQubitGate<applyPauliYFunctor, 1>(wires, inverse, params);
+        applySpecialQubitGate<pauliYFunctor, 1>(wires, inverse, params);
     }
 
     /**
@@ -967,7 +967,7 @@ template <class Precision> class StateVectorKokkos {
     void
     applyPauliZ(const std::vector<size_t> &wires, bool inverse = false,
                 [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        applySpecialQubitGate<applyPauliZFunctor, 1>(wires, inverse, params);
+        applySpecialQubitGate<pauliZFunctor, 1>(wires, inverse, params);
     }
 
     /**
@@ -1251,7 +1251,7 @@ template <class Precision> class StateVectorKokkos {
     void
     applyHadamard(const std::vector<size_t> &wires, bool inverse = false,
                   [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        applySpecialQubitGate<applyHadamardFunctor, 1>(wires, inverse, params);
+        applySpecialQubitGate<hadamardFunctor, 1>(wires, inverse, params);
     }
 
     /**
@@ -1263,7 +1263,7 @@ template <class Precision> class StateVectorKokkos {
      */
     void applyS(const std::vector<size_t> &wires, bool inverse = false,
                 [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        applySpecialQubitGate<applySFunctor, 1>(wires, inverse, params);
+        applySpecialQubitGate<sFunctor, 1>(wires, inverse, params);
     }
 
     /**
@@ -1275,7 +1275,7 @@ template <class Precision> class StateVectorKokkos {
      */
     void applyT(const std::vector<size_t> &wires, bool inverse = false,
                 [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        applySpecialQubitGate<applyTFunctor, 1>(wires, inverse, params);
+        applySpecialQubitGate<tFunctor, 1>(wires, inverse, params);
     }
 
     /**
@@ -1287,7 +1287,7 @@ template <class Precision> class StateVectorKokkos {
      */
     void applyRX(const std::vector<size_t> &wires, bool inverse,
                  [[maybe_unused]] const std::vector<Precision> &params) {
-        applySpecialQubitGate<applyRXFunctor, 1>(wires, inverse, params);
+        applySpecialQubitGate<rxFunctor, 1>(wires, inverse, params);
     }
 
     /**
@@ -1299,7 +1299,7 @@ template <class Precision> class StateVectorKokkos {
      */
     void applyRY(const std::vector<size_t> &wires, bool inverse,
                  [[maybe_unused]] const std::vector<Precision> &params) {
-        applySpecialQubitGate<applyRYFunctor, 1>(wires, inverse, params);
+        applySpecialQubitGate<ryFunctor, 1>(wires, inverse, params);
     }
 
     /**
@@ -1311,7 +1311,7 @@ template <class Precision> class StateVectorKokkos {
      */
     void applyRZ(const std::vector<size_t> &wires, bool inverse = false,
                  [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        applySpecialQubitGate<applyRZFunctor, 1>(wires, inverse, params);
+        applySpecialQubitGate<rzFunctor, 1>(wires, inverse, params);
     }
 
     /**
@@ -1324,8 +1324,7 @@ template <class Precision> class StateVectorKokkos {
     void applyPhaseShift(
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        applySpecialQubitGate<applyPhaseShiftFunctor, 1>(wires, inverse,
-                                                         params);
+        applySpecialQubitGate<phaseShiftFunctor, 1>(wires, inverse, params);
     }
 
     /**
@@ -1337,7 +1336,7 @@ template <class Precision> class StateVectorKokkos {
      */
     void applyRot(const std::vector<size_t> &wires, bool inverse,
                   const std::vector<Precision> &params) {
-        applySpecialQubitGate<applyRotFunctor, 1>(wires, inverse, params);
+        applySpecialQubitGate<rotFunctor, 1>(wires, inverse, params);
     }
 
     /**
@@ -1349,7 +1348,7 @@ template <class Precision> class StateVectorKokkos {
      */
     void applyCY(const std::vector<size_t> &wires, bool inverse = false,
                  [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        applySpecialQubitGate<applyCYFunctor, 2>(wires, inverse, params);
+        applySpecialQubitGate<cyFunctor, 2>(wires, inverse, params);
     }
 
     /**
@@ -1361,7 +1360,7 @@ template <class Precision> class StateVectorKokkos {
      */
     void applyCZ(const std::vector<size_t> &wires, bool inverse = false,
                  [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        applySpecialQubitGate<applyCZFunctor, 2>(wires, inverse, params);
+        applySpecialQubitGate<czFunctor, 2>(wires, inverse, params);
     }
 
     /**
@@ -1373,7 +1372,7 @@ template <class Precision> class StateVectorKokkos {
      */
     void applyCNOT(const std::vector<size_t> &wires, bool inverse = false,
                    [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        applySpecialQubitGate<applyCNOTFunctor, 2>(wires, inverse, params);
+        applySpecialQubitGate<cnotFunctor, 2>(wires, inverse, params);
     }
 
     /**
@@ -1385,7 +1384,7 @@ template <class Precision> class StateVectorKokkos {
      */
     void applySWAP(const std::vector<size_t> &wires, bool inverse = false,
                    [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        applySpecialQubitGate<applySWAPFunctor, 2>(wires, inverse, params);
+        applySpecialQubitGate<swapFunctor, 2>(wires, inverse, params);
     }
 
     /**
@@ -1399,8 +1398,8 @@ template <class Precision> class StateVectorKokkos {
     void applyControlledPhaseShift(
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        applySpecialQubitGate<applyControlledPhaseShiftFunctor, 2>(
-            wires, inverse, params);
+        applySpecialQubitGate<controlledPhaseShiftFunctor, 2>(wires, inverse,
+                                                              params);
     }
 
     /**
@@ -1412,7 +1411,7 @@ template <class Precision> class StateVectorKokkos {
      */
     void applyCRX(const std::vector<size_t> &wires, bool inverse = false,
                   [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        applySpecialQubitGate<applyCRXFunctor, 2>(wires, inverse, params);
+        applySpecialQubitGate<crxFunctor, 2>(wires, inverse, params);
     }
 
     /**
@@ -1424,7 +1423,7 @@ template <class Precision> class StateVectorKokkos {
      */
     void applyCRY(const std::vector<size_t> &wires, bool inverse = false,
                   [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        applySpecialQubitGate<applyCRYFunctor, 2>(wires, inverse, params);
+        applySpecialQubitGate<cryFunctor, 2>(wires, inverse, params);
     }
 
     /**
@@ -1436,7 +1435,7 @@ template <class Precision> class StateVectorKokkos {
      */
     void applyCRZ(const std::vector<size_t> &wires, bool inverse = false,
                   [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        applySpecialQubitGate<applyCRZFunctor, 2>(wires, inverse, params);
+        applySpecialQubitGate<crzFunctor, 2>(wires, inverse, params);
     }
 
     /**
@@ -1448,7 +1447,7 @@ template <class Precision> class StateVectorKokkos {
      */
     void applyCRot(const std::vector<size_t> &wires, bool inverse,
                    [[maybe_unused]] const std::vector<Precision> &params) {
-        applySpecialQubitGate<applyCRotFunctor, 2>(wires, inverse, params);
+        applySpecialQubitGate<cRotFunctor, 2>(wires, inverse, params);
     }
 
     /**
@@ -1461,7 +1460,7 @@ template <class Precision> class StateVectorKokkos {
     void
     applyIsingXX(const std::vector<size_t> &wires, bool inverse = false,
                  [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        applySpecialQubitGate<applyIsingXXFunctor, 2>(wires, inverse, params);
+        applySpecialQubitGate<isingXXFunctor, 2>(wires, inverse, params);
     }
 
     /**
@@ -1474,7 +1473,7 @@ template <class Precision> class StateVectorKokkos {
     void
     applyIsingXY(const std::vector<size_t> &wires, bool inverse = false,
                  [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        applySpecialQubitGate<applyIsingXYFunctor, 2>(wires, inverse, params);
+        applySpecialQubitGate<isingXYFunctor, 2>(wires, inverse, params);
     }
 
     /**
@@ -1487,7 +1486,7 @@ template <class Precision> class StateVectorKokkos {
     void
     applyIsingYY(const std::vector<size_t> &wires, bool inverse = false,
                  [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        applySpecialQubitGate<applyIsingYYFunctor, 2>(wires, inverse, params);
+        applySpecialQubitGate<isingYYFunctor, 2>(wires, inverse, params);
     }
 
     /**
@@ -1500,7 +1499,7 @@ template <class Precision> class StateVectorKokkos {
     void
     applyIsingZZ(const std::vector<size_t> &wires, bool inverse = false,
                  [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        applySpecialQubitGate<applyIsingZZFunctor, 2>(wires, inverse, params);
+        applySpecialQubitGate<isingZZFunctor, 2>(wires, inverse, params);
     }
 
     /**
@@ -1514,8 +1513,8 @@ template <class Precision> class StateVectorKokkos {
     void applySingleExcitation(
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        applySpecialQubitGate<applySingleExcitationFunctor, 2>(wires, inverse,
-                                                               params);
+        applySpecialQubitGate<singleExcitationFunctor, 2>(wires, inverse,
+                                                          params);
     }
 
     /**
@@ -1529,8 +1528,8 @@ template <class Precision> class StateVectorKokkos {
     void applySingleExcitationMinus(
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        applySpecialQubitGate<applySingleExcitationMinusFunctor, 2>(
-            wires, inverse, params);
+        applySpecialQubitGate<singleExcitationMinusFunctor, 2>(wires, inverse,
+                                                               params);
     }
 
     /**
@@ -1544,8 +1543,8 @@ template <class Precision> class StateVectorKokkos {
     void applySingleExcitationPlus(
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        applySpecialQubitGate<applySingleExcitationPlusFunctor, 2>(
-            wires, inverse, params);
+        applySpecialQubitGate<singleExcitationPlusFunctor, 2>(wires, inverse,
+                                                              params);
     }
 
     /**
@@ -1559,8 +1558,8 @@ template <class Precision> class StateVectorKokkos {
     void applyDoubleExcitation(
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        applySpecialQubitGate<applyDoubleExcitationFunctor, 4>(wires, inverse,
-                                                               params);
+        applySpecialQubitGate<doubleExcitationFunctor, 4>(wires, inverse,
+                                                          params);
     }
 
     /**
@@ -1574,8 +1573,8 @@ template <class Precision> class StateVectorKokkos {
     void applyDoubleExcitationMinus(
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        applySpecialQubitGate<applyDoubleExcitationMinusFunctor, 4>(
-            wires, inverse, params);
+        applySpecialQubitGate<doubleExcitationMinusFunctor, 4>(wires, inverse,
+                                                               params);
     }
 
     /**
@@ -1589,8 +1588,8 @@ template <class Precision> class StateVectorKokkos {
     void applyDoubleExcitationPlus(
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        applySpecialQubitGate<applyDoubleExcitationPlusFunctor, 4>(
-            wires, inverse, params);
+        applySpecialQubitGate<doubleExcitationPlusFunctor, 4>(wires, inverse,
+                                                              params);
     }
 
     /**
@@ -1608,13 +1607,13 @@ template <class Precision> class StateVectorKokkos {
         if (!inverse) {
             Kokkos::parallel_for(
                 Kokkos::RangePolicy<KokkosExecSpace>(0, Util::exp2(num_qubits)),
-                applyMultiRZFunctor<Precision, false>(*data_, num_qubits, wires,
-                                                      params));
+                multiRZFunctor<Precision, false>(*data_, num_qubits, wires,
+                                                 params));
         } else {
             Kokkos::parallel_for(
                 Kokkos::RangePolicy<KokkosExecSpace>(0, Util::exp2(num_qubits)),
-                applyMultiRZFunctor<Precision, true>(*data_, num_qubits, wires,
-                                                     params));
+                multiRZFunctor<Precision, true>(*data_, num_qubits, wires,
+                                                params));
         }
     }
 
@@ -1628,7 +1627,7 @@ template <class Precision> class StateVectorKokkos {
     void
     applyCSWAP(const std::vector<size_t> &wires, bool inverse = false,
                [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        applySpecialQubitGate<applyCSWAPFunctor, 3>(wires, inverse, params);
+        applySpecialQubitGate<cSWAPFunctor, 3>(wires, inverse, params);
     }
 
     /**
@@ -1641,7 +1640,7 @@ template <class Precision> class StateVectorKokkos {
     void
     applyToffoli(const std::vector<size_t> &wires, bool inverse = false,
                  [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        applySpecialQubitGate<applyToffoliFunctor, 3>(wires, inverse, params);
+        applySpecialQubitGate<toffoliFunctor, 3>(wires, inverse, params);
     }
 
     /**
@@ -1655,8 +1654,8 @@ template <class Precision> class StateVectorKokkos {
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {})
         -> Precision {
-        applySpecialQubitGate<applyGeneratorPhaseShiftFunctor, 1>(
-            wires, inverse, params);
+        applySpecialQubitGate<generatorPhaseShiftFunctor, 1>(wires, inverse,
+                                                             params);
         return static_cast<Precision>(1.0);
     }
 
@@ -1671,8 +1670,8 @@ template <class Precision> class StateVectorKokkos {
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {})
         -> Precision {
-        applySpecialQubitGate<applyGeneratorIsingXXFunctor, 2>(wires, inverse,
-                                                               params);
+        applySpecialQubitGate<generatorIsingXXFunctor, 2>(wires, inverse,
+                                                          params);
         return -static_cast<Precision>(0.5);
     }
 
@@ -1687,8 +1686,8 @@ template <class Precision> class StateVectorKokkos {
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {})
         -> Precision {
-        applySpecialQubitGate<applyGeneratorIsingXYFunctor, 2>(wires, inverse,
-                                                               params);
+        applySpecialQubitGate<generatorIsingXYFunctor, 2>(wires, inverse,
+                                                          params);
         return static_cast<Precision>(0.5);
     }
 
@@ -1703,8 +1702,8 @@ template <class Precision> class StateVectorKokkos {
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {})
         -> Precision {
-        applySpecialQubitGate<applyGeneratorIsingYYFunctor, 2>(wires, inverse,
-                                                               params);
+        applySpecialQubitGate<generatorIsingYYFunctor, 2>(wires, inverse,
+                                                          params);
         return -static_cast<Precision>(0.5);
     }
 
@@ -1719,8 +1718,8 @@ template <class Precision> class StateVectorKokkos {
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {})
         -> Precision {
-        applySpecialQubitGate<applyGeneratorIsingZZFunctor, 2>(wires, inverse,
-                                                               params);
+        applySpecialQubitGate<generatorIsingZZFunctor, 2>(wires, inverse,
+                                                          params);
         return -static_cast<Precision>(0.5);
     }
 
@@ -1736,7 +1735,7 @@ template <class Precision> class StateVectorKokkos {
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {})
         -> Precision {
-        applySpecialQubitGate<applyGeneratorSingleExcitationFunctor, 2>(
+        applySpecialQubitGate<generatorSingleExcitationFunctor, 2>(
             wires, inverse, params);
         return -static_cast<Precision>(0.5);
     }
@@ -1753,7 +1752,7 @@ template <class Precision> class StateVectorKokkos {
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {})
         -> Precision {
-        applySpecialQubitGate<applyGeneratorSingleExcitationMinusFunctor, 2>(
+        applySpecialQubitGate<generatorSingleExcitationMinusFunctor, 2>(
             wires, inverse, params);
         return -static_cast<Precision>(0.5);
     }
@@ -1770,7 +1769,7 @@ template <class Precision> class StateVectorKokkos {
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {})
         -> Precision {
-        applySpecialQubitGate<applyGeneratorSingleExcitationPlusFunctor, 2>(
+        applySpecialQubitGate<generatorSingleExcitationPlusFunctor, 2>(
             wires, inverse, params);
         return -static_cast<Precision>(0.5);
     }
@@ -1787,7 +1786,7 @@ template <class Precision> class StateVectorKokkos {
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {})
         -> Precision {
-        applySpecialQubitGate<applyGeneratorDoubleExcitationFunctor, 4>(
+        applySpecialQubitGate<generatorDoubleExcitationFunctor, 4>(
             wires, inverse, params);
         return -static_cast<Precision>(0.5);
     }
@@ -1804,7 +1803,7 @@ template <class Precision> class StateVectorKokkos {
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {})
         -> Precision {
-        applySpecialQubitGate<applyGeneratorDoubleExcitationMinusFunctor, 4>(
+        applySpecialQubitGate<generatorDoubleExcitationMinusFunctor, 4>(
             wires, inverse, params);
         return -static_cast<Precision>(0.5);
     }
@@ -1821,7 +1820,7 @@ template <class Precision> class StateVectorKokkos {
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {})
         -> Precision {
-        applySpecialQubitGate<applyGeneratorDoubleExcitationPlusFunctor, 4>(
+        applySpecialQubitGate<generatorDoubleExcitationPlusFunctor, 4>(
             wires, inverse, params);
         return static_cast<Precision>(0.5);
     }
@@ -1883,7 +1882,7 @@ template <class Precision> class StateVectorKokkos {
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {})
         -> Precision {
-        applySpecialQubitGate<applyGeneratorControlledPhaseShiftFunctor, 2>(
+        applySpecialQubitGate<generatorControlledPhaseShiftFunctor, 2>(
             wires, inverse, params);
         return static_cast<Precision>(1);
     }
@@ -1900,8 +1899,7 @@ template <class Precision> class StateVectorKokkos {
         [[maybe_unused]] const std::vector<Precision> &params = {})
 
         -> Precision {
-        applySpecialQubitGate<applyGeneratorCRXFunctor, 2>(wires, inverse,
-                                                           params);
+        applySpecialQubitGate<generatorCRXFunctor, 2>(wires, inverse, params);
         return -static_cast<Precision>(0.5);
     }
 
@@ -1916,8 +1914,7 @@ template <class Precision> class StateVectorKokkos {
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {})
         -> Precision {
-        applySpecialQubitGate<applyGeneratorCRYFunctor, 2>(wires, inverse,
-                                                           params);
+        applySpecialQubitGate<generatorCRYFunctor, 2>(wires, inverse, params);
         return -static_cast<Precision>(0.5);
     }
 
@@ -1932,8 +1929,7 @@ template <class Precision> class StateVectorKokkos {
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {})
         -> Precision {
-        applySpecialQubitGate<applyGeneratorCRZFunctor, 2>(wires, inverse,
-                                                           params);
+        applySpecialQubitGate<generatorCRZFunctor, 2>(wires, inverse, params);
         return -static_cast<Precision>(0.5);
     }
 
@@ -1953,13 +1949,13 @@ template <class Precision> class StateVectorKokkos {
         if (inverse == false) {
             Kokkos::parallel_for(
                 Kokkos::RangePolicy<KokkosExecSpace>(0, Util::exp2(num_qubits)),
-                applyGeneratorMultiRZFunctor<Precision, false>(
-                    *data_, num_qubits, wires));
+                generatorMultiRZFunctor<Precision, false>(*data_, num_qubits,
+                                                          wires));
         } else {
             Kokkos::parallel_for(
                 Kokkos::RangePolicy<KokkosExecSpace>(0, Util::exp2(num_qubits)),
-                applyGeneratorMultiRZFunctor<Precision, true>(
-                    *data_, num_qubits, wires));
+                generatorMultiRZFunctor<Precision, true>(*data_, num_qubits,
+                                                         wires));
         }
         return -static_cast<Precision>(0.5);
     }
