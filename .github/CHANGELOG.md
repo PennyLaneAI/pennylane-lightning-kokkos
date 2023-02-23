@@ -1,4 +1,4 @@
-# Release 0.29.0-dev
+# Release 0.29.0.rc0
 
 ### New features since last release
 
@@ -36,8 +36,6 @@
 
 * Add VJP support.
 [(#32)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/32)
-
-### Documentation
 
 ### Bug fixes
 
