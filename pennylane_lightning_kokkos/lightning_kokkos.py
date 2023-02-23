@@ -621,7 +621,7 @@ if CPP_BINARY_AVAILABLE:
             Args:
                 tape (.QuantumTape): quantum tape to differentiate.
             Raise:
-                ``QuantumFunctionError`` if ``tape`` contains not supported measurements, observables, or operations by the Lightning adjoint differentiation method.
+                QuantumFunctionError: if ``tape`` contains not supported measurements, observables, or operations by the Lightning adjoint differentiation method.
             """
             for op in operations:
                 if op.num_params > 1 and not isinstance(op, Rot):
