@@ -16,6 +16,7 @@ This module contains the :class:`~.LightningKokkos` class, a PennyLane simulator
 interfaces with Kokkos-enabled calculations to run efficiently on different kinds of shared memory
 hardware systems, such as AMD and Nvidia GPUs, or many-core CPUs. 
 """
+from typing import List
 from warnings import warn
 from itertools import product
 
@@ -37,8 +38,9 @@ from pennylane import (
 )
 from pennylane_lightning import LightningQubit
 from pennylane.operation import Tensor, Operation
+from pennylane.measurements import Expectation, MeasurementProcess, State
 from pennylane.ops.op_math import Adjoint
-from pennylane.measurements import Expectation
+
 from pennylane.wires import Wires
 
 # tolerance for numerical errors
@@ -54,13 +56,21 @@ try:
         LightningKokkos_C64,
         AdjointJacobianKokkos_C128,
         AdjointJacobianKokkos_C64,
+        NamedObsKokkos_C64,
+        NamedObsKokkos_C128,
+        TensorProdObsKokkos_C64,
+        TensorProdObsKokkos_C128,
+        HamiltonianKokkos_C64,
+        HamiltonianKokkos_C128,
+        SparseHamiltonianKokkos_C64,
+        SparseHamiltonianKokkos_C128,
         kokkos_config_info,
     )
 
-    from ._serialize import _serialize_obs, _serialize_ops
+    from ._serialize import _serialize_observables, _serialize_ops
 
     CPP_BINARY_AVAILABLE = True
-except (ModuleNotFoundError, ImportError, ValueError, PLException) as e:
+except (ImportError, ValueError, PLException) as e:
     warn(str(e), UserWarning)
     CPP_BINARY_AVAILABLE = False
 
@@ -562,46 +572,58 @@ if CPP_BINARY_AVAILABLE:
                 qml.matrix(observable).ravel(order="C"),
             )
 
-        def adjoint_diff_support_check(self, tape):
-            """Check Lightning adjoint differentiation method support for a tape.
-
-            Raise ``QuantumFunctionError`` if ``tape`` contains not supported measurements,
-            observables, or operations by the Lightning adjoint differentiation method.
-
+        @staticmethod
+        def _check_adjdiff_supported_measurements(measurements: List[MeasurementProcess]):
+            """Check whether given list of measurement is supported by adjoint_diff.
             Args:
-                tape (.QuantumTape): quantum tape to differentiate
+                measurements (List[MeasurementProcess]): a list of measurement processes to check.
+            Returns:
+                Expectation or State: a common return type of measurements.
             """
-            unsupported = [Projector, Hamiltonian, SparseHamiltonian, Hermitian]
-            for m in tape.measurements:
-                if m.return_type is not Expectation:
-                    raise QuantumFunctionError(
-                        "Adjoint differentiation method does not support"
-                        f" measurement {m.return_type.value}"
-                    )
+            if len(measurements) == 0:
+                return None
+
+            if len(measurements) == 1 and measurements[0].return_type is State:
+                # return State
+                raise QuantumFunctionError("Not supported")
+
+            # The return_type of measurement processes must be expectation
+            if not all([m.return_type is Expectation for m in measurements]):
+                raise QuantumFunctionError(
+                    "Adjoint differentiation method does not support expectation return type "
+                    "mixed with other return types"
+                )
+
+            for m in measurements:
                 if not isinstance(m.obs, Tensor):
-                    if any([isinstance(m.obs, k) for k in unsupported]):
+                    if isinstance(m.obs, Projector):
                         raise QuantumFunctionError(
-                            f"Adjoint differentiation method does not support the {m.obs.name} observable"
+                            "Adjoint differentiation method does not support the Projector observable"
+                        )
+                    if isinstance(m.obs, Hermitian):
+                        raise QuantumFunctionError(
+                            "LightningKokkos adjoint differentiation method does not currently support the Hermitian observable"
                         )
                 else:
                     if any([isinstance(o, Projector) for o in m.obs.non_identity_obs]):
                         raise QuantumFunctionError(
                             "Adjoint differentiation method does not support the Projector observable"
                         )
-                    if any([isinstance(o, Hamiltonian) for o in m.obs.non_identity_obs]):
-                        raise QuantumFunctionError(
-                            "Adjoint differentiation method does not currently support the Hamiltonian observable"
-                        )
-                    if any([isinstance(o, SparseHamiltonian) for o in m.obs.non_identity_obs]):
-                        raise QuantumFunctionError(
-                            "Adjoint differentiation method does not currently support the SparseHamiltonian observable"
-                        )
                     if any([isinstance(o, Hermitian) for o in m.obs.non_identity_obs]):
                         raise QuantumFunctionError(
-                            "Lightning adjoint differentiation method does not currently support the Hermitian observable"
+                            "LightningKokkos adjoint differentiation method does not currently support the Hermitian observable"
                         )
+            return Expectation
 
-            for op in tape.operations:
+        @staticmethod
+        def _check_adjdiff_supported_operations(operations):
+            """Check Lightning adjoint differentiation method support for a tape.
+            Args:
+                tape (.QuantumTape): quantum tape to differentiate.
+            Raise:
+                QuantumFunctionError: if ``tape`` contains not supported measurements, observables, or operations by the Lightning adjoint differentiation method.
+            """
+            for op in operations:
                 if op.num_params > 1 and not isinstance(op, Rot):
                     raise QuantumFunctionError(
                         f"The {op.name} operation is not supported using "
@@ -616,11 +638,13 @@ if CPP_BINARY_AVAILABLE:
                     UserWarning,
                 )
 
+            tape_return_type = self._check_adjdiff_supported_measurements(tape.measurements)
+
             if len(tape.trainable_params) == 0:
                 return np.array(0)
 
             # Check adjoint diff support
-            self.adjoint_diff_support_check(tape)
+            self._check_adjdiff_supported_operations(tape.operations)
 
             # Initialization of state
             if starting_state is not None:
@@ -636,7 +660,9 @@ if CPP_BINARY_AVAILABLE:
             else:
                 adj = AdjointJacobianKokkos_C128()
 
-            obs_serialized = _serialize_obs(tape, self.wire_map, use_csingle=self.use_csingle)
+            obs_serialized = _serialize_observables(
+                tape, self.wire_map, use_csingle=self.use_csingle
+            )
             ops_serialized, use_sp = _serialize_ops(
                 tape, self.wire_map, use_csingle=self.use_csingle
             )
@@ -671,6 +697,49 @@ if CPP_BINARY_AVAILABLE:
             jac_r = np.zeros((jac.shape[0], all_params))
             jac_r[:, record_tp_rows] = jac
             return jac_r
+
+        def vjp(self, measurements, dy, starting_state=None, use_device_state=False):
+            """Generate the processing function required to compute the vector-Jacobian products of a tape."""
+            if self.shots is not None:
+                warn(
+                    "Requested adjoint differentiation to be computed with finite shots."
+                    " The derivative is always exact when using the adjoint differentiation method.",
+                    UserWarning,
+                )
+
+            tape_return_type = self._check_adjdiff_supported_measurements(measurements)
+
+            if math.allclose(dy, 0) or tape_return_type is None:
+                return lambda tape: math.convert_like(np.zeros(len(tape.trainable_params)), dy)
+
+            if tape_return_type is Expectation:
+                if len(dy) != len(measurements):
+                    raise ValueError(
+                        "Number of observables in the tape must be the same as the length of dy in the vjp method"
+                    )
+
+                if np.iscomplexobj(dy):
+                    raise ValueError(
+                        "The vjp method only works with a real-valued dy when the tape is returning an expectation value"
+                    )
+
+                ham = qml.Hamiltonian(dy, [m.obs for m in measurements])
+
+                def processing_fn(tape):
+                    nonlocal ham
+                    num_params = len(tape.trainable_params)
+
+                    if num_params == 0:
+                        return np.array([], dtype=self._state.dtype)
+
+                    new_tape = tape.copy()
+                    new_tape._measurements = [qml.expval(ham)]
+
+                    return self.adjoint_jacobian(
+                        new_tape, starting_state, use_device_state
+                    ).reshape(-1)
+
+                return processing_fn
 
 else:  # CPP_BINARY_AVAILABLE:
 

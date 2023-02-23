@@ -84,7 +84,7 @@ class TestAdjointJacobian:
             return qml.device("lightning.kokkos", wires=3, kokkos_args=request.param)
 
     @pytest.fixture
-    def dev_cpu(self):
+    def dev_default(self):
         return qml.device("default.qubit", wires=3)
 
     def test_not_expval(self, dev_kokkos):
@@ -177,7 +177,7 @@ class TestAdjointJacobian:
 
     @pytest.mark.parametrize("theta", np.linspace(-2 * np.pi, 2 * np.pi, 7))
     @pytest.mark.parametrize("G", [qml.RX, qml.RY, qml.RZ])
-    def test_pauli_rotation_gradient(self, G, theta, tol, dev_cpu, dev_kokkos):
+    def test_pauli_rotation_gradient(self, G, theta, tol, dev_default, dev_kokkos):
         """Tests that the automatic gradients of Pauli rotations are correct."""
 
         with qml.tape.QuantumTape() as tape:
@@ -188,12 +188,12 @@ class TestAdjointJacobian:
         tape.trainable_params = {1}
 
         calculated_val = dev_kokkos.adjoint_jacobian(tape)
-        expected_val = dev_cpu.adjoint_jacobian(tape)
+        expected_val = dev_default.adjoint_jacobian(tape)
 
         assert np.allclose(calculated_val, expected_val, atol=tol, rtol=0)
 
     @pytest.mark.parametrize("theta", np.linspace(-2 * np.pi, 2 * np.pi, 7))
-    def test_Rot_gradient(self, theta, tol, dev_cpu, dev_kokkos):
+    def test_Rot_gradient(self, theta, tol, dev_default, dev_kokkos):
         """Tests that the device gradient of an arbitrary Euler-angle-parameterized gate is
         correct."""
         params = np.array([theta, theta**3, np.sqrt(2) * theta])
@@ -206,7 +206,7 @@ class TestAdjointJacobian:
         tape.trainable_params = {1, 2, 3}
 
         calculated_val = dev_kokkos.adjoint_jacobian(tape)
-        expected_val = dev_cpu.adjoint_jacobian(tape)
+        expected_val = dev_default.adjoint_jacobian(tape)
 
         assert np.allclose(calculated_val, expected_val, atol=tol, rtol=0)
 
@@ -280,7 +280,7 @@ class TestAdjointJacobian:
             qml.Rot(0.2, -0.1, 0.2, wires=0),
         ],
     )
-    def test_gradients(self, op, obs, tol, dev_cpu, dev_kokkos):
+    def test_gradients(self, op, obs, tol, dev_default, dev_kokkos):
         """Tests that the gradients of circuits match between the param-shift and device
         methods."""
 
@@ -797,15 +797,20 @@ def test_fail_adjoint_mixed_Hamiltonian_Hermitian(returns):
         j_kokkos = qml.jacobian(qnode_kokkos)(params)
 
 
-def test_fail_adjoint_Hamiltonian():
+def test_adjoint_Hamiltonian():
     """Integration tests that compare to default.qubit for a large circuit containing parametrized
     operations and when using custom wire labels"""
 
     coeffs = [0.5, -0.25, 1.0]
-    obs = [qml.PauliX(0) @ qml.PauliX(1), qml.PauliZ(0) @ qml.PauliY(2), qml.PauliZ(3)]
+    obs = [
+        qml.PauliX(custom_wires[0]) @ qml.PauliX(custom_wires[1]),
+        qml.PauliZ(custom_wires[0]) @ qml.PauliY(custom_wires[2]),
+        qml.PauliZ(custom_wires[3]),
+    ]
     hamiltonian = qml.Hamiltonian(coeffs, obs)
 
     dev_kokkos = qml.device("lightning.kokkos", wires=custom_wires)
+    dev_default = qml.device("default.qubit", wires=custom_wires)
 
     def circuit(params):
         circuit_ansatz(params, wires=custom_wires)
@@ -816,9 +821,12 @@ def test_fail_adjoint_Hamiltonian():
     params = np.random.rand(n_params)
 
     qnode_kokkos = qml.QNode(circuit, dev_kokkos, diff_method="adjoint")
+    qnode_default = qml.QNode(circuit, dev_default, diff_method="parameter-shift")
 
-    with pytest.raises(Exception):
-        j_kokkos = qml.jacobian(qnode_kokkos)(params)
+    j_kokkos = qml.jacobian(qnode_kokkos)(params)
+    j_default = qml.jacobian(qnode_default)(params)
+
+    assert np.allclose(j_kokkos, j_default)
 
 
 @pytest.mark.parametrize(
@@ -847,11 +855,12 @@ def test_fail_adjoint_Hamiltonian():
         ),
     ],
 )
-def test_fail_adjoint_SparseHamiltonian(returns):
+def test_adjoint_SparseHamiltonian(returns):
     """Integration tests that compare to default.qubit for a large circuit containing parametrized
     operations and when using custom wire labels"""
 
     dev_kokkos = qml.device("lightning.kokkos", wires=custom_wires)
+    dev_default = qml.device("default.qubit", wires=custom_wires)
 
     def circuit(params):
         circuit_ansatz(params, wires=custom_wires)
@@ -862,6 +871,9 @@ def test_fail_adjoint_SparseHamiltonian(returns):
     params = np.random.rand(n_params)
 
     qnode_kokkos = qml.QNode(circuit, dev_kokkos, diff_method="adjoint")
+    qnode_default = qml.QNode(circuit, dev_default, diff_method="parameter-shift")
 
-    with pytest.raises(Exception):
-        j_kokkos = qml.jacobian(qnode_kokkos)(params)
+    j_kokkos = qml.jacobian(qnode_kokkos)(params)
+    j_default = qml.jacobian(qnode_default)(params)
+
+    assert np.allclose(j_kokkos, j_default)

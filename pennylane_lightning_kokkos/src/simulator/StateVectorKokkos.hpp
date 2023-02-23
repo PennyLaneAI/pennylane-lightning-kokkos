@@ -118,6 +118,9 @@ template <class Precision> class StateVectorKokkos {
     using UnmanagedComplexHostView =
         Kokkos::View<Kokkos::complex<Precision> *, Kokkos::HostSpace,
                      Kokkos::MemoryTraits<Kokkos::Unmanaged>>;
+    using UnmanagedSizeTHostView =
+        Kokkos::View<size_t *, Kokkos::HostSpace,
+                     Kokkos::MemoryTraits<Kokkos::Unmanaged>>;
     using UnmanagedConstComplexHostView =
         Kokkos::View<const Kokkos::complex<Precision> *, Kokkos::HostSpace,
                      Kokkos::MemoryTraits<Kokkos::Unmanaged>>;
@@ -893,10 +896,6 @@ template <class Precision> class StateVectorKokkos {
         //  Determining probabilities for the sorted wires.
         const Kokkos::View<Kokkos::complex<Precision> *> arr_data = getData();
         const size_t num_qubits = getNumQubits();
-
-        using UnmanagedSizeTHostView =
-            Kokkos::View<size_t *, Kokkos::HostSpace,
-                         Kokkos::MemoryTraits<Kokkos::Unmanaged>>;
 
         using UnmanagedPrecisionHostView =
             Kokkos::View<Precision *, Kokkos::HostSpace,

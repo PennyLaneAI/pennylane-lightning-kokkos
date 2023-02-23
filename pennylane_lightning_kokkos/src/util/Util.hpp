@@ -44,6 +44,33 @@
 #endif
 
 namespace Pennylane::Util {
+template <typename T> struct remove_complex { using type = T; };
+template <typename T> struct remove_complex<std::complex<T>> {
+    using type = T;
+};
+template <typename T> using remove_complex_t = typename remove_complex<T>::type;
+
+template <typename T> struct is_complex : std::false_type {};
+
+template <typename T> struct is_complex<std::complex<T>> : std::true_type {};
+
+template <typename T> constexpr bool is_complex_v = is_complex<T>::value;
+
+/**
+ * Utility hash function for complex vectors representing matrices.
+ */
+struct MatrixHasher {
+    template <class Precision = double>
+    std::size_t
+    operator()(const std::vector<std::complex<Precision>> &matrix) const {
+        std::size_t hash_val = matrix.size();
+        for (const auto &c_val : matrix) {
+            hash_val ^= std::hash<Precision>()(c_val.real()) ^
+                        std::hash<Precision>()(c_val.imag());
+        }
+        return hash_val;
+    }
+};
 
 struct BitSwapFunctor {
     BitSwapFunctor() = default;

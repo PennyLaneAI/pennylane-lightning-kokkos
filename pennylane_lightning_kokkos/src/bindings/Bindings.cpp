@@ -582,88 +582,152 @@ void StateVectorKokkos_class_bindings(py::module &m) {
     //                              Observable
     //***********************************************************************//
 
-    class_name = "ObsStructKokkos_C" + bitsize;
-    using obs_data_var = std::variant<std::monostate, np_arr_r, np_arr_c>;
-    py::class_<ObsDatum<PrecisionT>>(m, class_name.c_str(), py::module_local())
-        .def(py::init([](const std::vector<std::string> &names,
-                         const std::vector<obs_data_var> &params,
-                         const std::vector<std::vector<size_t>> &wires) {
-            std::vector<typename ObsDatum<PrecisionT>::param_var_t> conv_params(
-                params.size());
-            for (size_t p_idx = 0; p_idx < params.size(); p_idx++) {
-                std::visit(
-                    [&](const auto &param) {
-                        using p_t = std::decay_t<decltype(param)>;
-                        if constexpr (std::is_same_v<p_t, np_arr_c>) {
-                            auto buffer = param.request();
-                            auto ptr =
-                                static_cast<std::complex<ParamT> *>(buffer.ptr);
-                            if (buffer.size) {
-                                conv_params[p_idx] =
-                                    std::vector<std::complex<ParamT>>{
-                                        ptr, ptr + buffer.size};
-                            }
-                        } else if constexpr (std::is_same_v<p_t, np_arr_r>) {
-                            auto buffer = param.request();
+    class_name = "ObservableKokkos_C" + bitsize;
+    py::class_<ObservableKokkos<PrecisionT>,
+               std::shared_ptr<ObservableKokkos<PrecisionT>>>(
+        m, class_name.c_str(), py::module_local());
 
-                            auto *ptr = static_cast<ParamT *>(buffer.ptr);
-                            if (buffer.size) {
-                                conv_params[p_idx] =
-                                    std::vector<ParamT>{ptr, ptr + buffer.size};
-                            }
-                        } else {
-                            PL_ABORT(
-                                "Parameter datatype not current supported");
-                        }
-                    },
-                    params[p_idx]);
+    class_name = "NamedObsKokkos_C" + bitsize;
+    py::class_<NamedObsKokkos<PrecisionT>,
+               std::shared_ptr<NamedObsKokkos<PrecisionT>>,
+               ObservableKokkos<PrecisionT>>(m, class_name.c_str(),
+                                             py::module_local())
+        .def(py::init(
+            [](const std::string &name, const std::vector<size_t> &wires) {
+                return NamedObsKokkos<PrecisionT>(name, wires);
+            }))
+        .def("__repr__", &NamedObsKokkos<PrecisionT>::getObsName)
+        .def("get_wires", &NamedObsKokkos<PrecisionT>::getWires,
+             "Get wires of observables")
+        .def(
+            "__eq__",
+            [](const NamedObsKokkos<PrecisionT> &self,
+               py::handle other) -> bool {
+                if (!py::isinstance<NamedObsKokkos<PrecisionT>>(other)) {
+                    return false;
+                }
+                auto other_cast = other.cast<NamedObsKokkos<PrecisionT>>();
+                return self == other_cast;
+            },
+            "Compare two observables");
+
+    class_name = "HermitianObsKokkos_C" + bitsize;
+    py::class_<HermitianObsKokkos<PrecisionT>,
+               std::shared_ptr<HermitianObsKokkos<PrecisionT>>,
+               ObservableKokkos<PrecisionT>>(m, class_name.c_str(),
+                                             py::module_local())
+        .def(py::init([](const np_arr_c &matrix,
+                         const std::vector<size_t> &wires) {
+            const auto m_buffer = matrix.request();
+            std::vector<std::complex<ParamT>> conv_matrix;
+            if (m_buffer.size) {
+                const auto m_ptr =
+                    static_cast<const std::complex<PrecisionT> *>(m_buffer.ptr);
+                conv_matrix = std::vector<std::complex<PrecisionT>>{
+                    m_ptr, m_ptr + m_buffer.size};
             }
-            return ObsDatum<PrecisionT>(names, conv_params, wires);
+            return HermitianObsKokkos<PrecisionT>(conv_matrix, wires);
         }))
-        .def("__repr__",
-             [](const ObsDatum<PrecisionT> &obs) {
-                 using namespace Pennylane::Util;
-                 std::ostringstream obs_stream;
-                 std::string obs_name = obs.getObsName()[0];
-                 for (size_t o = 1; o < obs.getObsName().size(); o++) {
-                     if (o < obs.getObsName().size()) {
-                         obs_name += " @ ";
-                     }
-                     obs_name += obs.getObsName()[o];
-                 }
-                 obs_stream << "'wires' : " << obs.getObsWires();
-                 return "Observable: { 'name' : " + obs_name + ", " +
-                        obs_stream.str() + " }";
-             })
-        .def("get_name",
-             [](const ObsDatum<PrecisionT> &obs) { return obs.getObsName(); })
-        .def("get_wires",
-             [](const ObsDatum<PrecisionT> &obs) { return obs.getObsWires(); })
-        .def("get_params", [](const ObsDatum<PrecisionT> &obs) {
-            py::list params;
-            for (size_t i = 0; i < obs.getObsParams().size(); i++) {
-                std::visit(
-                    [&](const auto &param) {
-                        using p_t = std::decay_t<decltype(param)>;
-                        if constexpr (std::is_same_v<
-                                          p_t,
-                                          std::vector<std::complex<ParamT>>>) {
-                            params.append(py::array_t<std::complex<ParamT>>(
-                                py::cast(param)));
-                        } else if constexpr (std::is_same_v<
-                                                 p_t, std::vector<ParamT>>) {
-                            params.append(py::array_t<ParamT>(py::cast(param)));
-                        } else if constexpr (std::is_same_v<p_t,
-                                                            std::monostate>) {
-                            params.append(py::list{});
-                        } else {
-                            throw("Unsupported data type");
-                        }
-                    },
-                    obs.getObsParams()[i]);
-            }
-            return params;
-        });
+        .def("__repr__", &HermitianObsKokkos<PrecisionT>::getObsName)
+        .def("get_wires", &HermitianObsKokkos<PrecisionT>::getWires,
+             "Get wires of observables")
+        .def(
+            "__eq__",
+            [](const HermitianObsKokkos<PrecisionT> &self,
+               py::handle other) -> bool {
+                if (!py::isinstance<HermitianObsKokkos<PrecisionT>>(other)) {
+                    return false;
+                }
+                auto other_cast = other.cast<HermitianObsKokkos<PrecisionT>>();
+                return self == other_cast;
+            },
+            "Compare two observables");
+
+    class_name = "TensorProdObsKokkos_C" + bitsize;
+    py::class_<TensorProdObsKokkos<PrecisionT>,
+               std::shared_ptr<TensorProdObsKokkos<PrecisionT>>,
+               ObservableKokkos<PrecisionT>>(m, class_name.c_str(),
+                                             py::module_local())
+        .def(py::init(
+            [](const std::vector<std::shared_ptr<ObservableKokkos<PrecisionT>>>
+                   &obs) { return TensorProdObsKokkos<PrecisionT>(obs); }))
+        .def("__repr__", &TensorProdObsKokkos<PrecisionT>::getObsName)
+        .def("get_wires", &TensorProdObsKokkos<PrecisionT>::getWires,
+             "Get wires of observables")
+        .def(
+            "__eq__",
+            [](const TensorProdObsKokkos<PrecisionT> &self,
+               py::handle other) -> bool {
+                if (!py::isinstance<TensorProdObsKokkos<PrecisionT>>(other)) {
+                    return false;
+                }
+                auto other_cast = other.cast<TensorProdObsKokkos<PrecisionT>>();
+                return self == other_cast;
+            },
+            "Compare two observables");
+
+    class_name = "HamiltonianKokkos_C" + bitsize;
+    using ObsPtr = std::shared_ptr<ObservableKokkos<PrecisionT>>;
+    py::class_<HamiltonianKokkos<PrecisionT>,
+               std::shared_ptr<HamiltonianKokkos<PrecisionT>>,
+               ObservableKokkos<PrecisionT>>(m, class_name.c_str(),
+                                             py::module_local())
+        .def(py::init(
+            [](const np_arr_r &coeffs, const std::vector<ObsPtr> &obs) {
+                auto buffer = coeffs.request();
+                const auto ptr = static_cast<const ParamT *>(buffer.ptr);
+                return HamiltonianKokkos<PrecisionT>{
+                    std::vector(ptr, ptr + buffer.size), obs};
+            }))
+        .def("__repr__", &HamiltonianKokkos<PrecisionT>::getObsName)
+        .def("get_wires", &HamiltonianKokkos<PrecisionT>::getWires,
+             "Get wires of observables")
+        .def(
+            "__eq__",
+            [](const HamiltonianKokkos<PrecisionT> &self,
+               py::handle other) -> bool {
+                if (!py::isinstance<HamiltonianKokkos<PrecisionT>>(other)) {
+                    return false;
+                }
+                auto other_cast = other.cast<HamiltonianKokkos<PrecisionT>>();
+                return self == other_cast;
+            },
+            "Compare two observables");
+
+    class_name = "SparseHamiltonianKokkos_C" + bitsize;
+    py::class_<SparseHamiltonianKokkos<PrecisionT>,
+               std::shared_ptr<SparseHamiltonianKokkos<PrecisionT>>,
+               ObservableKokkos<PrecisionT>>(m, class_name.c_str(),
+                                             py::module_local())
+        .def(py::init([](const np_arr_c &data,
+                         const std::vector<std::size_t> &indices,
+                         const std::vector<std::size_t> &indptr,
+                         const std::vector<std::size_t> &wires) {
+            const py::buffer_info buffer_data = data.request();
+            const auto *data_ptr =
+                static_cast<std::complex<PrecisionT> *>(buffer_data.ptr);
+
+            return SparseHamiltonianKokkos<PrecisionT>{
+                std::vector<std::complex<PrecisionT>>(
+                    {data_ptr, data_ptr + data.size()}),
+                indices, indptr, wires};
+        }))
+        .def("__repr__", &SparseHamiltonianKokkos<PrecisionT>::getObsName)
+        .def("get_wires", &SparseHamiltonianKokkos<PrecisionT>::getWires,
+             "Get wires of observables")
+        .def(
+            "__eq__",
+            [](const SparseHamiltonianKokkos<PrecisionT> &self,
+               py::handle other) -> bool {
+                if (!py::isinstance<SparseHamiltonianKokkos<PrecisionT>>(
+                        other)) {
+                    return false;
+                }
+                auto other_cast =
+                    other.cast<SparseHamiltonianKokkos<PrecisionT>>();
+                return self == other_cast;
+            },
+            "Compare two observables");
 
     //***********************************************************************//
     //                              Operations
@@ -738,7 +802,7 @@ void StateVectorKokkos_class_bindings(py::module &m) {
         .def("adjoint_jacobian",
              [](AdjointJacobianKokkos<PrecisionT> &adj,
                 const StateVectorKokkos<PrecisionT> &sv,
-                const std::vector<Pennylane::Algorithms::ObsDatum<PrecisionT>>
+                const std::vector<std::shared_ptr<ObservableKokkos<PrecisionT>>>
                     &observables,
                 const Pennylane::Algorithms::OpsData<PrecisionT> &operations,
                 const std::vector<size_t> &trainableParams) {

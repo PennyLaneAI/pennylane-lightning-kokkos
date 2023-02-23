@@ -34,6 +34,9 @@
 * Add Nvidia GPU support for CI checks.
 [(#37)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/37)
 
+* Add VJP support.
+[(#32)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/32)
+
 ### Documentation
 
 ### Bug fixes
