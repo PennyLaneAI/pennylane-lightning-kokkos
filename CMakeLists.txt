@@ -172,6 +172,19 @@ if(PLKOKKOS_ENABLE_NATIVE)
     target_compile_options(lightning_kokkos_qubit_ops PRIVATE -march=native)
 endif()
 
+install(TARGETS pennylane_lightning_kokkos
+        RUNTIME DESTINATION bin
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib
+        INCLUDES DESTINATION include
+        PUBLIC_HEADER DESTINATION include
+)
+
+install(DIRECTORY 
+    ${PROJECT_SOURCE_DIR}/pennylane_lightning_kokkos/src
+    DESTINATION include/pennylane_lightning_kokkos
+)
+
 if (PLKOKKOS_BUILD_TESTS)
     enable_testing()
 endif()
