@@ -3,7 +3,7 @@ PennyLane-Lightning-Kokkos Plugin
 
 .. header-start-inclusion-marker-do-not-remove
 
-The `PennyLane-Lightning-Kokkos <https://github.com/PennyLaneAI/pennylane-lightning-kokkos>`_ plugin extends the `Pennylane-Lightning <https://github.com/PennyLaneAI/pennylane-lightning>`_ state-vector simulator written in C++, and offloads to the `Kokkos library <https://github.com/kokkos/kokkos>`_ for accelerated circuit simulation.
+The `PennyLane-Lightning-Kokkos <https://github.com/PennyLaneAI/pennylane-lightning-kokkos>`_ plugin extends the `Pennylane-Lightning <https://github.com/PennyLaneAI/pennylane-lightning>`_ state-vector simulator written in C++, and offloads to the `Kokkos library <https://github.com/kokkos/kokkos>`__ for accelerated circuit simulation.
 
 `PennyLane <https://docs.pennylane.ai>`_ is a cross-platform Python library for quantum machine
 learning, automatic differentiation, and optimization of hybrid quantum-classical computations.
@@ -99,7 +99,7 @@ License
 
 The PennyLane-Lightning-Kokkos plugin is **free** and **open source**, released under
 the `Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>`_. 
-The PennyLane-Lightning-Kokkos plugin makes use of the `Kokkos <https://github.com/kokkos/kokkos>`_ library, which is held to their own respective licenses.
+The PennyLane-Lightning-Kokkos plugin makes use of the `Kokkos <https://github.com/kokkos/kokkos>`__ library, which is held to their own respective licenses.
 
 .. license-end-inclusion-marker-do-not-remove
 .. acknowledgements-start-inclusion-marker-do-not-remove
