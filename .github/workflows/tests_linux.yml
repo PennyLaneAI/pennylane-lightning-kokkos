@@ -70,7 +70,7 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install pytest pytest-mock flaky
           pip uninstall pennylane -y
-          pip install git+https://github.com/PennyLaneAI/pennylane.git@v0.29.0-rc0
+          pip install git+https://github.com/PennyLaneAI/pennylane.git@master
 
       - name: Install lightning.kokkos device
         run: |

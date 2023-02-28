@@ -1,4 +1,4 @@
-# Release 0.29.0.rc0
+# Release 0.29.0
 
 ### New features since last release
 
@@ -13,7 +13,7 @@
  >>> dev.kokkos_config["Backend"]
  {'Parallel': 'OpenMP'}
  ```
- [(#14)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/14)
+ [(#14)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/17)
 
 ### Breaking changes
 

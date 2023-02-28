@@ -82,7 +82,7 @@ jobs:
           CIBW_TEST_REQUIRES: numpy~=1.21 scipy pytest pytest-cov pytest-mock flaky
 
           CIBW_BEFORE_TEST: |
-            pip install git+https://github.com/PennyLaneAI/pennylane.git@v0.29.0-rc0
+            pip install git+https://github.com/PennyLaneAI/pennylane.git@master
           CIBW_TEST_COMMAND: |
             pl-device-test --device=lightning.kokkos --skip-ops -x --tb=short --no-flaky-report
           
