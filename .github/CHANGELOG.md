@@ -13,7 +13,7 @@
  >>> dev.kokkos_config["Backend"]
  {'Parallel': 'OpenMP'}
  ```
- [(#14)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/17)
+ [(#17)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/17)
 
 ### Breaking changes
 
