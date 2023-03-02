@@ -916,7 +916,7 @@ template <class Precision> class StateVectorKokkos {
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {}) {
         auto &&num_qubits = getNumQubits();
-        assert(wires.size() == nqubits);
+        PL_ASSERT(wires.size() == nqubits);
         if (!inverse) {
             Kokkos::parallel_for(
                 Kokkos::RangePolicy<KokkosExecSpace>(
