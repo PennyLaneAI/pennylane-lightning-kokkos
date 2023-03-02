@@ -1,4 +1,22 @@
-# Release 0.29.0-dev
+# Release 0.30.0-dev
+
+### New features since last release
+
+### Breaking changes
+
+### Improvements
+
+### Documentation
+
+### Bug fixes
+
+### Contributors
+
+This release contains contributions from (in alphabetical order):
+
+---
+
+# Release 0.29.0
 
 ### New features since last release
 
@@ -19,6 +37,9 @@
 
 ### Breaking changes
 
+* Change LightningKokkos to inherit from QubitDevice instead of LightningQubit. Numpy data initialization is decoupled. 
+[(#31)] (https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/31)
+
 ### Improvements
 
 * Template n-qubit gate methods.
@@ -33,12 +54,18 @@
 * Add Kokkos::InitArguments support.
 [(#17)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/17)
 
-* Add support for CI checks.
+* Add Nvidia GPU support for CI checks.
 [(#37)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/37)
+
+* Add VJP support.
+[(#32)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/32)
 
 ### Documentation
 
 ### Bug fixes
+
+* Ensure early-failure rather than return of incorrect results from out of order probs wires.
+[(#41)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/41)
 
 * Fix the CI environment variables for building wheels with the OpenMP backend.
 [(#36)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/36)
@@ -50,7 +77,7 @@
 
 This release contains contributions from (in alphabetical order):
 
-Amintor Dusko, Vincent Michaud-Rioux, Shuli Shu
+Amintor Dusko, Vincent Michaud-Rioux, Lee James O'Riordan, Shuli Shu
 
 ---
 

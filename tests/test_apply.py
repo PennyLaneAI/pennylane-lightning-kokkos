@@ -135,7 +135,10 @@ class TestApply:
         dev._kokkos_state = kokkos_ctor(np.array(input).astype(dev.C_DTYPE))
         dev.apply([operation(wires=[0])])
 
-        assert np.allclose(dev._state, np.array(expected_output), atol=tol, rtol=0)
+        state_vector = np.zeros(2**dev.num_wires).astype(dev.C_DTYPE)
+        dev.syncD2H(state_vector)
+
+        assert np.allclose(state_vector, np.array(expected_output), atol=tol, rtol=0)
 
     test_data_two_wires_no_parameters = [
         (qml.CNOT, [1, 0, 0, 0], [1, 0, 0, 0]),

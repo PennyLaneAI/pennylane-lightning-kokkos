@@ -55,6 +55,55 @@ template <typename Precision> struct InitView {
 };
 
 /**
+ * @brief Kokkos functor for setting the basis state
+ *
+ * @tparam Precision Floating point precision of underlying statevector data
+ */
+template <typename Precision> struct setBasisStateFunctor {
+    Kokkos::View<Kokkos::complex<Precision> *> a;
+    const std::size_t index;
+    setBasisStateFunctor(Kokkos::View<Kokkos::complex<Precision> *> a_,
+                         const std::size_t index_)
+        : a(a_), index(index_) {}
+    KOKKOS_INLINE_FUNCTION
+    void operator()(const std::size_t i) const {
+        a(i) = Kokkos::complex<Precision>((i == index) * 1.0, 0.0);
+    }
+};
+
+/**
+ * @brief Kokkos functor for setting the state vector
+ *
+ * @tparam Precision Floating point precision of underlying statevector data
+ */
+template <typename Precision> struct setStateVectorFunctor {
+    Kokkos::View<Kokkos::complex<Precision> *> a;
+    Kokkos::View<size_t *> indices;
+    Kokkos::View<Kokkos::complex<Precision> *> values;
+    setStateVectorFunctor(
+        Kokkos::View<Kokkos::complex<Precision> *> a_,
+        const Kokkos::View<size_t *> indices_,
+        const Kokkos::View<Kokkos::complex<Precision> *> values_)
+        : a(a_), indices(indices_), values(values_) {}
+    KOKKOS_INLINE_FUNCTION
+    void operator()(const std::size_t i) const { a(indices[i]) = values[i]; }
+};
+
+/**
+ * @brief Kokkos functor for initializing zeros to the state vector.
+ *
+ * @tparam Precision Floating point precision of underlying statevector data
+ */
+template <typename Precision> struct initZerosFunctor {
+    Kokkos::View<Kokkos::complex<Precision> *> a;
+    initZerosFunctor(Kokkos::View<Kokkos::complex<Precision> *> a_) : a(a_) {}
+    KOKKOS_INLINE_FUNCTION
+    void operator()(const std::size_t i) const {
+        a(i) = Kokkos::complex<Precision>(0.0, 0.0);
+    }
+};
+
+/**
  * @brief  Kokkos state vector class
  *
  * @tparam Precision Floating-point precision type.
@@ -68,6 +117,9 @@ template <class Precision> class StateVectorKokkos {
     using KokkosRangePolicy = Kokkos::RangePolicy<KokkosExecSpace>;
     using UnmanagedComplexHostView =
         Kokkos::View<Kokkos::complex<Precision> *, Kokkos::HostSpace,
+                     Kokkos::MemoryTraits<Kokkos::Unmanaged>>;
+    using UnmanagedSizeTHostView =
+        Kokkos::View<size_t *, Kokkos::HostSpace,
                      Kokkos::MemoryTraits<Kokkos::Unmanaged>>;
     using UnmanagedConstComplexHostView =
         Kokkos::View<const Kokkos::complex<Precision> *, Kokkos::HostSpace,
@@ -449,6 +501,49 @@ template <class Precision> class StateVectorKokkos {
     };
 
     /**
+     * @brief Init zeros for the state-vector on device.
+     */
+    void initZeros() {
+        Kokkos::parallel_for(getLength(), initZerosFunctor(getData()));
+    }
+
+    /**
+     * @brief Set value for a single element of the state-vector on device.
+     *
+     * @param index Index of the target element.
+     */
+    void setBasisState(const size_t index) {
+        Kokkos::parallel_for(getLength(),
+                             setBasisStateFunctor(getData(), index));
+    }
+
+    /**
+     * @brief Set values for a batch of elements of the state-vector.
+     *
+     * @param values Values to be set for the target elements.
+     * @param indices Indices of the target elements.
+     */
+    void setStateVector(const std::vector<std::size_t> &indices,
+                        const std::vector<Kokkos::complex<Precision>> &values) {
+
+        initZeros();
+
+        KokkosSizeTVector d_indices("d_indices", indices.size());
+
+        KokkosVector d_values("d_values", values.size());
+
+        Kokkos::deep_copy(d_indices, UnmanagedConstSizeTHostView(
+                                         indices.data(), indices.size()));
+
+        Kokkos::deep_copy(d_values, UnmanagedConstComplexHostView(
+                                        values.data(), values.size()));
+
+        Kokkos::parallel_for(
+            indices.size(),
+            setStateVectorFunctor(getData(), d_indices, d_values));
+    }
+
+    /**
      * @brief  Inverse transform sampling method for samples.
      * Reference https://en.wikipedia.org/wiki/Inverse_transform_sampling
      *
@@ -801,10 +896,6 @@ template <class Precision> class StateVectorKokkos {
         //  Determining probabilities for the sorted wires.
         const Kokkos::View<Kokkos::complex<Precision> *> arr_data = getData();
         const size_t num_qubits = getNumQubits();
-
-        using UnmanagedSizeTHostView =
-            Kokkos::View<size_t *, Kokkos::HostSpace,
-                         Kokkos::MemoryTraits<Kokkos::Unmanaged>>;
 
         using UnmanagedPrecisionHostView =
             Kokkos::View<Precision *, Kokkos::HostSpace,
