@@ -6,6 +6,9 @@
 
 ### Improvements
 
+* Template n-qubit gate methods.
+[(#40)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/40)
+
 ### Documentation
 
 ### Bug fixes
@@ -13,6 +16,8 @@
 ### Contributors
 
 This release contains contributions from (in alphabetical order):
+
+Vincent Michaud-Rioux
 
 ---
 
@@ -41,9 +46,6 @@ This release contains contributions from (in alphabetical order):
 [(#31)] (https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/31)
 
 ### Improvements
-
-* Template n-qubit gate methods.
-[(#40)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/40)
 
 * Update `inv()` methods in Python unit tests with `qml.adjoint()`.
 [(#33)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/33)
