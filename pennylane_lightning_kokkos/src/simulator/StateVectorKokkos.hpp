@@ -779,12 +779,12 @@ template <class Precision> class StateVectorKokkos {
         if (!inverse) {
             Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
                                      0, Util::exp2(num_qubits - 1)),
-                                 applySingleQubitOpFunctor<Precision, false>(
+                                 singleQubitOpFunctor<Precision, false>(
                                      *data_, num_qubits, matrix, wires));
         } else {
             Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
                                      0, Util::exp2(num_qubits - 1)),
-                                 applySingleQubitOpFunctor<Precision, true>(
+                                 singleQubitOpFunctor<Precision, true>(
                                      *data_, num_qubits, matrix, wires));
         }
     }
@@ -804,12 +804,12 @@ template <class Precision> class StateVectorKokkos {
         if (!inverse) {
             Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
                                      0, Util::exp2(num_qubits - 2)),
-                                 applyTwoQubitOpFunctor<Precision, false>(
+                                 twoQubitOpFunctor<Precision, false>(
                                      *data_, num_qubits, matrix, wires));
         } else {
             Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
                                      0, Util::exp2(num_qubits - 2)),
-                                 applyTwoQubitOpFunctor<Precision, true>(
+                                 twoQubitOpFunctor<Precision, true>(
                                      *data_, num_qubits, matrix, wires));
         }
     }
@@ -842,14 +842,14 @@ template <class Precision> class StateVectorKokkos {
                 Kokkos::parallel_for(
                     Kokkos::RangePolicy<KokkosExecSpace>(
                         0, Util::exp2(num_qubits_ - wires.size())),
-                    applyMultiQubitOpFunctor<Precision, false>(
-                        *data_, num_qubits, matrix, wires_view));
+                    multiQubitOpFunctor<Precision, false>(*data_, num_qubits,
+                                                          matrix, wires_view));
             } else {
                 Kokkos::parallel_for(
                     Kokkos::RangePolicy<KokkosExecSpace>(
                         0, Util::exp2(num_qubits_ - wires.size())),
-                    applyMultiQubitOpFunctor<Precision, true>(
-                        *data_, num_qubits, matrix, wires_view));
+                    multiQubitOpFunctor<Precision, true>(*data_, num_qubits,
+                                                         matrix, wires_view));
             }
         }
     }
@@ -994,6 +994,34 @@ template <class Precision> class StateVectorKokkos {
     }
 
     /**
+     * @brief Templated method that applies special n-qubit gates.
+     *
+     * @tparam functor_t Gate functor class for Kokkos dispatcher.
+     * @tparam nqubits Number of qubits.
+     * @param wires Wires to apply gate to.
+     * @param inverse Indicates whether to use adjoint of gate.
+     * @param params parameters for this gate
+     */
+    template <template <class, bool> class functor_t, int nqubits>
+    void applyGateFunctor(
+        const std::vector<size_t> &wires, bool inverse = false,
+        [[maybe_unused]] const std::vector<Precision> &params = {}) {
+        auto &&num_qubits = getNumQubits();
+        PL_ASSERT(wires.size() == nqubits);
+        if (!inverse) {
+            Kokkos::parallel_for(
+                Kokkos::RangePolicy<KokkosExecSpace>(
+                    0, Util::exp2(num_qubits - nqubits)),
+                functor_t<Precision, false>(*data_, num_qubits, wires, params));
+        } else {
+            Kokkos::parallel_for(
+                Kokkos::RangePolicy<KokkosExecSpace>(
+                    0, Util::exp2(num_qubits - nqubits)),
+                functor_t<Precision, true>(*data_, num_qubits, wires, params));
+        }
+    }
+
+    /**
      * @brief Apply a PauliX operator to the state vector using a matrix
      *
      * @param wires Wires to apply gate to.
@@ -1003,19 +1031,7 @@ template <class Precision> class StateVectorKokkos {
     void
     applyPauliX(const std::vector<size_t> &wires, bool inverse = false,
                 [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 1);
-        if (!inverse) {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 1)),
-                                 applyPauliXFunctor<Precision, false>(
-                                     *data_, num_qubits, wires));
-        } else {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 1)),
-                applyPauliXFunctor<Precision, true>(*data_, num_qubits, wires));
-        }
+        applyGateFunctor<pauliXFunctor, 1>(wires, inverse, params);
     }
 
     /**
@@ -1028,19 +1044,7 @@ template <class Precision> class StateVectorKokkos {
     void
     applyPauliY(const std::vector<size_t> &wires, bool inverse = false,
                 [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 1);
-        if (!inverse) {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 1)),
-                                 applyPauliYFunctor<Precision, false>(
-                                     *data_, num_qubits, wires));
-        } else {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 1)),
-                applyPauliYFunctor<Precision, true>(*data_, num_qubits, wires));
-        }
+        applyGateFunctor<pauliYFunctor, 1>(wires, inverse, params);
     }
 
     /**
@@ -1054,19 +1058,7 @@ template <class Precision> class StateVectorKokkos {
     void
     applyPauliZ(const std::vector<size_t> &wires, bool inverse = false,
                 [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 1);
-        if (!inverse) {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 1)),
-                                 applyPauliZFunctor<Precision, false>(
-                                     *data_, num_qubits, wires));
-        } else {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 1)),
-                applyPauliZFunctor<Precision, true>(*data_, num_qubits, wires));
-        }
+        applyGateFunctor<pauliZFunctor, 1>(wires, inverse, params);
     }
 
     /**
@@ -1350,19 +1342,7 @@ template <class Precision> class StateVectorKokkos {
     void
     applyHadamard(const std::vector<size_t> &wires, bool inverse = false,
                   [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 1);
-        if (!inverse) {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 1)),
-                                 applyHadamardFunctor<Precision, false>(
-                                     *data_, num_qubits, wires));
-        } else {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 1)),
-                                 applyHadamardFunctor<Precision, true>(
-                                     *data_, num_qubits, wires));
-        }
+        applyGateFunctor<hadamardFunctor, 1>(wires, inverse, params);
     }
 
     /**
@@ -1374,19 +1354,7 @@ template <class Precision> class StateVectorKokkos {
      */
     void applyS(const std::vector<size_t> &wires, bool inverse = false,
                 [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 1);
-        if (!inverse) {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 1)),
-                applySFunctor<Precision, false>(*data_, num_qubits, wires));
-        } else {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 1)),
-                applySFunctor<Precision, true>(*data_, num_qubits, wires));
-        }
+        applyGateFunctor<sFunctor, 1>(wires, inverse, params);
     }
 
     /**
@@ -1398,19 +1366,7 @@ template <class Precision> class StateVectorKokkos {
      */
     void applyT(const std::vector<size_t> &wires, bool inverse = false,
                 [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 1);
-        if (!inverse) {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 1)),
-                applyTFunctor<Precision, false>(*data_, num_qubits, wires));
-        } else {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 1)),
-                applyTFunctor<Precision, true>(*data_, num_qubits, wires));
-        }
+        applyGateFunctor<tFunctor, 1>(wires, inverse, params);
     }
 
     /**
@@ -1422,20 +1378,7 @@ template <class Precision> class StateVectorKokkos {
      */
     void applyRX(const std::vector<size_t> &wires, bool inverse,
                  [[maybe_unused]] const std::vector<Precision> &params) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 1);
-
-        if (!inverse) {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 1)),
-                                 applyRXFunctor<Precision, false>(
-                                     *data_, num_qubits, wires, params));
-        } else {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 1)),
-                                 applyRXFunctor<Precision, true>(
-                                     *data_, num_qubits, wires, params));
-        }
+        applyGateFunctor<rxFunctor, 1>(wires, inverse, params);
     }
 
     /**
@@ -1447,19 +1390,7 @@ template <class Precision> class StateVectorKokkos {
      */
     void applyRY(const std::vector<size_t> &wires, bool inverse,
                  [[maybe_unused]] const std::vector<Precision> &params) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 1);
-        if (!inverse) {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 1)),
-                                 applyRYFunctor<Precision, false>(
-                                     *data_, num_qubits, wires, params));
-        } else {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 1)),
-                                 applyRYFunctor<Precision, true>(
-                                     *data_, num_qubits, wires, params));
-        }
+        applyGateFunctor<ryFunctor, 1>(wires, inverse, params);
     }
 
     /**
@@ -1471,19 +1402,7 @@ template <class Precision> class StateVectorKokkos {
      */
     void applyRZ(const std::vector<size_t> &wires, bool inverse = false,
                  [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 1);
-        if (!inverse) {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 1)),
-                                 applyRZFunctor<Precision, false>(
-                                     *data_, num_qubits, wires, params));
-        } else {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 1)),
-                                 applyRZFunctor<Precision, true>(
-                                     *data_, num_qubits, wires, params));
-        }
+        applyGateFunctor<rzFunctor, 1>(wires, inverse, params);
     }
 
     /**
@@ -1496,20 +1415,7 @@ template <class Precision> class StateVectorKokkos {
     void applyPhaseShift(
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 1);
-
-        if (!inverse) {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 1)),
-                                 applyPhaseShiftFunctor<Precision, false>(
-                                     *data_, num_qubits, wires, params[0]));
-        } else {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 1)),
-                                 applyPhaseShiftFunctor<Precision, true>(
-                                     *data_, num_qubits, wires, params[0]));
-        }
+        applyGateFunctor<phaseShiftFunctor, 1>(wires, inverse, params);
     }
 
     /**
@@ -1521,19 +1427,7 @@ template <class Precision> class StateVectorKokkos {
      */
     void applyRot(const std::vector<size_t> &wires, bool inverse,
                   const std::vector<Precision> &params) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 1);
-        if (!inverse) {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 1)),
-                                 applyRotFunctor<Precision, false>(
-                                     *data_, num_qubits, wires, params));
-        } else {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 1)),
-                                 applyRotFunctor<Precision, true>(
-                                     *data_, num_qubits, wires, params));
-        }
+        applyGateFunctor<rotFunctor, 1>(wires, inverse, params);
     }
 
     /**
@@ -1544,20 +1438,8 @@ template <class Precision> class StateVectorKokkos {
      * @param params parameters for this gate
      */
     void applyCY(const std::vector<size_t> &wires, bool inverse = false,
-                 [[maybe_unused]] const std::vector<Precision> &param = {}) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 2);
-        if (!inverse) {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 2)),
-                applyCYFunctor<Precision, false>(*data_, num_qubits, wires));
-        } else {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 2)),
-                applyCYFunctor<Precision, true>(*data_, num_qubits, wires));
-        }
+                 [[maybe_unused]] const std::vector<Precision> &params = {}) {
+        applyGateFunctor<cyFunctor, 2>(wires, inverse, params);
     }
 
     /**
@@ -1569,19 +1451,7 @@ template <class Precision> class StateVectorKokkos {
      */
     void applyCZ(const std::vector<size_t> &wires, bool inverse = false,
                  [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 2);
-        if (!inverse) {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 2)),
-                applyCZFunctor<Precision, false>(*data_, num_qubits, wires));
-        } else {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 2)),
-                applyCZFunctor<Precision, true>(*data_, num_qubits, wires));
-        }
+        applyGateFunctor<czFunctor, 2>(wires, inverse, params);
     }
 
     /**
@@ -1593,19 +1463,7 @@ template <class Precision> class StateVectorKokkos {
      */
     void applyCNOT(const std::vector<size_t> &wires, bool inverse = false,
                    [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 2);
-        if (!inverse) {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 2)),
-                applyCNOTFunctor<Precision, false>(*data_, num_qubits, wires));
-        } else {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 2)),
-                applyCNOTFunctor<Precision, true>(*data_, num_qubits, wires));
-        }
+        applyGateFunctor<cnotFunctor, 2>(wires, inverse, params);
     }
 
     /**
@@ -1617,19 +1475,7 @@ template <class Precision> class StateVectorKokkos {
      */
     void applySWAP(const std::vector<size_t> &wires, bool inverse = false,
                    [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 2);
-        if (!inverse) {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 2)),
-                applySWAPFunctor<Precision, false>(*data_, num_qubits, wires));
-        } else {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 2)),
-                applySWAPFunctor<Precision, true>(*data_, num_qubits, wires));
-        }
+        applyGateFunctor<swapFunctor, 2>(wires, inverse, params);
     }
 
     /**
@@ -1643,22 +1489,8 @@ template <class Precision> class StateVectorKokkos {
     void applyControlledPhaseShift(
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 2);
-
-        if (!inverse) {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 2)),
-                applyControlledPhaseShiftFunctor<Precision, false>(
-                    *data_, num_qubits, wires, params));
-        } else {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 2)),
-                applyControlledPhaseShiftFunctor<Precision, true>(
-                    *data_, num_qubits, wires, params));
-        }
+        applyGateFunctor<controlledPhaseShiftFunctor, 2>(wires, inverse,
+                                                         params);
     }
 
     /**
@@ -1670,19 +1502,7 @@ template <class Precision> class StateVectorKokkos {
      */
     void applyCRX(const std::vector<size_t> &wires, bool inverse = false,
                   [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 2);
-        if (!inverse) {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applyCRXFunctor<Precision, false>(
-                                     *data_, num_qubits, wires, params));
-        } else {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applyCRXFunctor<Precision, true>(
-                                     *data_, num_qubits, wires, params));
-        }
+        applyGateFunctor<crxFunctor, 2>(wires, inverse, params);
     }
 
     /**
@@ -1694,19 +1514,7 @@ template <class Precision> class StateVectorKokkos {
      */
     void applyCRY(const std::vector<size_t> &wires, bool inverse = false,
                   [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 2);
-        if (!inverse) {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applyCRYFunctor<Precision, false>(
-                                     *data_, num_qubits, wires, params));
-        } else {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applyCRYFunctor<Precision, true>(
-                                     *data_, num_qubits, wires, params));
-        }
+        applyGateFunctor<cryFunctor, 2>(wires, inverse, params);
     }
 
     /**
@@ -1718,20 +1526,7 @@ template <class Precision> class StateVectorKokkos {
      */
     void applyCRZ(const std::vector<size_t> &wires, bool inverse = false,
                   [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 2);
-
-        if (!inverse) {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applyCRZFunctor<Precision, false>(
-                                     *data_, num_qubits, wires, params));
-        } else {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applyCRZFunctor<Precision, true>(
-                                     *data_, num_qubits, wires, params));
-        }
+        applyGateFunctor<crzFunctor, 2>(wires, inverse, params);
     }
 
     /**
@@ -1743,20 +1538,7 @@ template <class Precision> class StateVectorKokkos {
      */
     void applyCRot(const std::vector<size_t> &wires, bool inverse,
                    [[maybe_unused]] const std::vector<Precision> &params) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 2);
-
-        if (!inverse) {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applyCRotFunctor<Precision, false>(
-                                     *data_, num_qubits, wires, params));
-        } else {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applyCRotFunctor<Precision, true>(
-                                     *data_, num_qubits, wires, params));
-        }
+        applyGateFunctor<cRotFunctor, 2>(wires, inverse, params);
     }
 
     /**
@@ -1769,19 +1551,7 @@ template <class Precision> class StateVectorKokkos {
     void
     applyIsingXX(const std::vector<size_t> &wires, bool inverse = false,
                  [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 2);
-        if (!inverse) {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applyIsingXXFunctor<Precision, false>(
-                                     *data_, num_qubits, wires, params));
-        } else {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applyIsingXXFunctor<Precision, true>(
-                                     *data_, num_qubits, wires, params));
-        }
+        applyGateFunctor<isingXXFunctor, 2>(wires, inverse, params);
     }
 
     /**
@@ -1794,19 +1564,7 @@ template <class Precision> class StateVectorKokkos {
     void
     applyIsingXY(const std::vector<size_t> &wires, bool inverse = false,
                  [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 2);
-        if (!inverse) {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applyIsingXYFunctor<Precision, false>(
-                                     *data_, num_qubits, wires, params));
-        } else {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applyIsingXYFunctor<Precision, true>(
-                                     *data_, num_qubits, wires, params));
-        }
+        applyGateFunctor<isingXYFunctor, 2>(wires, inverse, params);
     }
 
     /**
@@ -1819,19 +1577,7 @@ template <class Precision> class StateVectorKokkos {
     void
     applyIsingYY(const std::vector<size_t> &wires, bool inverse = false,
                  [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 2);
-        if (!inverse) {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applyIsingYYFunctor<Precision, false>(
-                                     *data_, num_qubits, wires, params));
-        } else {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applyIsingYYFunctor<Precision, true>(
-                                     *data_, num_qubits, wires, params));
-        }
+        applyGateFunctor<isingYYFunctor, 2>(wires, inverse, params);
     }
 
     /**
@@ -1844,20 +1590,7 @@ template <class Precision> class StateVectorKokkos {
     void
     applyIsingZZ(const std::vector<size_t> &wires, bool inverse = false,
                  [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 2);
-
-        if (!inverse) {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applyIsingZZFunctor<Precision, false>(
-                                     *data_, num_qubits, wires, params));
-        } else {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applyIsingZZFunctor<Precision, true>(
-                                     *data_, num_qubits, wires, params));
-        }
+        applyGateFunctor<isingZZFunctor, 2>(wires, inverse, params);
     }
 
     /**
@@ -1871,20 +1604,7 @@ template <class Precision> class StateVectorKokkos {
     void applySingleExcitation(
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 2);
-
-        if (!inverse) {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applySingleExcitationFunctor<Precision, false>(
-                                     *data_, num_qubits, wires, params));
-        } else {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applySingleExcitationFunctor<Precision, true>(
-                                     *data_, num_qubits, wires, params));
-        }
+        applyGateFunctor<singleExcitationFunctor, 2>(wires, inverse, params);
     }
 
     /**
@@ -1898,22 +1618,8 @@ template <class Precision> class StateVectorKokkos {
     void applySingleExcitationMinus(
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 2);
-
-        if (!inverse) {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 2)),
-                applySingleExcitationMinusFunctor<Precision, false>(
-                    *data_, num_qubits, wires, params));
-        } else {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 2)),
-                applySingleExcitationMinusFunctor<Precision, true>(
-                    *data_, num_qubits, wires, params));
-        }
+        applyGateFunctor<singleExcitationMinusFunctor, 2>(wires, inverse,
+                                                          params);
     }
 
     /**
@@ -1927,22 +1633,8 @@ template <class Precision> class StateVectorKokkos {
     void applySingleExcitationPlus(
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 2);
-
-        if (!inverse) {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 2)),
-                applySingleExcitationPlusFunctor<Precision, false>(
-                    *data_, num_qubits, wires, params));
-        } else {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 2)),
-                applySingleExcitationPlusFunctor<Precision, true>(
-                    *data_, num_qubits, wires, params));
-        }
+        applyGateFunctor<singleExcitationPlusFunctor, 2>(wires, inverse,
+                                                         params);
     }
 
     /**
@@ -1956,20 +1648,7 @@ template <class Precision> class StateVectorKokkos {
     void applyDoubleExcitation(
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 4);
-
-        if (!inverse) {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 4)),
-                                 applyDoubleExcitationFunctor<Precision, false>(
-                                     *data_, num_qubits, wires, params));
-        } else {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 4)),
-                                 applyDoubleExcitationFunctor<Precision, true>(
-                                     *data_, num_qubits, wires, params));
-        }
+        applyGateFunctor<doubleExcitationFunctor, 4>(wires, inverse, params);
     }
 
     /**
@@ -1983,22 +1662,8 @@ template <class Precision> class StateVectorKokkos {
     void applyDoubleExcitationMinus(
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 4);
-
-        if (!inverse) {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 4)),
-                applyDoubleExcitationMinusFunctor<Precision, false>(
-                    *data_, num_qubits, wires, params));
-        } else {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 4)),
-                applyDoubleExcitationMinusFunctor<Precision, true>(
-                    *data_, num_qubits, wires, params));
-        }
+        applyGateFunctor<doubleExcitationMinusFunctor, 4>(wires, inverse,
+                                                          params);
     }
 
     /**
@@ -2012,22 +1677,8 @@ template <class Precision> class StateVectorKokkos {
     void applyDoubleExcitationPlus(
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 4);
-
-        if (!inverse) {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 4)),
-                applyDoubleExcitationPlusFunctor<Precision, false>(
-                    *data_, num_qubits, wires, params));
-        } else {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 4)),
-                applyDoubleExcitationPlusFunctor<Precision, true>(
-                    *data_, num_qubits, wires, params));
-        }
+        applyGateFunctor<doubleExcitationPlusFunctor, 4>(wires, inverse,
+                                                         params);
     }
 
     /**
@@ -2045,13 +1696,13 @@ template <class Precision> class StateVectorKokkos {
         if (!inverse) {
             Kokkos::parallel_for(
                 Kokkos::RangePolicy<KokkosExecSpace>(0, Util::exp2(num_qubits)),
-                applyMultiRZFunctor<Precision, false>(*data_, num_qubits, wires,
-                                                      params));
+                multiRZFunctor<Precision, false>(*data_, num_qubits, wires,
+                                                 params));
         } else {
             Kokkos::parallel_for(
                 Kokkos::RangePolicy<KokkosExecSpace>(0, Util::exp2(num_qubits)),
-                applyMultiRZFunctor<Precision, true>(*data_, num_qubits, wires,
-                                                     params));
+                multiRZFunctor<Precision, true>(*data_, num_qubits, wires,
+                                                params));
         }
     }
 
@@ -2065,20 +1716,7 @@ template <class Precision> class StateVectorKokkos {
     void
     applyCSWAP(const std::vector<size_t> &wires, bool inverse = false,
                [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 3);
-
-        if (!inverse) {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 3)),
-                applyCSWAPFunctor<Precision, false>(*data_, num_qubits, wires));
-        } else {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 3)),
-                applyCSWAPFunctor<Precision, true>(*data_, num_qubits, wires));
-        }
+        applyGateFunctor<cSWAPFunctor, 3>(wires, inverse, params);
     }
 
     /**
@@ -2091,20 +1729,7 @@ template <class Precision> class StateVectorKokkos {
     void
     applyToffoli(const std::vector<size_t> &wires, bool inverse = false,
                  [[maybe_unused]] const std::vector<Precision> &params = {}) {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 3);
-
-        if (!inverse) {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 3)),
-                                 applyToffoliFunctor<Precision, false>(
-                                     *data_, num_qubits, wires));
-        } else {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 3)),
-                                 applyToffoliFunctor<Precision, true>(
-                                     *data_, num_qubits, wires));
-        }
+        applyGateFunctor<toffoliFunctor, 3>(wires, inverse, params);
     }
 
     /**
@@ -2118,22 +1743,7 @@ template <class Precision> class StateVectorKokkos {
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {})
         -> Precision {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 1);
-
-        if (!inverse) {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 1)),
-                applyGeneratorPhaseShiftFunctor<Precision, false>(
-                    *data_, num_qubits, wires));
-        } else {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 1)),
-                applyGeneratorPhaseShiftFunctor<Precision, true>(
-                    *data_, num_qubits, wires));
-        }
+        applyGateFunctor<generatorPhaseShiftFunctor, 1>(wires, inverse, params);
         return static_cast<Precision>(1.0);
     }
 
@@ -2148,20 +1758,7 @@ template <class Precision> class StateVectorKokkos {
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {})
         -> Precision {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 2);
-
-        if (inverse == false) {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applyGeneratorIsingXXFunctor<Precision, false>(
-                                     *data_, num_qubits, wires));
-        } else {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applyGeneratorIsingXXFunctor<Precision, true>(
-                                     *data_, num_qubits, wires));
-        }
+        applyGateFunctor<generatorIsingXXFunctor, 2>(wires, inverse, params);
         return -static_cast<Precision>(0.5);
     }
 
@@ -2176,20 +1773,7 @@ template <class Precision> class StateVectorKokkos {
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {})
         -> Precision {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 2);
-
-        if (inverse == false) {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applyGeneratorIsingXYFunctor<Precision, false>(
-                                     *data_, num_qubits, wires));
-        } else {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applyGeneratorIsingXYFunctor<Precision, true>(
-                                     *data_, num_qubits, wires));
-        }
+        applyGateFunctor<generatorIsingXYFunctor, 2>(wires, inverse, params);
         return static_cast<Precision>(0.5);
     }
 
@@ -2204,20 +1788,7 @@ template <class Precision> class StateVectorKokkos {
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {})
         -> Precision {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 2);
-
-        if (!inverse) {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applyGeneratorIsingYYFunctor<Precision, false>(
-                                     *data_, num_qubits, wires));
-        } else {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applyGeneratorIsingYYFunctor<Precision, true>(
-                                     *data_, num_qubits, wires));
-        }
+        applyGateFunctor<generatorIsingYYFunctor, 2>(wires, inverse, params);
         return -static_cast<Precision>(0.5);
     }
 
@@ -2232,20 +1803,7 @@ template <class Precision> class StateVectorKokkos {
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {})
         -> Precision {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 2);
-
-        if (inverse == false) {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applyGeneratorIsingZZFunctor<Precision, false>(
-                                     *data_, num_qubits, wires));
-        } else {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applyGeneratorIsingZZFunctor<Precision, true>(
-                                     *data_, num_qubits, wires));
-        }
+        applyGateFunctor<generatorIsingZZFunctor, 2>(wires, inverse, params);
         return -static_cast<Precision>(0.5);
     }
 
@@ -2261,22 +1819,8 @@ template <class Precision> class StateVectorKokkos {
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {})
         -> Precision {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 2);
-
-        if (inverse == false) {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 2)),
-                applyGeneratorSingleExcitationFunctor<Precision, false>(
-                    *data_, num_qubits, wires));
-        } else {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 2)),
-                applyGeneratorSingleExcitationFunctor<Precision, true>(
-                    *data_, num_qubits, wires));
-        }
+        applyGateFunctor<generatorSingleExcitationFunctor, 2>(wires, inverse,
+                                                              params);
         return -static_cast<Precision>(0.5);
     }
 
@@ -2292,22 +1836,8 @@ template <class Precision> class StateVectorKokkos {
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {})
         -> Precision {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 2);
-
-        if (inverse == false) {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 2)),
-                applyGeneratorSingleExcitationMinusFunctor<Precision, false>(
-                    *data_, num_qubits, wires));
-        } else {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 2)),
-                applyGeneratorSingleExcitationMinusFunctor<Precision, true>(
-                    *data_, num_qubits, wires));
-        }
+        applyGateFunctor<generatorSingleExcitationMinusFunctor, 2>(
+            wires, inverse, params);
         return -static_cast<Precision>(0.5);
     }
 
@@ -2323,22 +1853,8 @@ template <class Precision> class StateVectorKokkos {
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {})
         -> Precision {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 2);
-
-        if (inverse == false) {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 2)),
-                applyGeneratorSingleExcitationPlusFunctor<Precision, false>(
-                    *data_, num_qubits, wires));
-        } else {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 2)),
-                applyGeneratorSingleExcitationPlusFunctor<Precision, true>(
-                    *data_, num_qubits, wires));
-        }
+        applyGateFunctor<generatorSingleExcitationPlusFunctor, 2>(
+            wires, inverse, params);
         return -static_cast<Precision>(0.5);
     }
 
@@ -2354,22 +1870,8 @@ template <class Precision> class StateVectorKokkos {
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {})
         -> Precision {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 4);
-
-        if (inverse == false) {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 4)),
-                applyGeneratorDoubleExcitationFunctor<Precision, false>(
-                    *data_, num_qubits, wires));
-        } else {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 4)),
-                applyGeneratorDoubleExcitationFunctor<Precision, true>(
-                    *data_, num_qubits, wires));
-        }
+        applyGateFunctor<generatorDoubleExcitationFunctor, 4>(wires, inverse,
+                                                              params);
         return -static_cast<Precision>(0.5);
     }
 
@@ -2385,22 +1887,8 @@ template <class Precision> class StateVectorKokkos {
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {})
         -> Precision {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 4);
-
-        if (inverse == false) {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 4)),
-                applyGeneratorDoubleExcitationMinusFunctor<Precision, false>(
-                    *data_, num_qubits, wires));
-        } else {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 4)),
-                applyGeneratorDoubleExcitationMinusFunctor<Precision, true>(
-                    *data_, num_qubits, wires));
-        }
+        applyGateFunctor<generatorDoubleExcitationMinusFunctor, 4>(
+            wires, inverse, params);
         return -static_cast<Precision>(0.5);
     }
 
@@ -2416,22 +1904,8 @@ template <class Precision> class StateVectorKokkos {
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {})
         -> Precision {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 4);
-
-        if (inverse == false) {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 4)),
-                applyGeneratorDoubleExcitationPlusFunctor<Precision, false>(
-                    *data_, num_qubits, wires));
-        } else {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 4)),
-                applyGeneratorDoubleExcitationPlusFunctor<Precision, true>(
-                    *data_, num_qubits, wires));
-        }
+        applyGateFunctor<generatorDoubleExcitationPlusFunctor, 4>(
+            wires, inverse, params);
         return static_cast<Precision>(0.5);
     }
 
@@ -2446,20 +1920,7 @@ template <class Precision> class StateVectorKokkos {
     applyGeneratorRX(const std::vector<size_t> &wires, bool inverse = false,
                      [[maybe_unused]] const std::vector<Precision> &params = {})
         -> Precision {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 1);
-
-        if (!inverse) {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 1)),
-                                 applyPauliXFunctor<Precision, false>(
-                                     *data_, num_qubits, wires));
-        } else {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 1)),
-                applyPauliXFunctor<Precision, true>(*data_, num_qubits, wires));
-        }
+        applyPauliX(wires, inverse, params);
         return -static_cast<Precision>(0.5);
     }
 
@@ -2474,20 +1935,7 @@ template <class Precision> class StateVectorKokkos {
     applyGeneratorRY(const std::vector<size_t> &wires, bool inverse = false,
                      [[maybe_unused]] const std::vector<Precision> &params = {})
         -> Precision {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 1);
-
-        if (!inverse) {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 1)),
-                                 applyPauliYFunctor<Precision, false>(
-                                     *data_, num_qubits, wires));
-        } else {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 1)),
-                applyPauliYFunctor<Precision, true>(*data_, num_qubits, wires));
-        }
+        applyPauliY(wires, inverse, params);
         return -static_cast<Precision>(0.5);
     }
 
@@ -2502,20 +1950,7 @@ template <class Precision> class StateVectorKokkos {
     applyGeneratorRZ(const std::vector<size_t> &wires, bool inverse = false,
                      [[maybe_unused]] const std::vector<Precision> &params = {})
         -> Precision {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 1);
-
-        if (!inverse) {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 1)),
-                                 applyPauliZFunctor<Precision, false>(
-                                     *data_, num_qubits, wires));
-        } else {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 1)),
-                applyPauliZFunctor<Precision, true>(*data_, num_qubits, wires));
-        }
+        applyPauliZ(wires, inverse, params);
         return -static_cast<Precision>(0.5);
     }
 
@@ -2531,22 +1966,8 @@ template <class Precision> class StateVectorKokkos {
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {})
         -> Precision {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 2);
-
-        if (!inverse) {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 2)),
-                applyGeneratorControlledPhaseShiftFunctor<Precision, false>(
-                    *data_, num_qubits, wires));
-        } else {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - 2)),
-                applyGeneratorControlledPhaseShiftFunctor<Precision, true>(
-                    *data_, num_qubits, wires));
-        }
+        applyGateFunctor<generatorControlledPhaseShiftFunctor, 2>(
+            wires, inverse, params);
         return static_cast<Precision>(1);
     }
 
@@ -2562,20 +1983,7 @@ template <class Precision> class StateVectorKokkos {
         [[maybe_unused]] const std::vector<Precision> &params = {})
 
         -> Precision {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 2);
-
-        if (!inverse) {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applyGeneratorCRXFunctor<Precision, false>(
-                                     *data_, num_qubits, wires));
-        } else {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applyGeneratorCRXFunctor<Precision, true>(
-                                     *data_, num_qubits, wires));
-        }
+        applyGateFunctor<generatorCRXFunctor, 2>(wires, inverse, params);
         return -static_cast<Precision>(0.5);
     }
 
@@ -2590,20 +1998,7 @@ template <class Precision> class StateVectorKokkos {
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {})
         -> Precision {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 2);
-
-        if (inverse == false) {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applyGeneratorCRYFunctor<Precision, false>(
-                                     *data_, num_qubits, wires));
-        } else {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applyGeneratorCRYFunctor<Precision, true>(
-                                     *data_, num_qubits, wires));
-        }
+        applyGateFunctor<generatorCRYFunctor, 2>(wires, inverse, params);
         return -static_cast<Precision>(0.5);
     }
 
@@ -2618,20 +2013,7 @@ template <class Precision> class StateVectorKokkos {
         const std::vector<size_t> &wires, bool inverse = false,
         [[maybe_unused]] const std::vector<Precision> &params = {})
         -> Precision {
-        auto &&num_qubits = getNumQubits();
-        assert(wires.size() == 2);
-
-        if (inverse == false) {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applyGeneratorCRZFunctor<Precision, false>(
-                                     *data_, num_qubits, wires));
-        } else {
-            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
-                                     0, Util::exp2(num_qubits - 2)),
-                                 applyGeneratorCRZFunctor<Precision, true>(
-                                     *data_, num_qubits, wires));
-        }
+        applyGateFunctor<generatorCRZFunctor, 2>(wires, inverse, params);
         return -static_cast<Precision>(0.5);
     }
 
@@ -2651,13 +2033,13 @@ template <class Precision> class StateVectorKokkos {
         if (inverse == false) {
             Kokkos::parallel_for(
                 Kokkos::RangePolicy<KokkosExecSpace>(0, Util::exp2(num_qubits)),
-                applyGeneratorMultiRZFunctor<Precision, false>(
-                    *data_, num_qubits, wires));
+                generatorMultiRZFunctor<Precision, false>(*data_, num_qubits,
+                                                          wires));
         } else {
             Kokkos::parallel_for(
                 Kokkos::RangePolicy<KokkosExecSpace>(0, Util::exp2(num_qubits)),
-                applyGeneratorMultiRZFunctor<Precision, true>(
-                    *data_, num_qubits, wires));
+                generatorMultiRZFunctor<Precision, true>(*data_, num_qubits,
+                                                         wires));
         }
         return -static_cast<Precision>(0.5);
     }
