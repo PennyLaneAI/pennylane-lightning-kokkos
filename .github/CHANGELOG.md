@@ -1,3 +1,20 @@
+# Release 0.29.1
+
+### Bug fixes
+
+* Ensure Kokkos finalize is only called at the end of process execution.
+[(#)]()
+
+### Contributors
+
+This release contains contributions from (in alphabetical order):
+
+Lee James O'Riordan
+
+
+
+
+
 # Release 0.29.0
 
 ### New features since last release
