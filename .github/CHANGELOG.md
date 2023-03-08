@@ -3,7 +3,7 @@
 ### Bug fixes
 
 * Ensure Kokkos finalize is only called at the end of process execution.
-[(#)]()
+[(#45)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/45)
 
 ### Contributors
 
@@ -11,9 +11,7 @@ This release contains contributions from (in alphabetical order):
 
 Lee James O'Riordan
 
-
-
-
+---
 
 # Release 0.29.0
 
