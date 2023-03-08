@@ -75,7 +75,7 @@ jobs:
       - name: Install lightning.kokkos device
         run: |
           cd main
-          CXX=$(which g++-${{ env.GCC_VERSION }}) BACKEND="OPENMP" python -m pip install -e . --verbose
+          CC=$(which gcc-${{ env.GCC_VERSION }}) CXX=$(which g++-${{ env.GCC_VERSION }}) BACKEND="OPENMP" python -m pip install -e . --verbose
       - name: Run PennyLane-Lightning-Kokkos unit tests
         run: |
           cd main/
@@ -143,7 +143,7 @@ jobs:
       - name: Install lightning.kokkos device
         run: |
           cd main
-          CXX=$(which g++-${{ env.GCC_VERSION }}) BACKEND="SERIAL" python -m pip install -e . --verbose
+          CC=$(which gcc-${{ env.GCC_VERSION }}) CXX=$(which g++-${{ env.GCC_VERSION }}) BACKEND="SERIAL" python -m pip install -e . --verbose
       - name: Run PennyLane-Lightning-Kokkos unit tests
         run: |
           cd main/
@@ -211,7 +211,7 @@ jobs:
       - name: Install lightning.kokkos device
         run: |
           cd main
-          CXX=$(which g++-${{ env.GCC_VERSION }}) BACKEND="THREADS" python -m pip install -e . --verbose
+          CC=$(which gcc-${{ env.GCC_VERSION }}) CXX=$(which g++-${{ env.GCC_VERSION }}) BACKEND="THREADS" python -m pip install -e . --verbose
       - name: Run PennyLane-Lightning-Kokkos unit tests
         run: |
           cd main/
