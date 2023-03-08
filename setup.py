@@ -123,7 +123,10 @@ if not os.getenv("READTHEDOCS"):
                 ]  # only build with Clang under Windows
             elif platform.system() != "Linux":
                 raise RuntimeError(f"Unsupported '{platform.system()}' platform")
-
+            for var, opt in zip(["CC", "CXX"], ["C", "CXX"]):
+                if os.getenv(var):
+                    tmp = os.getenv(var)
+                    configure_args += [f"-DCMAKE_{opt}_COMPILER={tmp}"]
             if not Path(self.build_temp).exists():
                 os.makedirs(self.build_temp)
 
