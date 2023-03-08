@@ -21,7 +21,6 @@ from pathlib import Path
 from setuptools import setup, find_packages
 
 if not os.getenv("READTHEDOCS"):
-
     from setuptools import Extension
     from setuptools.command.build_ext import build_ext
 
@@ -68,7 +67,7 @@ if not os.getenv("READTHEDOCS"):
 
             # Set Python_EXECUTABLE instead if you use PYBIND11_FINDPYTHON
             configure_args = [
-                f"-DCMAKE_CXX_FLAGS=-fno-lto",
+                "-DCMAKE_CXX_FLAGS=-fno-lto",
                 f"-DCMAKE_LIBRARY_OUTPUT_DIRECTORY={extdir}",
                 f"-DPYTHON_EXECUTABLE={sys.executable}",
                 f"-DCMAKE_BUILD_TYPE={cfg}",  # not used on MSVC, but no harm
@@ -101,24 +100,29 @@ if not os.getenv("READTHEDOCS"):
 
             # Add more platform dependent options
             if platform.system() == "Darwin":
-                #To support ARM64
-                if os.getenv('ARCHS') == "arm64":
-                    configure_args += ["-DCMAKE_CXX_COMPILER_TARGET=arm64-apple-macos11",
-                                    "-DCMAKE_SYSTEM_NAME=Darwin",
-                                    "-DCMAKE_SYSTEM_PROCESSOR=ARM64"]
-                else: # X64 arch
-                    llvmpath = subprocess.check_output(["brew", "--prefix", "llvm"]).decode().strip()
+                # To support ARM64
+                if os.getenv("ARCHS") == "arm64":
                     configure_args += [
-                            f"-DCMAKE_CXX_COMPILER={llvmpath}/bin/clang++",
-                            f"-DCMAKE_LINKER={llvmpath}/bin/lld",
-                    ] # Use clang instead of appleclang
+                        "-DCMAKE_CXX_COMPILER_TARGET=arm64-apple-macos11",
+                        "-DCMAKE_SYSTEM_NAME=Darwin",
+                        "-DCMAKE_SYSTEM_PROCESSOR=ARM64",
+                    ]
+                else:  # X64 arch
+                    llvmpath = (
+                        subprocess.check_output(["brew", "--prefix", "llvm"]).decode().strip()
+                    )
+                    configure_args += [
+                        f"-DCMAKE_CXX_COMPILER={llvmpath}/bin/clang++",
+                        f"-DCMAKE_LINKER={llvmpath}/bin/lld",
+                    ]  # Use clang instead of appleclang
                 # Disable OpenMP in M1 Macs
                 configure_args += ["-DKokkos_ENABLE_OPENMP=OFF"]
             elif platform.system() == "Windows":
-                configure_args += ["-DKokkos_ENABLE_OPENMP=OFF"] # only build with Clang under Windows
-            else:
-                if platform.system() != "Linux":
-                    raise RuntimeError(f"Unsupported '{platform.system()}' platform")
+                configure_args += [
+                    "-DKokkos_ENABLE_OPENMP=OFF"
+                ]  # only build with Clang under Windows
+            elif platform.system() != "Linux":
+                raise RuntimeError(f"Unsupported '{platform.system()}' platform")
 
             if not Path(self.build_temp).exists():
                 os.makedirs(self.build_temp)
@@ -133,10 +137,6 @@ with open("pennylane_lightning_kokkos/_version.py") as f:
     version = f.readlines()[-1].split()[-1].strip("\"'")
 
 requirements = [
-    "ninja",
-    "wheel",
-    "cmake",
-    "pennylane-lightning>=0.28",
     "pennylane>=0.28",
 ]
 

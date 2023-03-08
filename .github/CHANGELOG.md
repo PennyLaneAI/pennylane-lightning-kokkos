@@ -1,5 +1,10 @@
 # Release 0.29.1
 
+### Improvements
+
+* Use CMake `find_package` to bind pre-installed Kokkos libraries.
+[(#43)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/43)
+
 ### Bug fixes
 
 * Ensure Kokkos finalize is only called at the end of process execution.
@@ -9,7 +14,7 @@
 
 This release contains contributions from (in alphabetical order):
 
-Lee James O'Riordan
+Vincent Michaud-Rioux, Lee James O'Riordan
 
 ---
 
@@ -20,7 +25,7 @@ Lee James O'Riordan
  * Add support for building X86-64 Linux wheels with OpenMP and SERIAL backends with Github Actions.
  [(#14)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/14)
 
- * Add the `kokkos_config` class variable, which stores the kokkos build and runtime information such as `Backend`, `Architecture`, `Kokkos Version`, `Compiler`, to LightningKokkos for users' query purpose. Users can also access other information such as `Options`, `Memory`, `Atomics` and `Vectorization` from `kokkos_config`.   
+ * Add the `kokkos_config` class variable, which stores the kokkos build and runtime information such as `Backend`, `Architecture`, `Kokkos Version`, `Compiler`, to LightningKokkos for users' query purpose. Users can also access other information such as `Options`, `Memory`, `Atomics` and `Vectorization` from `kokkos_config`.
  The workflow for build and runtime information query is:
  ```python
  >>> import pennylane as qml
@@ -32,10 +37,13 @@ Lee James O'Riordan
 
 ### Breaking changes
 
-* Change LightningKokkos to inherit from QubitDevice instead of LightningQubit. Numpy data initialization is decoupled. 
+* Change LightningKokkos to inherit from QubitDevice instead of LightningQubit. Numpy data initialization is decoupled.
 [(#31)] (https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/31)
 
 ### Improvements
+
+* Use CMake `find_package` to bind pre-installed Kokkos libraries.
+[(#43)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/43)
 
 * Update `inv()` methods in Python unit tests with `qml.adjoint()`.
 [(#33)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/33)
