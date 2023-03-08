@@ -140,11 +140,8 @@ jobs:
           pip uninstall pennylane -y
           pip install git+https://github.com/PennyLaneAI/pennylane.git
 
-      - uses: nick-fields/retry@v2
-        timeout_minutes: 10
-        max_attempts: 3
-        name: Install lightning.kokkos device
-        command: |
+      - name: Install lightning.kokkos device
+        run: |
           cd main
           CC=$(which gcc-${{ env.GCC_VERSION }}) CXX=$(which g++-${{ env.GCC_VERSION }}) BACKEND="SERIAL" python -m pip install -e . --verbose
       - name: Run PennyLane-Lightning-Kokkos unit tests
