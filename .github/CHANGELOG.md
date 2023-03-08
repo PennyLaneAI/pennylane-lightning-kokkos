@@ -1,5 +1,10 @@
 # Release 0.29.1
 
+### Improvements
+
+* Use CMake `find_package` to bind pre-installed Kokkos libraries.
+[(#43)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/43)
+
 ### Bug fixes
 
 * Ensure Kokkos finalize is only called at the end of process execution.
@@ -9,7 +14,7 @@
 
 This release contains contributions from (in alphabetical order):
 
-Lee James O'Riordan
+Vincent Michaud-Rioux, Lee James O'Riordan
 
 ---
 
