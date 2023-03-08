@@ -75,7 +75,8 @@ jobs:
       - name: Install lightning.kokkos device
         run: |
           cd main
-          CC=$(which gcc-${{ env.GCC_VERSION }}) CXX=$(which g++-${{ env.GCC_VERSION }}) BACKEND="OPENMP" python -m pip install -e . --verbose
+          CC=$(which gcc-${{ env.GCC_VERSION }}) CXX=$(which g++-${{ env.GCC_VERSION }}) python setup.py build_ext -i --backend="OPENMP"
+          python -m pip install -e .
       - name: Run PennyLane-Lightning-Kokkos unit tests
         run: |
           cd main/
