@@ -75,8 +75,7 @@ jobs:
       - name: Install lightning.kokkos device
         run: |
           cd main
-          CC=$(which gcc-${{ env.GCC_VERSION }}) CXX=$(which g++-${{ env.GCC_VERSION }}) python setup.py build_ext -i --backend="OPENMP"
-          python -m pip install -e .
+          CC=$(which gcc-${{ env.GCC_VERSION }}) CXX=$(which g++-${{ env.GCC_VERSION }}) BACKEND="OPENMP" python -m pip install -e . --verbose
       - name: Run PennyLane-Lightning-Kokkos unit tests
         run: |
           cd main/
@@ -141,8 +140,11 @@ jobs:
           pip uninstall pennylane -y
           pip install git+https://github.com/PennyLaneAI/pennylane.git
 
-      - name: Install lightning.kokkos device
-        run: |
+      - uses: nick-fields/retry@v2
+        timeout_minutes: 10
+        max_attempts: 3
+        name: Install lightning.kokkos device
+        command: |
           cd main
           CC=$(which gcc-${{ env.GCC_VERSION }}) CXX=$(which g++-${{ env.GCC_VERSION }}) BACKEND="SERIAL" python -m pip install -e . --verbose
       - name: Run PennyLane-Lightning-Kokkos unit tests
