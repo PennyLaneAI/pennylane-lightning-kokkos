@@ -44,9 +44,7 @@
 #endif
 
 namespace Pennylane::Util {
-template <typename T> struct remove_complex {
-    using type = T;
-};
+template <typename T> struct remove_complex { using type = T; };
 template <typename T> struct remove_complex<std::complex<T>> {
     using type = T;
 };
