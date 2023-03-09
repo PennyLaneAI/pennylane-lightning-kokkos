@@ -63,7 +63,7 @@ jobs:
           python-version: '${{ env.PY_VERSION }}'
 
       - name: Install dependencies
-        run: sudo apt-get update && sudo apt-get -y -q install cmake gcc-${{ env.GCC_VERSION }} g++-${{ env.GCC_VERSION }}
+        run: sudo apt-get update && sudo apt-get -y -q install cmake gcc-${{ env.GCC_VERSION }} g++-${{ env.GCC_VERSION }} ninja-build
 
       - name: Get required Python packages
         run: |
@@ -131,7 +131,7 @@ jobs:
           python-version: '${{ env.PY_VERSION }}'
 
       - name: Install dependencies
-        run: sudo apt-get update && sudo apt-get -y -q install cmake gcc-${{ env.GCC_VERSION }} g++-${{ env.GCC_VERSION }}
+        run: sudo apt-get update && sudo apt-get -y -q install cmake gcc-${{ env.GCC_VERSION }} g++-${{ env.GCC_VERSION }} ninja-build
 
       - name: Get required Python packages
         run: |
@@ -199,7 +199,7 @@ jobs:
           python-version: '${{ env.PY_VERSION }}'
 
       - name: Install dependencies
-        run: sudo apt-get update && sudo apt-get -y -q install cmake gcc-${{ env.GCC_VERSION }} g++-${{ env.GCC_VERSION }}
+        run: sudo apt-get update && sudo apt-get -y -q install cmake gcc-${{ env.GCC_VERSION }} g++-${{ env.GCC_VERSION }} ninja-build
 
       - name: Get required Python packages
         run: |
