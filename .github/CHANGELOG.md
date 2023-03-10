@@ -1,3 +1,26 @@
+# Release 0.30.0-dev
+
+### New features since last release
+
+### Breaking changes
+
+### Improvements
+
+* Template n-qubit gate methods.
+[(#40)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/40)
+
+### Documentation
+
+### Bug fixes
+
+### Contributors
+
+This release contains contributions from (in alphabetical order):
+
+Vincent Michaud-Rioux
+
+---
+
 # Release 0.29.1
 
 ### Improvements
@@ -27,13 +50,15 @@ Vincent Michaud-Rioux, Lee James O'Riordan
 
  * Add the `kokkos_config` class variable, which stores the kokkos build and runtime information such as `Backend`, `Architecture`, `Kokkos Version`, `Compiler`, to LightningKokkos for users' query purpose. Users can also access other information such as `Options`, `Memory`, `Atomics` and `Vectorization` from `kokkos_config`.
  The workflow for build and runtime information query is:
+
  ```python
  >>> import pennylane as qml
  >>> dev = qml.device('lightning.kokkos', wires=3)
  >>> dev.kokkos_config["Backend"]
  {'Parallel': 'OpenMP'}
  ```
- [(#17)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/17)
+[(#17)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/17)
+
 
 ### Breaking changes
 
