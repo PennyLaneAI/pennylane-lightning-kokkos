@@ -20,6 +20,7 @@
 #include "AdjointDiffKokkos.hpp"
 #include "Error.hpp"         // LightningException
 #include "GetConfigInfo.hpp" // Kokkos configuration info
+#include "MeasuresKokkos.hpp"
 #include "StateVectorKokkos.hpp"
 
 #include "pybind11/complex.h"
@@ -443,9 +444,10 @@ void StateVectorKokkos_class_bindings(py::module &m) {
                     conv_matrix = std::vector<Kokkos::complex<ParamT>>{
                         m_ptr, m_ptr + m_buffer.size};
                 }
+                auto m = Algorithms::MeasuresKokkos<PrecisionT>(sv);
                 // Return the real component only
-                return sv.getExpectationValue(obsName, wires, params,
-                                              conv_matrix);
+                return m.getExpectationValue(obsName, wires, params,
+                                             conv_matrix);
             },
             "Calculate the expectation value of the given observable.")
         .def(
@@ -468,8 +470,9 @@ void StateVectorKokkos_class_bindings(py::module &m) {
                     conv_matrix = std::vector<Kokkos::complex<ParamT>>{
                         m_ptr, m_ptr + m_buffer.size};
                 }
+                auto m = Algorithms::MeasuresKokkos<PrecisionT>(sv);
                 // Return the real component only & ignore params
-                return sv.getExpectationValue(
+                return m.getExpectationValue(
                     obs_concat, wires, std::vector<ParamT>{}, conv_matrix);
             },
             "Calculate the expectation value of the given observable.")
@@ -487,8 +490,9 @@ void StateVectorKokkos_class_bindings(py::module &m) {
                     conv_matrix = std::vector<Kokkos::complex<ParamT>>{
                         m_ptr, m_ptr + m_buffer.size};
                 }
+                auto m = Algorithms::MeasuresKokkos<PrecisionT>(sv);
                 // Return the real component only & ignore params
-                return sv.getExpectationValue(wires, conv_matrix);
+                return m.getExpectationValue(wires, conv_matrix);
             },
             "Calculate the expectation value of the given observable.")
 
@@ -506,15 +510,17 @@ void StateVectorKokkos_class_bindings(py::module &m) {
                     conv_data = std::vector<Kokkos::complex<ParamT>>{
                         m_ptr, m_ptr + m_buffer.size};
                 }
+                auto m = Algorithms::MeasuresKokkos<PrecisionT>(sv);
                 // Return the real component only & ignore params
-                return sv.getExpectationValue(conv_data, indices, index_ptr);
+                return m.getExpectationValue(conv_data, indices, index_ptr);
             },
             "Calculate the expectation value of the given observable.")
         .def("probs",
              [](StateVectorKokkos<PrecisionT> &sv,
                 const std::vector<size_t> &wires) {
+                 auto m = Pennylane::Algorithms::MeasuresKokkos<PrecisionT>(sv);
                  if (wires.empty()) {
-                     return py::array_t<ParamT>(py::cast(sv.probs()));
+                     return py::array_t<ParamT>(py::cast(m.probs()));
                  }
 
                  const bool is_sorted_wires =
@@ -522,14 +528,15 @@ void StateVectorKokkos_class_bindings(py::module &m) {
 
                  if (wires.size() == sv.getNumQubits()) {
                      if (is_sorted_wires)
-                         return py::array_t<ParamT>(py::cast(sv.probs()));
+                         return py::array_t<ParamT>(py::cast(m.probs()));
                  }
-                 return py::array_t<ParamT>(py::cast(sv.probs(wires)));
+                 return py::array_t<ParamT>(py::cast(m.probs(wires)));
              })
         .def("GenerateSamples",
              [](StateVectorKokkos<PrecisionT> &sv, size_t num_wires,
                 size_t num_shots) {
-                 auto &&result = sv.generate_samples(num_shots);
+                 auto m = Pennylane::Algorithms::MeasuresKokkos<PrecisionT>(sv);
+                 auto &&result = m.generate_samples(num_shots);
 
                  const size_t ndim = 2;
                  const std::vector<size_t> shape{num_shots, num_wires};

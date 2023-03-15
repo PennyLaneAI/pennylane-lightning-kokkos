@@ -9,6 +9,7 @@
 #include <catch2/catch.hpp>
 
 #include "MeasuresFunctors.hpp"
+#include "MeasuresKokkos.hpp"
 #include "StateVectorKokkos.hpp"
 #include "TestHelpers.hpp"
 
@@ -49,8 +50,9 @@ TEMPLATE_TEST_CASE("Probabilities", "[Measures]", float, double) {
     auto measure_sv = Initializing_StateVector<TestType>(num_qubits);
 
     SECTION("Looping over different wire configurations:") {
+        auto m = Algorithms::MeasuresKokkos<TestType>(measure_sv);
         for (const auto &term : input) {
-            auto probabilities = measure_sv.probs(term.first);
+            auto probabilities = m.probs(term.first);
             REQUIRE_THAT(term.second,
                          Catch::Approx(probabilities).margin(1e-6));
         }

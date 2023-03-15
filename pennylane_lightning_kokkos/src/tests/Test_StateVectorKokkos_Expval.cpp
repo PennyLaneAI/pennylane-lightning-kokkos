@@ -8,6 +8,7 @@
 
 #include <catch2/catch.hpp>
 
+#include "MeasuresKokkos.hpp"
 #include "StateVectorKokkos.hpp"
 #include "TestHelpers.hpp"
 
@@ -19,12 +20,13 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::getExpectationValueIdentity",
     const std::size_t num_qubits = 3;
     auto ONE = TestType(1);
     StateVectorKokkos<TestType> kokkos_sv{num_qubits};
+    auto m = Algorithms::MeasuresKokkos<TestType>(kokkos_sv);
 
     SECTION("Apply directly") {
         kokkos_sv.applyOperation("Hadamard", {0}, false);
         kokkos_sv.applyOperation("CNOT", {0, 1}, false);
         kokkos_sv.applyOperation("CNOT", {1, 2}, false);
-        auto res = kokkos_sv.getExpectationValueIdentity({0});
+        auto res = m.getExpectationValueIdentity({0});
         CHECK(res == Approx(ONE));
     }
 }
@@ -39,29 +41,32 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::getExpectationValuePauliX",
 
         SECTION("Apply directly") {
             StateVectorKokkos<TestType> kokkos_sv{num_qubits};
+            auto m = Algorithms::MeasuresKokkos<TestType>(kokkos_sv);
             kokkos_sv.applyOperation("Hadamard", {0}, false);
             kokkos_sv.applyOperation("CNOT", {0, 1}, false);
             kokkos_sv.applyOperation("CNOT", {1, 2}, false);
-            auto res = kokkos_sv.getExpectationValuePauliX({0});
+            auto res = m.getExpectationValuePauliX({0});
             CHECK(res == ZERO);
         }
         SECTION("Apply directly: Plus states") {
             StateVectorKokkos<TestType> kokkos_sv{num_qubits};
+            auto m = Algorithms::MeasuresKokkos<TestType>(kokkos_sv);
             kokkos_sv.applyOperation("Hadamard", {0}, false);
             kokkos_sv.applyOperation("Hadamard", {1}, false);
             kokkos_sv.applyOperation("Hadamard", {2}, false);
-            auto res = kokkos_sv.getExpectationValuePauliX({0});
+            auto res = m.getExpectationValuePauliX({0});
             CHECK(res == Approx(ONE));
         }
         SECTION("Apply directly: Minus states") {
             StateVectorKokkos<TestType> kokkos_sv{num_qubits};
+            auto m = Algorithms::MeasuresKokkos<TestType>(kokkos_sv);
             kokkos_sv.applyPauliX({0}, false);
             kokkos_sv.applyOperation("Hadamard", {0}, false);
             kokkos_sv.applyPauliX({1}, false);
             kokkos_sv.applyOperation("Hadamard", {1}, false);
             kokkos_sv.applyPauliX({2}, false);
             kokkos_sv.applyOperation("Hadamard", {2}, false);
-            auto res = kokkos_sv.getExpectationValuePauliX({0});
+            auto res = m.getExpectationValuePauliX({0});
             CHECK(res == -Approx(ONE));
         }
     }
@@ -78,26 +83,29 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::getExpectationValuePauliY",
 
         SECTION("Apply directly") {
             StateVectorKokkos<TestType> kokkos_sv{num_qubits};
+            auto m = Algorithms::MeasuresKokkos<TestType>(kokkos_sv);
             kokkos_sv.applyOperation("Hadamard", {0}, false);
             kokkos_sv.applyOperation("CNOT", {0, 1}, false);
             kokkos_sv.applyOperation("CNOT", {1, 2}, false);
-            auto res = kokkos_sv.getExpectationValuePauliY({0});
+            auto res = m.getExpectationValuePauliY({0});
             CHECK(res == ZERO);
         }
         SECTION("Apply directly: Plus i states") {
             StateVectorKokkos<TestType> kokkos_sv{num_qubits};
+            auto m = Algorithms::MeasuresKokkos<TestType>(kokkos_sv);
             kokkos_sv.applyRX({0}, false, {-PI / 2});
             kokkos_sv.applyRX({1}, false, {-PI / 2});
             kokkos_sv.applyRX({2}, false, {-PI / 2});
-            auto res = kokkos_sv.getExpectationValuePauliY({0});
+            auto res = m.getExpectationValuePauliY({0});
             CHECK(res == Approx(ONE));
         }
         SECTION("Apply directly: Minus i states") {
             StateVectorKokkos<TestType> kokkos_sv{num_qubits};
+            auto m = Algorithms::MeasuresKokkos<TestType>(kokkos_sv);
             kokkos_sv.applyRX({0}, false, {PI / 2});
             kokkos_sv.applyRX({1}, false, {PI / 2});
             kokkos_sv.applyRX({2}, false, {PI / 2});
-            auto res = kokkos_sv.getExpectationValuePauliY({0});
+            auto res = m.getExpectationValuePauliY({0});
             CHECK(res == -Approx(ONE));
         }
     }
@@ -110,10 +118,11 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::getExpectationValuePauliZ",
 
         SECTION("Apply directly") {
             StateVectorKokkos<TestType> kokkos_sv{num_qubits};
+            auto m = Algorithms::MeasuresKokkos<TestType>(kokkos_sv);
             kokkos_sv.applyOperation("Hadamard", {0}, false);
             kokkos_sv.applyOperation("CNOT", {0, 1}, false);
             kokkos_sv.applyOperation("CNOT", {1, 2}, false);
-            auto res = kokkos_sv.getExpectationValuePauliZ({0});
+            auto res = m.getExpectationValuePauliZ({0});
             CHECK(res == 0); // A 0-result is not a good test.
         }
     }
@@ -127,13 +136,15 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::getExpectationValueHadamard",
 
         SECTION("Apply directly") {
             StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-            auto res = kokkos_sv.getExpectationValueHadamard({0});
+            auto m = Algorithms::MeasuresKokkos<TestType>(kokkos_sv);
+            auto res = m.getExpectationValueHadamard({0});
             CHECK(res == INVSQRT2);
         }
         SECTION("Apply directly") {
             StateVectorKokkos<TestType> kokkos_sv{num_qubits};
+            auto m = Algorithms::MeasuresKokkos<TestType>(kokkos_sv);
             kokkos_sv.applyPauliX({0});
-            auto res = kokkos_sv.getExpectationValueHadamard({0});
+            auto res = m.getExpectationValueHadamard({0});
             CHECK(res == -INVSQRT2);
         }
     }
@@ -148,6 +159,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::getExpectationValueSingleQubitOp",
 
         SECTION("Apply directly") {
             StateVectorKokkos<TestType> kokkos_sv{num_qubits};
+            auto m = Algorithms::MeasuresKokkos<TestType>(kokkos_sv);
             Kokkos::View<Kokkos::complex<TestType> *> opMatDevice("opMat", 4);
             Kokkos::View<Kokkos::complex<TestType> *, Kokkos::HostSpace> opMat(
                 "opMatHost", 4);
@@ -162,8 +174,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::getExpectationValueSingleQubitOp",
             opMat[3] = c;
 
             Kokkos::deep_copy(opMatDevice, opMat);
-            auto res =
-                kokkos_sv.getExpectationValueSingleQubitOp(opMatDevice, {0});
+            auto res = m.getExpectationValueSingleQubitOp(opMatDevice, {0});
             CHECK(res == INVSQRT2);
         }
     }
@@ -177,6 +188,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::getExpectationValueTwoQubitOp",
 
         SECTION("Apply directly") {
             StateVectorKokkos<TestType> kokkos_sv{num_qubits};
+            auto m = Algorithms::MeasuresKokkos<TestType>(kokkos_sv);
 
             Kokkos::View<Kokkos::complex<TestType> *> opMatDevice("opMat", 16);
             Kokkos::View<Kokkos::complex<TestType> *, Kokkos::HostSpace> opMat(
@@ -194,8 +206,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::getExpectationValueTwoQubitOp",
             opMat[15] = Kokkos::complex<TestType>(static_cast<TestType>(1), 0);
 
             Kokkos::deep_copy(opMatDevice, opMat);
-            auto res =
-                kokkos_sv.getExpectationValueTwoQubitOp(opMatDevice, {0, 1});
+            auto res = m.getExpectationValueTwoQubitOp(opMatDevice, {0, 1});
             CHECK(res == INVSQRT2);
         }
     }
@@ -207,6 +218,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::Hamiltonian_expval",
     const std::size_t num_qubits = 3;
     SECTION("GetExpectionIdentity") {
         StateVectorKokkos<TestType> kokkos_sv{num_qubits};
+        auto m = Algorithms::MeasuresKokkos<TestType>(kokkos_sv);
         std::vector<size_t> wires{0, 1, 2};
 
         kokkos_sv.applyHadamard({0}, false);
@@ -223,7 +235,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::Hamiltonian_expval",
                 matrix[i] = std::complex<TestType>(0, 0);
         }
 
-        auto results = kokkos_sv.getExpectationValue(wires, matrix);
+        auto results = m.getExpectationValue(wires, matrix);
         cp_t expected(1, 0);
         CHECK(real(expected) == Approx(results).epsilon(1e-7));
     }
@@ -235,6 +247,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::Hamiltonian_expval",
                                      {0.3, 0.4}, {0.4, 0.5}};
         StateVectorKokkos<TestType> kokkos_sv{init_state.data(),
                                               init_state.size()};
+        auto m = Algorithms::MeasuresKokkos<TestType>(kokkos_sv);
         std::vector<size_t> wires{0, 1, 2};
         std::vector<cp_t> matrix{
             {0.5, 0.0},  {0.2, 0.5},  {0.2, -0.5}, {0.3, 0.0},  {0.2, -0.5},
@@ -251,7 +264,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::Hamiltonian_expval",
             {0.3, 0.0},  {0.2, -0.5}, {0.3, 0.0},  {0.2, -0.5}, {0.3, 0.0},
             {0.2, -0.5}, {0.3, 0.0},  {0.2, -0.5}, {0.3, 0.0}};
 
-        auto results = kokkos_sv.getExpectationValue(wires, matrix);
+        auto results = m.getExpectationValue(wires, matrix);
         cp_t expected(1.263000, -1.011000);
 
         CHECK(real(expected) == Approx(results).epsilon(1e-7));
@@ -267,6 +280,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::Hamiltonian_expval_Sparse",
                                      {0.3, 0.4}, {0.4, 0.5}};
         StateVectorKokkos<TestType> kokkos_sv{init_state.data(),
                                               init_state.size()};
+        auto m = Algorithms::MeasuresKokkos<TestType>(kokkos_sv);
 
         std::vector<size_t> index_ptr = {0, 2, 4, 6, 8, 10, 12, 14, 16};
         std::vector<size_t> indices = {0, 3, 1, 2, 1, 2, 0, 3,
@@ -277,7 +291,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::Hamiltonian_expval_Sparse",
             {3.1415, 0.0},  {0.0, -3.1415}, {3.1415, 0.0}, {0.0, 3.1415},
             {0.0, -3.1415}, {3.1415, 0.0},  {0.0, 3.1415}, {3.1415, 0.0}};
 
-        auto result = kokkos_sv.getExpectationValue(values, indices, index_ptr);
+        auto result = m.getExpectationValue(values, indices, index_ptr);
 
         TestType expected = 3.1415;
 

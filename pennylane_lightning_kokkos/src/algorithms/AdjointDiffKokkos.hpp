@@ -1,44 +1,11 @@
 #pragma once
+#include "LinearAlgebra.hpp"
 #include "ObservablesKokkos.hpp"
 #include "StateVectorKokkos.hpp"
 #include <Kokkos_Core.hpp>
 #include <variant>
 
-namespace Pennylane {
-namespace Algorithms {
-
-template <class Precision> struct getImagOfComplexInnerProductFunctor {
-
-    Kokkos::View<Kokkos::complex<Precision> *> sv1;
-    Kokkos::View<Kokkos::complex<Precision> *> sv2;
-
-    getImagOfComplexInnerProductFunctor(
-        Kokkos::View<Kokkos::complex<Precision> *> sv1_,
-        Kokkos::View<Kokkos::complex<Precision> *> sv2_) {
-        sv1 = sv1_;
-        sv2 = sv2_;
-    }
-
-    KOKKOS_INLINE_FUNCTION
-    void operator()(const std::size_t k, Precision &inner) const {
-        inner += imag(conj(sv1[k]) * sv2[k]);
-    }
-};
-
-template <class Precision>
-inline auto
-getImagOfComplexInnerProduct(Kokkos::View<Kokkos::complex<Precision> *> sv1_vec,
-                             Kokkos::View<Kokkos::complex<Precision> *> sv2_vec)
-    -> Precision {
-
-    assert(sv1_vec.size() == sv2_vec.size());
-    Precision inner = 0;
-    Kokkos::parallel_reduce(
-        sv1_vec.size(),
-        getImagOfComplexInnerProductFunctor<Precision>(sv1_vec, sv2_vec),
-        inner);
-    return inner;
-}
+namespace Pennylane::Algorithms {
 
 template <class T> class OpsData {
   private:
@@ -227,7 +194,8 @@ template <class T = double> class AdjointJacobianKokkos {
                                size_t param_index) {
         jac[obs_index][param_index] =
             -2 * scaling_coeff *
-            getImagOfComplexInnerProduct<T>(sv1.getData(), sv2.getData());
+            Pennylane::Util::getImagOfComplexInnerProduct<T>(sv1.getData(),
+                                                             sv2.getData());
     }
 
     /**
@@ -503,5 +471,4 @@ template <class T = double> class AdjointJacobianKokkos {
     }
 };
 
-} // namespace Algorithms
-} // namespace Pennylane
+} // namespace Pennylane::Algorithms
