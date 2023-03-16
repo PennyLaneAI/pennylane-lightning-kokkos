@@ -34,10 +34,40 @@ template <class Precision> class MeasuresKokkos {
     using ExpValMap = std::unordered_map<std::string, ExpValFunc>;
 
     const StateVectorKokkos<Precision> &original_sv;
+    ExpValMap expval_funcs;
 
   public:
     explicit MeasuresKokkos(const StateVectorKokkos<Precision> &state_vector)
-        : original_sv{state_vector} {};
+        : original_sv{state_vector},
+          expval_funcs{{"Identity",
+                        [&](auto &&wires, auto &&params) {
+                            return getExpectationValueIdentity(
+                                std::forward<decltype(wires)>(wires),
+                                std::forward<decltype(params)>(params));
+                        }},
+                       {"PauliX",
+                        [&](auto &&wires, auto &&params) {
+                            return getExpectationValuePauliX(
+                                std::forward<decltype(wires)>(wires),
+                                std::forward<decltype(params)>(params));
+                        }},
+                       {"PauliY",
+                        [&](auto &&wires, auto &&params) {
+                            return getExpectationValuePauliY(
+                                std::forward<decltype(wires)>(wires),
+                                std::forward<decltype(params)>(params));
+                        }},
+                       {"PauliZ",
+                        [&](auto &&wires, auto &&params) {
+                            return getExpectationValuePauliZ(
+                                std::forward<decltype(wires)>(wires),
+                                std::forward<decltype(params)>(params));
+                        }},
+                       {"Hadamard", [&](auto &&wires, auto &&params) {
+                            return getExpectationValueHadamard(
+                                std::forward<decltype(wires)>(wires),
+                                std::forward<decltype(params)>(params));
+                        }}} {};
 
     /**
      * @brief Calculate the expectation value of a named observable
@@ -51,38 +81,6 @@ template <class Precision> class MeasuresKokkos {
         const std::string &obsName, const std::vector<size_t> &wires,
         [[maybe_unused]] const std::vector<Precision> &params = {0.0},
         const std::vector<Kokkos::complex<Precision>> &gate_matrix = {}) {
-
-        ExpValMap expval_funcs_;
-        expval_funcs_["Identity"] = [&](auto &&wires, auto &&params) {
-            return getExpectationValueIdentity(
-                std::forward<decltype(wires)>(wires),
-                std::forward<decltype(params)>(params));
-        };
-
-        expval_funcs_["PauliX"] = [&](auto &&wires, auto &&params) {
-            return getExpectationValuePauliX(
-                std::forward<decltype(wires)>(wires),
-                std::forward<decltype(params)>(params));
-        };
-
-        expval_funcs_["PauliY"] = [&](auto &&wires, auto &&params) {
-            return getExpectationValuePauliY(
-                std::forward<decltype(wires)>(wires),
-                std::forward<decltype(params)>(params));
-        };
-
-        expval_funcs_["PauliZ"] = [&](auto &&wires, auto &&params) {
-            return getExpectationValuePauliZ(
-                std::forward<decltype(wires)>(wires),
-                std::forward<decltype(params)>(params));
-        };
-
-        expval_funcs_["Hadamard"] = [&](auto &&wires, auto &&params) {
-            return getExpectationValueHadamard(
-                std::forward<decltype(wires)>(wires),
-                std::forward<decltype(params)>(params));
-        };
-
         auto &&par = (params.empty()) ? std::vector<Precision>{0.0} : params;
         auto &&local_wires =
             (gate_matrix.empty())
@@ -92,15 +90,14 @@ template <class Precision> class MeasuresKokkos {
                       wires.rend()}; // ensure wire indexing correctly preserved
                                      // for tensor-observables
 
-        if (expval_funcs_.find(obsName) != expval_funcs_.end()) {
-            return expval_funcs_.at(obsName)(local_wires, par);
-        } else {
-            KokkosVector matrix("gate_matrix", gate_matrix.size());
-            Kokkos::deep_copy(
-                matrix, UnmanagedConstComplexHostView(gate_matrix.data(),
-                                                      gate_matrix.size()));
-            return getExpectationValueMultiQubitOp(matrix, wires, par);
+        if (expval_funcs.find(obsName) != expval_funcs.end()) {
+            return expval_funcs.at(obsName)(local_wires, par);
         }
+
+        KokkosVector matrix("gate_matrix", gate_matrix.size());
+        Kokkos::deep_copy(matrix, UnmanagedConstComplexHostView(
+                                      gate_matrix.data(), gate_matrix.size()));
+        return getExpectationValueMultiQubitOp(matrix, wires, par);
     }
 
     /**
