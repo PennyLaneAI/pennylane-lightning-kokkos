@@ -367,13 +367,13 @@ template <class Precision> class MeasuresKokkos {
      * @param ob Observable.
      * @return Expectation value with respect to the given observable.
      */
-    // auto getExpectationValueGenericOp(const ObservableKokkos<Precision> &ob)
-    // {
-    //     StateVectorKokkos<Precision> copy_sv(this->getNumQubits());
-    //     copy_sv.DeviceToDevice(this->getData());
-    //     ob.applyInPlace(copy_sv);
-    //     return getRealOfComplexInnerProductFunctor(*this, copy_sv);
-    // }
+    auto expval(const ObservableKokkos<Precision> &ob) {
+        StateVectorKokkos<Precision> applied_sv(original_sv.getNumQubits());
+        applied_sv.DeviceToDevice(original_sv.getData());
+        ob.applyInPlace(applied_sv);
+        return Pennylane::Util::getRealOfComplexInnerProduct(
+            original_sv.getData(), applied_sv.getData());
+    }
 
     /**
      * @brief Probabilities of each computational basis state.

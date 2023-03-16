@@ -187,7 +187,7 @@ getRealOfComplexInnerProduct(Kokkos::View<Kokkos::complex<Precision> *> x,
     assert(x.size() == y.size());
     Precision inner = 0;
     Kokkos::parallel_reduce(
-        x.size(), getRealOfComplexInnerProduct<Precision>(x, y), inner);
+        x.size(), getRealOfComplexInnerProductFunctor<Precision>(x, y), inner);
     return inner;
 }
 
