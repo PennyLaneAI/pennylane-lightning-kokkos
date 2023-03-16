@@ -14,14 +14,14 @@
 #include "TestHelpers.hpp"
 
 using namespace Pennylane;
-using namespace Pennylane::Algorithms;
+using namespace Pennylane::Simulators;
 
 TEMPLATE_TEST_CASE("Test variance of NamedObs", "[StateVectorKokkos_Var]",
                    float, double) {
     const std::size_t num_qubits = 2;
     SECTION("var(PauliX[0])") {
         StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-        auto m = Algorithms::MeasuresKokkos<TestType>(kokkos_sv);
+        auto m = MeasuresKokkos<TestType>(kokkos_sv);
 
         kokkos_sv.applyOperation("RX", {0}, false, {0.7});
         kokkos_sv.applyOperation("RY", {0}, false, {0.7});
@@ -36,7 +36,7 @@ TEMPLATE_TEST_CASE("Test variance of NamedObs", "[StateVectorKokkos_Var]",
 
     SECTION("var(PauliY[0])") {
         StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-        auto m = Algorithms::MeasuresKokkos<TestType>(kokkos_sv);
+        auto m = MeasuresKokkos<TestType>(kokkos_sv);
 
         kokkos_sv.applyOperation("RX", {0}, false, {0.7});
         kokkos_sv.applyOperation("RY", {0}, false, {0.7});
@@ -51,7 +51,7 @@ TEMPLATE_TEST_CASE("Test variance of NamedObs", "[StateVectorKokkos_Var]",
 
     SECTION("var(PauliZ[1])") {
         StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-        auto m = Algorithms::MeasuresKokkos<TestType>(kokkos_sv);
+        auto m = MeasuresKokkos<TestType>(kokkos_sv);
 
         kokkos_sv.applyOperation("RX", {0}, false, {0.7});
         kokkos_sv.applyOperation("RY", {0}, false, {0.7});
@@ -70,7 +70,7 @@ TEMPLATE_TEST_CASE("Test variance of HermitianObs", "[StateVectorKokkos_Var]",
     const std::size_t num_qubits = 3;
     SECTION("Using var") {
         StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-        auto m = Algorithms::MeasuresKokkos<TestType>(kokkos_sv);
+        auto m = MeasuresKokkos<TestType>(kokkos_sv);
 
         kokkos_sv.applyOperation("RX", {0}, false, {0.7});
         kokkos_sv.applyOperation("RY", {0}, false, {0.7});
@@ -102,12 +102,12 @@ TEMPLATE_TEST_CASE("Test variance of TensorProdObs", "[StateVectorKokkos_Var]",
     const std::size_t num_qubits = 3;
     SECTION("Using var") {
         StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-        auto m = Algorithms::MeasuresKokkos<TestType>(kokkos_sv);
+        auto m = MeasuresKokkos<TestType>(kokkos_sv);
 
-        kokkos_sv.applyOperation("RX", {0}, false, {0.7});
-        kokkos_sv.applyOperation("RY", {0}, false, {0.7});
-        kokkos_sv.applyOperation("RX", {1}, false, {0.3});
-        kokkos_sv.applyOperation("RY", {1}, false, {0.3});
+        kokkos_sv.applyOperation("RX", {0}, false, {0.5});
+        kokkos_sv.applyOperation("RY", {0}, false, {0.5});
+        kokkos_sv.applyOperation("RX", {1}, false, {0.2});
+        kokkos_sv.applyOperation("RY", {1}, false, {0.2});
 
         auto X0 = std::make_shared<NamedObsKokkos<TestType>>(
             "PauliX", std::vector<size_t>{0});
@@ -115,9 +115,9 @@ TEMPLATE_TEST_CASE("Test variance of TensorProdObs", "[StateVectorKokkos_Var]",
             "PauliZ", std::vector<size_t>{1});
 
         auto ob = TensorProdObsKokkos<TestType>::create({X0, Z1});
-        auto res = TestType(m.var(*ob.get()));
-        auto expected = TestType(0.7977751964);
-        CHECK(expected == Approx(res).epsilon(1e-7));
+        auto res = m.var(*ob);
+        auto expected = TestType(0.836679);
+        CHECK(expected == Approx(res));
     }
 }
 
@@ -129,7 +129,7 @@ TEMPLATE_TEST_CASE("Test variance of HamiltonianObs", "[StateVectorKokkos_Var]",
             {0.2, 0.2}, {0.3, 0.3}, {0.3, 0.4}, {0.4, 0.5}};
         StateVectorKokkos<TestType> kokkos_sv{init_state.data(),
                                               init_state.size()};
-        auto m = Algorithms::MeasuresKokkos<TestType>(kokkos_sv);
+        auto m = MeasuresKokkos<TestType>(kokkos_sv);
 
         auto X0 = std::make_shared<NamedObsKokkos<TestType>>(
             "PauliX", std::vector<size_t>{0});
@@ -139,6 +139,6 @@ TEMPLATE_TEST_CASE("Test variance of HamiltonianObs", "[StateVectorKokkos_Var]",
         auto ob = HamiltonianKokkos<TestType>::create({0.3, 0.5}, {X0, Z1});
         auto res = m.var(*ob);
         auto expected = TestType(0.224604);
-        CHECK(expected == Approx(res).epsilon(1e-7));
+        CHECK(expected == Approx(res));
     }
 }

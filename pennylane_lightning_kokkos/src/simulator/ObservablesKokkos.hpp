@@ -6,7 +6,7 @@
 #include "LinearAlgebra.hpp"
 #include "StateVectorKokkos.hpp"
 
-namespace Pennylane::Algorithms {
+namespace Pennylane::Simulators {
 
 /**
  * @brief A base class for all observable classes.
@@ -516,4 +516,4 @@ class SparseHamiltonianKokkos final : public ObservableKokkos<T> {
     };
 };
 
-} // namespace Pennylane::Algorithms
+} // namespace Pennylane::Simulators

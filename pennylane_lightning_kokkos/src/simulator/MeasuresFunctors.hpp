@@ -5,13 +5,7 @@
 
 #include "Util.hpp"
 
-namespace {
-using namespace Pennylane::Util;
-namespace KE = Kokkos::Experimental;
-} // namespace
-
-namespace Pennylane {
-namespace Functors {
+namespace Pennylane::Functors {
 /**
  * @brief Compute probability distribution from StateVector.
  *
@@ -215,5 +209,4 @@ template <class Precision> struct getTransposedFunctor {
     }
 };
 
-} // namespace Functors
-} // namespace Pennylane
+} // namespace Pennylane::Functors

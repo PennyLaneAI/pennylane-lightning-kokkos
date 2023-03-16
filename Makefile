@@ -37,7 +37,7 @@ test-python:
 	$(PYTHON) -I $(TESTRUNNER)
 
 test-cpp:
-	# rm -rf ./BuildTests
+	rm -rf ./BuildTests
 	cmake . -BBuildTests -DPLKOKKOS_BUILD_TESTS=1
 	cmake --build ./BuildTests
 	./BuildTests/pennylane_lightning_kokkos/src/tests/runner_kokkos

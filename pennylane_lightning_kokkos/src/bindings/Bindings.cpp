@@ -32,6 +32,7 @@
 namespace {
 using namespace Pennylane;
 using namespace Pennylane::Algorithms;
+using namespace Pennylane::Simulators;
 using std::complex;
 using std::set;
 using std::string;
@@ -444,10 +445,9 @@ void StateVectorKokkos_class_bindings(py::module &m) {
                     conv_matrix = std::vector<Kokkos::complex<ParamT>>{
                         m_ptr, m_ptr + m_buffer.size};
                 }
-                auto m = Algorithms::MeasuresKokkos<PrecisionT>(sv);
                 // Return the real component only
-                return m.getExpectationValue(obsName, wires, params,
-                                             conv_matrix);
+                return MeasuresKokkos<PrecisionT>(sv).getExpectationValue(
+                    obsName, wires, params, conv_matrix);
             },
             "Calculate the expectation value of the given observable.")
         .def(
@@ -470,9 +470,8 @@ void StateVectorKokkos_class_bindings(py::module &m) {
                     conv_matrix = std::vector<Kokkos::complex<ParamT>>{
                         m_ptr, m_ptr + m_buffer.size};
                 }
-                auto m = Algorithms::MeasuresKokkos<PrecisionT>(sv);
                 // Return the real component only & ignore params
-                return m.getExpectationValue(
+                return MeasuresKokkos<PrecisionT>(sv).getExpectationValue(
                     obs_concat, wires, std::vector<ParamT>{}, conv_matrix);
             },
             "Calculate the expectation value of the given observable.")
@@ -490,9 +489,9 @@ void StateVectorKokkos_class_bindings(py::module &m) {
                     conv_matrix = std::vector<Kokkos::complex<ParamT>>{
                         m_ptr, m_ptr + m_buffer.size};
                 }
-                auto m = Algorithms::MeasuresKokkos<PrecisionT>(sv);
                 // Return the real component only & ignore params
-                return m.getExpectationValue(wires, conv_matrix);
+                return MeasuresKokkos<PrecisionT>(sv).getExpectationValue(
+                    wires, conv_matrix);
             },
             "Calculate the expectation value of the given observable.")
 
@@ -510,15 +509,15 @@ void StateVectorKokkos_class_bindings(py::module &m) {
                     conv_data = std::vector<Kokkos::complex<ParamT>>{
                         m_ptr, m_ptr + m_buffer.size};
                 }
-                auto m = Algorithms::MeasuresKokkos<PrecisionT>(sv);
                 // Return the real component only & ignore params
-                return m.getExpectationValue(conv_data, indices, index_ptr);
+                return MeasuresKokkos<PrecisionT>(sv).getExpectationValue(
+                    conv_data, indices, index_ptr);
             },
             "Calculate the expectation value of the given observable.")
         .def("probs",
              [](StateVectorKokkos<PrecisionT> &sv,
                 const std::vector<size_t> &wires) {
-                 auto m = Pennylane::Algorithms::MeasuresKokkos<PrecisionT>(sv);
+                 auto m = MeasuresKokkos<PrecisionT>(sv);
                  if (wires.empty()) {
                      return py::array_t<ParamT>(py::cast(m.probs()));
                  }
@@ -535,8 +534,8 @@ void StateVectorKokkos_class_bindings(py::module &m) {
         .def("GenerateSamples",
              [](StateVectorKokkos<PrecisionT> &sv, size_t num_wires,
                 size_t num_shots) {
-                 auto m = Pennylane::Algorithms::MeasuresKokkos<PrecisionT>(sv);
-                 auto &&result = m.generate_samples(num_shots);
+                 auto &&result =
+                     MeasuresKokkos<PrecisionT>(sv).generate_samples(num_shots);
 
                  const size_t ndim = 2;
                  const std::vector<size_t> shape{num_shots, num_wires};
@@ -811,7 +810,7 @@ void StateVectorKokkos_class_bindings(py::module &m) {
                 const StateVectorKokkos<PrecisionT> &sv,
                 const std::vector<std::shared_ptr<ObservableKokkos<PrecisionT>>>
                     &observables,
-                const Pennylane::Algorithms::OpsData<PrecisionT> &operations,
+                const OpsData<PrecisionT> &operations,
                 const std::vector<size_t> &trainableParams) {
                  std::vector<std::vector<PrecisionT>> jac(
                      observables.size(),

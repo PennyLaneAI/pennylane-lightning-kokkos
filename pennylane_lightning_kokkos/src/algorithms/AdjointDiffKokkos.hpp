@@ -5,6 +5,13 @@
 #include <Kokkos_Core.hpp>
 #include <variant>
 
+/// @cond DEV
+namespace {
+namespace Simulators = Pennylane::Simulators;
+using namespace Simulators;
+} // namespace
+/// @endcond
+
 namespace Pennylane::Algorithms {
 
 template <class T> class OpsData {
@@ -247,8 +254,9 @@ template <class T = double> class AdjointJacobianKokkos {
      * @param state Statevector to be updated.
      * @param observable Observable to apply.
      */
-    inline void applyObservable(StateVectorKokkos<T> &state,
-                                const ObservableKokkos<T> &observable) {
+    inline void
+    applyObservable(StateVectorKokkos<T> &state,
+                    const Simulators::ObservableKokkos<T> &observable) {
         using namespace Pennylane::Util;
         observable.applyInPlace(state);
     }
@@ -264,7 +272,8 @@ template <class T = double> class AdjointJacobianKokkos {
     inline void applyObservables(
         std::vector<StateVectorKokkos<T>> &states,
         const StateVectorKokkos<T> &reference_state,
-        const std::vector<std::shared_ptr<ObservableKokkos<T>>> &observables) {
+        const std::vector<std::shared_ptr<Simulators::ObservableKokkos<T>>>
+            &observables) {
         // clang-format off
         // Globally scoped exception value to be captured within OpenMP block.
         // See the following for OpenMP design decisions:
@@ -396,7 +405,8 @@ template <class T = double> class AdjointJacobianKokkos {
      */
     void adjointJacobian(
         const StateVectorKokkos<T> &ref_data, std::vector<std::vector<T>> &jac,
-        const std::vector<std::shared_ptr<ObservableKokkos<T>>> &obs,
+        const std::vector<std::shared_ptr<Simulators::ObservableKokkos<T>>>
+            &obs,
         const Pennylane::Algorithms::OpsData<T> &ops,
         const std::vector<size_t> &trainableParams,
         bool apply_operations = false) {

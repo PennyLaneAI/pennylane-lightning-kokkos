@@ -14,14 +14,14 @@
 #include "TestHelpers.hpp"
 
 using namespace Pennylane;
-using namespace Pennylane::Algorithms;
+using namespace Pennylane::Simulators;
 
 TEMPLATE_TEST_CASE("StateVectorKokkosManaged::getExpectationValueIdentity",
                    "[StateVectorKokkosManaged_Expval]", float, double) {
     const std::size_t num_qubits = 3;
     auto ONE = TestType(1);
     StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-    auto m = Algorithms::MeasuresKokkos<TestType>(kokkos_sv);
+    auto m = MeasuresKokkos<TestType>(kokkos_sv);
 
     SECTION("Apply directly") {
         kokkos_sv.applyOperation("Hadamard", {0}, false);
@@ -51,7 +51,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::getExpectationValuePauliX",
 
         SECTION("Apply directly") {
             StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-            auto m = Algorithms::MeasuresKokkos<TestType>(kokkos_sv);
+            auto m = MeasuresKokkos<TestType>(kokkos_sv);
             kokkos_sv.applyOperation("Hadamard", {0}, false);
             kokkos_sv.applyOperation("CNOT", {0, 1}, false);
             kokkos_sv.applyOperation("CNOT", {1, 2}, false);
@@ -60,7 +60,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::getExpectationValuePauliX",
         }
         SECTION("Using expval") {
             StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-            auto m = Algorithms::MeasuresKokkos<TestType>(kokkos_sv);
+            auto m = MeasuresKokkos<TestType>(kokkos_sv);
             kokkos_sv.applyOperation("Hadamard", {0}, false);
             kokkos_sv.applyOperation("CNOT", {0, 1}, false);
             kokkos_sv.applyOperation("CNOT", {1, 2}, false);
@@ -70,7 +70,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::getExpectationValuePauliX",
         }
         SECTION("Apply directly: Plus states") {
             StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-            auto m = Algorithms::MeasuresKokkos<TestType>(kokkos_sv);
+            auto m = MeasuresKokkos<TestType>(kokkos_sv);
             kokkos_sv.applyOperation("Hadamard", {0}, false);
             kokkos_sv.applyOperation("Hadamard", {1}, false);
             kokkos_sv.applyOperation("Hadamard", {2}, false);
@@ -79,7 +79,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::getExpectationValuePauliX",
         }
         SECTION("Using expval: Plus states") {
             StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-            auto m = Algorithms::MeasuresKokkos<TestType>(kokkos_sv);
+            auto m = MeasuresKokkos<TestType>(kokkos_sv);
             kokkos_sv.applyOperation("Hadamard", {0}, false);
             kokkos_sv.applyOperation("Hadamard", {1}, false);
             kokkos_sv.applyOperation("Hadamard", {2}, false);
@@ -89,7 +89,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::getExpectationValuePauliX",
         }
         SECTION("Apply directly: Minus states") {
             StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-            auto m = Algorithms::MeasuresKokkos<TestType>(kokkos_sv);
+            auto m = MeasuresKokkos<TestType>(kokkos_sv);
             kokkos_sv.applyPauliX({0}, false);
             kokkos_sv.applyOperation("Hadamard", {0}, false);
             kokkos_sv.applyPauliX({1}, false);
@@ -101,7 +101,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::getExpectationValuePauliX",
         }
         SECTION("Using expval: Minus states") {
             StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-            auto m = Algorithms::MeasuresKokkos<TestType>(kokkos_sv);
+            auto m = MeasuresKokkos<TestType>(kokkos_sv);
             kokkos_sv.applyPauliX({0}, false);
             kokkos_sv.applyOperation("Hadamard", {0}, false);
             kokkos_sv.applyPauliX({1}, false);
@@ -126,7 +126,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::getExpectationValuePauliY",
 
         SECTION("Apply directly") {
             StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-            auto m = Algorithms::MeasuresKokkos<TestType>(kokkos_sv);
+            auto m = MeasuresKokkos<TestType>(kokkos_sv);
             kokkos_sv.applyOperation("Hadamard", {0}, false);
             kokkos_sv.applyOperation("CNOT", {0, 1}, false);
             kokkos_sv.applyOperation("CNOT", {1, 2}, false);
@@ -135,7 +135,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::getExpectationValuePauliY",
         }
         SECTION("Using expval") {
             StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-            auto m = Algorithms::MeasuresKokkos<TestType>(kokkos_sv);
+            auto m = MeasuresKokkos<TestType>(kokkos_sv);
             kokkos_sv.applyOperation("Hadamard", {0}, false);
             kokkos_sv.applyOperation("CNOT", {0, 1}, false);
             kokkos_sv.applyOperation("CNOT", {1, 2}, false);
@@ -145,7 +145,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::getExpectationValuePauliY",
         }
         SECTION("Apply directly: Plus i states") {
             StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-            auto m = Algorithms::MeasuresKokkos<TestType>(kokkos_sv);
+            auto m = MeasuresKokkos<TestType>(kokkos_sv);
             kokkos_sv.applyRX({0}, false, {-PI / 2});
             kokkos_sv.applyRX({1}, false, {-PI / 2});
             kokkos_sv.applyRX({2}, false, {-PI / 2});
@@ -154,7 +154,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::getExpectationValuePauliY",
         }
         SECTION("Using expval: Plus i states") {
             StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-            auto m = Algorithms::MeasuresKokkos<TestType>(kokkos_sv);
+            auto m = MeasuresKokkos<TestType>(kokkos_sv);
             kokkos_sv.applyRX({0}, false, {-PI / 2});
             kokkos_sv.applyRX({1}, false, {-PI / 2});
             kokkos_sv.applyRX({2}, false, {-PI / 2});
@@ -164,7 +164,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::getExpectationValuePauliY",
         }
         SECTION("Apply directly: Minus i states") {
             StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-            auto m = Algorithms::MeasuresKokkos<TestType>(kokkos_sv);
+            auto m = MeasuresKokkos<TestType>(kokkos_sv);
             kokkos_sv.applyRX({0}, false, {PI / 2});
             kokkos_sv.applyRX({1}, false, {PI / 2});
             kokkos_sv.applyRX({2}, false, {PI / 2});
@@ -173,7 +173,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::getExpectationValuePauliY",
         }
         SECTION("Using expval: Minus i states") {
             StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-            auto m = Algorithms::MeasuresKokkos<TestType>(kokkos_sv);
+            auto m = MeasuresKokkos<TestType>(kokkos_sv);
             kokkos_sv.applyRX({0}, false, {PI / 2});
             kokkos_sv.applyRX({1}, false, {PI / 2});
             kokkos_sv.applyRX({2}, false, {PI / 2});
@@ -191,7 +191,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::getExpectationValuePauliZ",
 
         SECTION("Apply directly") {
             StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-            auto m = Algorithms::MeasuresKokkos<TestType>(kokkos_sv);
+            auto m = MeasuresKokkos<TestType>(kokkos_sv);
             kokkos_sv.applyOperation("Hadamard", {0}, false);
             kokkos_sv.applyOperation("CNOT", {0, 1}, false);
             kokkos_sv.applyOperation("CNOT", {1, 2}, false);
@@ -200,7 +200,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::getExpectationValuePauliZ",
         }
         SECTION("Using expval") {
             StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-            auto m = Algorithms::MeasuresKokkos<TestType>(kokkos_sv);
+            auto m = MeasuresKokkos<TestType>(kokkos_sv);
             kokkos_sv.applyOperation("Hadamard", {0}, false);
             kokkos_sv.applyOperation("CNOT", {0, 1}, false);
             kokkos_sv.applyOperation("CNOT", {1, 2}, false);
@@ -219,20 +219,20 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::getExpectationValueHadamard",
 
         SECTION("Apply directly") {
             StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-            auto m = Algorithms::MeasuresKokkos<TestType>(kokkos_sv);
+            auto m = MeasuresKokkos<TestType>(kokkos_sv);
             auto res = m.getExpectationValueHadamard({0});
             CHECK(res == INVSQRT2);
         }
         SECTION("Apply directly") {
             StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-            auto m = Algorithms::MeasuresKokkos<TestType>(kokkos_sv);
+            auto m = MeasuresKokkos<TestType>(kokkos_sv);
             kokkos_sv.applyPauliX({0});
             auto res = m.getExpectationValueHadamard({0});
             CHECK(res == -INVSQRT2);
         }
         SECTION("Using expval") {
             StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-            auto m = Algorithms::MeasuresKokkos<TestType>(kokkos_sv);
+            auto m = MeasuresKokkos<TestType>(kokkos_sv);
             kokkos_sv.applyPauliX({0});
             auto ob = NamedObsKokkos<TestType>("Hadamard", {0});
             auto res = m.expval(ob);
@@ -250,7 +250,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::getExpectationValueSingleQubitOp",
 
         SECTION("Apply directly") {
             StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-            auto m = Algorithms::MeasuresKokkos<TestType>(kokkos_sv);
+            auto m = MeasuresKokkos<TestType>(kokkos_sv);
             Kokkos::View<Kokkos::complex<TestType> *> opMatDevice("opMat", 4);
             Kokkos::View<Kokkos::complex<TestType> *, Kokkos::HostSpace> opMat(
                 "opMatHost", 4);
@@ -270,7 +270,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::getExpectationValueSingleQubitOp",
         }
         SECTION("Using expval") {
             StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-            auto m = Algorithms::MeasuresKokkos<TestType>(kokkos_sv);
+            auto m = MeasuresKokkos<TestType>(kokkos_sv);
 
             const TestType theta = M_PI / 2;
             const TestType c = std::cos(theta / 2);
@@ -292,7 +292,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::getExpectationValueTwoQubitOp",
 
         SECTION("Apply directly") {
             StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-            auto m = Algorithms::MeasuresKokkos<TestType>(kokkos_sv);
+            auto m = MeasuresKokkos<TestType>(kokkos_sv);
 
             Kokkos::View<Kokkos::complex<TestType> *> opMatDevice("opMat", 16);
             Kokkos::View<Kokkos::complex<TestType> *, Kokkos::HostSpace> opMat(
@@ -315,7 +315,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::getExpectationValueTwoQubitOp",
         }
         SECTION("Using expval") {
             StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-            auto m = Algorithms::MeasuresKokkos<TestType>(kokkos_sv);
+            auto m = MeasuresKokkos<TestType>(kokkos_sv);
 
             const TestType theta = M_PI / 2;
             const TestType c = std::cos(theta / 2);
@@ -341,7 +341,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::Hamiltonian_expval",
     const std::size_t num_qubits = 3;
     SECTION("GetExpectionIdentity") {
         StateVectorKokkos<TestType> kokkos_sv{num_qubits};
-        auto m = Algorithms::MeasuresKokkos<TestType>(kokkos_sv);
+        auto m = MeasuresKokkos<TestType>(kokkos_sv);
         std::vector<size_t> wires{0, 1, 2};
 
         kokkos_sv.applyHadamard({0}, false);
@@ -370,7 +370,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::Hamiltonian_expval",
                                      {0.3, 0.4}, {0.4, 0.5}};
         StateVectorKokkos<TestType> kokkos_sv{init_state.data(),
                                               init_state.size()};
-        auto m = Algorithms::MeasuresKokkos<TestType>(kokkos_sv);
+        auto m = MeasuresKokkos<TestType>(kokkos_sv);
         std::vector<size_t> wires{0, 1, 2};
         std::vector<cp_t> matrix{
             {0.5, 0.0},  {0.2, 0.5},  {0.2, -0.5}, {0.3, 0.0},  {0.2, -0.5},
@@ -412,7 +412,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::Hamiltonian_expval",
             {0.3, 0.0},  {0.2, -0.5}, {0.3, 0.0},  {0.2, -0.5}, {0.3, 0.0},
             {0.2, -0.5}, {0.3, 0.0},  {0.2, -0.5}, {0.3, 0.0}};
 
-        auto m = Algorithms::MeasuresKokkos<TestType>(kokkos_sv);
+        auto m = MeasuresKokkos<TestType>(kokkos_sv);
         auto ob = HermitianObsKokkos<TestType>(matrix, {0, 1, 2});
         auto res = m.expval(ob);
         std::complex<TestType> expected(1.263000, -1.011000);
@@ -429,7 +429,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::Hamiltonian_expval_Sparse",
                                      {0.3, 0.4}, {0.4, 0.5}};
         StateVectorKokkos<TestType> kokkos_sv{init_state.data(),
                                               init_state.size()};
-        auto m = Algorithms::MeasuresKokkos<TestType>(kokkos_sv);
+        auto m = MeasuresKokkos<TestType>(kokkos_sv);
 
         std::vector<size_t> index_ptr = {0, 2, 4, 6, 8, 10, 12, 14, 16};
         std::vector<size_t> indices = {0, 3, 1, 2, 1, 2, 0, 3,
@@ -454,7 +454,7 @@ TEMPLATE_TEST_CASE("Test expectation value of HamiltonianObs",
             {0.2, 0.2}, {0.3, 0.3}, {0.3, 0.4}, {0.4, 0.5}};
         StateVectorKokkos<TestType> kokkos_sv{init_state.data(),
                                               init_state.size()};
-        auto m = Algorithms::MeasuresKokkos<TestType>(kokkos_sv);
+        auto m = MeasuresKokkos<TestType>(kokkos_sv);
 
         auto X0 = std::make_shared<NamedObsKokkos<TestType>>(
             "PauliX", std::vector<size_t>{0});
@@ -462,9 +462,9 @@ TEMPLATE_TEST_CASE("Test expectation value of HamiltonianObs",
             "PauliZ", std::vector<size_t>{1});
 
         auto ob = HamiltonianKokkos<TestType>::create({0.3, 0.5}, {X0, Z1});
-        auto res = m.expval(*ob.get());
+        auto res = m.expval(*ob);
         auto expected = TestType(-0.086);
-        CHECK(expected == Approx(res).epsilon(1e-7));
+        CHECK(expected == Approx(res));
     }
 }
 
@@ -476,7 +476,7 @@ TEMPLATE_TEST_CASE("Test expectation value of TensorProdObs",
             {0.2, 0.2}, {0.3, 0.3}, {0.3, 0.4}, {0.4, 0.5}};
         StateVectorKokkos<TestType> kokkos_sv{init_state.data(),
                                               init_state.size()};
-        auto m = Algorithms::MeasuresKokkos<TestType>(kokkos_sv);
+        auto m = MeasuresKokkos<TestType>(kokkos_sv);
 
         auto X0 = std::make_shared<NamedObsKokkos<TestType>>(
             "PauliX", std::vector<size_t>{0});
@@ -484,8 +484,8 @@ TEMPLATE_TEST_CASE("Test expectation value of TensorProdObs",
             "PauliZ", std::vector<size_t>{1});
 
         auto ob = TensorProdObsKokkos<TestType>::create({X0, Z1});
-        auto res = m.expval(*ob.get());
+        auto res = m.expval(*ob);
         auto expected = TestType(-0.36);
-        CHECK(expected == Approx(res).epsilon(1e-7));
+        CHECK(expected == Approx(res));
     }
 }

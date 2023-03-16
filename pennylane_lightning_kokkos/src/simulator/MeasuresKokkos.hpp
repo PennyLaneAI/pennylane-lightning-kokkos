@@ -9,7 +9,7 @@
 #include "ObservablesKokkos.hpp"
 #include "StateVectorKokkos.hpp"
 
-namespace Pennylane::Algorithms {
+namespace Pennylane::Simulators {
 
 template <class Precision> class MeasuresKokkos {
 
@@ -29,17 +29,30 @@ template <class Precision> class MeasuresKokkos {
     using UnmanagedConstSizeTHostView =
         Kokkos::View<const size_t *, Kokkos::HostSpace,
                      Kokkos::MemoryTraits<Kokkos::Unmanaged>>;
-
-    const StateVectorKokkos<Precision> &original_sv;
-
     using ExpValFunc = std::function<Precision(const std::vector<size_t> &,
                                                const std::vector<Precision> &)>;
     using ExpValMap = std::unordered_map<std::string, ExpValFunc>;
-    ExpValMap expval_funcs_;
+
+    const StateVectorKokkos<Precision> &original_sv;
 
   public:
     explicit MeasuresKokkos(const StateVectorKokkos<Precision> &state_vector)
-        : original_sv{state_vector} {
+        : original_sv{state_vector} {};
+
+    /**
+     * @brief Calculate the expectation value of a named observable
+     *
+     * @param obsName observable name
+     * @param wires wires the observable acts on
+     * @param params parameters for the observable
+     * @param gate_matrix optional matrix
+     */
+    auto getExpectationValue(
+        const std::string &obsName, const std::vector<size_t> &wires,
+        [[maybe_unused]] const std::vector<Precision> &params = {0.0},
+        const std::vector<Kokkos::complex<Precision>> &gate_matrix = {}) {
+
+        ExpValMap expval_funcs_;
         expval_funcs_["Identity"] = [&](auto &&wires, auto &&params) {
             return getExpectationValueIdentity(
                 std::forward<decltype(wires)>(wires),
@@ -69,20 +82,6 @@ template <class Precision> class MeasuresKokkos {
                 std::forward<decltype(wires)>(wires),
                 std::forward<decltype(params)>(params));
         };
-    };
-
-    /**
-     * @brief Calculate the expectation value of an observable
-     *
-     * @param obsName observable name
-     * @param wires wires the observable acts on
-     * @param params parameters for the observable
-     * @param gate_matrix optional matrix
-     */
-    auto getExpectationValue(
-        const std::string &obsName, const std::vector<size_t> &wires,
-        [[maybe_unused]] const std::vector<Precision> &params = {0.0},
-        const std::vector<Kokkos::complex<Precision>> &gate_matrix = {}) {
 
         auto &&par = (params.empty()) ? std::vector<Precision>{0.0} : params;
         auto &&local_wires =
@@ -582,4 +581,4 @@ template <class Precision> class MeasuresKokkos {
     }
 };
 
-} // namespace Pennylane::Algorithms
+} // namespace Pennylane::Simulators
