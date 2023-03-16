@@ -16,8 +16,6 @@
 using namespace Pennylane;
 using namespace Pennylane::Algorithms;
 
-namespace {} // namespace
-
 TEMPLATE_TEST_CASE("StateVectorKokkosManaged::getExpectationValueIdentity",
                    "[StateVectorKokkosManaged_Expval]", float, double) {
     const std::size_t num_qubits = 3;
@@ -443,7 +441,8 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::Hamiltonian_expval_Sparse",
             {0.0, -3.1415}, {3.1415, 0.0},  {0.0, 3.1415}, {3.1415, 0.0}};
 
         auto result = m.getExpectationValue(values, indices, index_ptr);
-        CHECK(3.1415 == Approx(result).epsilon(1e-7));
+        auto expected = TestType(3.1415);
+        CHECK(expected == Approx(result).epsilon(1e-7));
     }
 }
 
@@ -464,7 +463,8 @@ TEMPLATE_TEST_CASE("Test expectation value of HamiltonianObs",
 
         auto ob = HamiltonianKokkos<TestType>::create({0.3, 0.5}, {X0, Z1});
         auto res = m.expval(*ob.get());
-        CHECK(-0.086 == Approx(res).epsilon(1e-7));
+        auto expected = TestType(-0.086);
+        CHECK(expected == Approx(res).epsilon(1e-7));
     }
 }
 
@@ -485,6 +485,7 @@ TEMPLATE_TEST_CASE("Test expectation value of TensorProdObs",
 
         auto ob = TensorProdObsKokkos<TestType>::create({X0, Z1});
         auto res = m.expval(*ob.get());
-        CHECK(-0.36 == Approx(res).epsilon(1e-7));
+        auto expected = TestType(-0.36);
+        CHECK(expected == Approx(res).epsilon(1e-7));
     }
 }

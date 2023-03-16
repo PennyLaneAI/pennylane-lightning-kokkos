@@ -368,11 +368,32 @@ template <class Precision> class MeasuresKokkos {
      * @return Expectation value with respect to the given observable.
      */
     auto expval(const ObservableKokkos<Precision> &ob) {
-        StateVectorKokkos<Precision> applied_sv(original_sv.getNumQubits());
-        applied_sv.DeviceToDevice(original_sv.getData());
-        ob.applyInPlace(applied_sv);
+        StateVectorKokkos<Precision> ob_sv(original_sv.getNumQubits());
+        ob_sv.DeviceToDevice(original_sv.getData());
+        ob.applyInPlace(ob_sv);
         return Pennylane::Util::getRealOfComplexInnerProduct(
-            original_sv.getData(), applied_sv.getData());
+            original_sv.getData(), ob_sv.getData());
+    }
+
+    /**
+     * @brief Calculate variance of a general Observable
+     *
+     * @param ob Observable.
+     * @return Variance with respect to the given observable.
+     */
+    auto var(const ObservableKokkos<Precision> &ob) -> Precision {
+        StateVectorKokkos<Precision> ob_sv(original_sv.getNumQubits());
+        ob_sv.DeviceToDevice(original_sv.getData());
+        ob.applyInPlace(ob_sv);
+
+        const Precision mean_square =
+            Pennylane::Util::getRealOfComplexInnerProduct(ob_sv.getData(),
+                                                          ob_sv.getData());
+        const Precision squared_mean = static_cast<Precision>(
+            std::pow(Pennylane::Util::getRealOfComplexInnerProduct(
+                         original_sv.getData(), ob_sv.getData()),
+                     2));
+        return (mean_square - squared_mean);
     }
 
     /**
