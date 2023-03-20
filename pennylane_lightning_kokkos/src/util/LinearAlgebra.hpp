@@ -166,7 +166,7 @@ template <class Precision> struct getRealOfComplexInnerProductFunctor {
 
     KOKKOS_INLINE_FUNCTION
     void operator()(const std::size_t k, Precision &inner) const {
-        inner += real(conj(x[k]) * y[k]);
+        inner += real(x[k]) * real(y[k]) + imag(x[k]) * imag(y[k]);
     }
 };
 
@@ -210,7 +210,7 @@ template <class Precision> struct getImagOfComplexInnerProductFunctor {
 
     KOKKOS_INLINE_FUNCTION
     void operator()(const std::size_t k, Precision &inner) const {
-        inner += imag(conj(x[k]) * y[k]);
+        inner += real(x[k]) * imag(y[k]) - imag(x[k]) * real(y[k]);
     }
 };
 
