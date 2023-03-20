@@ -20,6 +20,7 @@
 #include "AdjointDiffKokkos.hpp"
 #include "Error.hpp"         // LightningException
 #include "GetConfigInfo.hpp" // Kokkos configuration info
+#include "MeasuresKokkos.hpp"
 #include "StateVectorKokkos.hpp"
 
 #include "pybind11/complex.h"
@@ -31,6 +32,7 @@
 namespace {
 using namespace Pennylane;
 using namespace Pennylane::Algorithms;
+using namespace Pennylane::Simulators;
 using std::complex;
 using std::set;
 using std::string;
@@ -444,8 +446,8 @@ void StateVectorKokkos_class_bindings(py::module &m) {
                         m_ptr, m_ptr + m_buffer.size};
                 }
                 // Return the real component only
-                return sv.getExpectationValue(obsName, wires, params,
-                                              conv_matrix);
+                return MeasuresKokkos<PrecisionT>(sv).getExpectationValue(
+                    obsName, wires, params, conv_matrix);
             },
             "Calculate the expectation value of the given observable.")
         .def(
@@ -469,7 +471,7 @@ void StateVectorKokkos_class_bindings(py::module &m) {
                         m_ptr, m_ptr + m_buffer.size};
                 }
                 // Return the real component only & ignore params
-                return sv.getExpectationValue(
+                return MeasuresKokkos<PrecisionT>(sv).getExpectationValue(
                     obs_concat, wires, std::vector<ParamT>{}, conv_matrix);
             },
             "Calculate the expectation value of the given observable.")
@@ -488,7 +490,8 @@ void StateVectorKokkos_class_bindings(py::module &m) {
                         m_ptr, m_ptr + m_buffer.size};
                 }
                 // Return the real component only & ignore params
-                return sv.getExpectationValue(wires, conv_matrix);
+                return MeasuresKokkos<PrecisionT>(sv).getExpectationValue(
+                    wires, conv_matrix);
             },
             "Calculate the expectation value of the given observable.")
 
@@ -507,14 +510,16 @@ void StateVectorKokkos_class_bindings(py::module &m) {
                         m_ptr, m_ptr + m_buffer.size};
                 }
                 // Return the real component only & ignore params
-                return sv.getExpectationValue(conv_data, indices, index_ptr);
+                return MeasuresKokkos<PrecisionT>(sv).getExpectationValue(
+                    conv_data, indices, index_ptr);
             },
             "Calculate the expectation value of the given observable.")
         .def("probs",
              [](StateVectorKokkos<PrecisionT> &sv,
                 const std::vector<size_t> &wires) {
+                 auto m = MeasuresKokkos<PrecisionT>(sv);
                  if (wires.empty()) {
-                     return py::array_t<ParamT>(py::cast(sv.probs()));
+                     return py::array_t<ParamT>(py::cast(m.probs()));
                  }
 
                  const bool is_sorted_wires =
@@ -522,14 +527,15 @@ void StateVectorKokkos_class_bindings(py::module &m) {
 
                  if (wires.size() == sv.getNumQubits()) {
                      if (is_sorted_wires)
-                         return py::array_t<ParamT>(py::cast(sv.probs()));
+                         return py::array_t<ParamT>(py::cast(m.probs()));
                  }
-                 return py::array_t<ParamT>(py::cast(sv.probs(wires)));
+                 return py::array_t<ParamT>(py::cast(m.probs(wires)));
              })
         .def("GenerateSamples",
              [](StateVectorKokkos<PrecisionT> &sv, size_t num_wires,
                 size_t num_shots) {
-                 auto &&result = sv.generate_samples(num_shots);
+                 auto &&result =
+                     MeasuresKokkos<PrecisionT>(sv).generate_samples(num_shots);
 
                  const size_t ndim = 2;
                  const std::vector<size_t> shape{num_shots, num_wires};
@@ -804,7 +810,7 @@ void StateVectorKokkos_class_bindings(py::module &m) {
                 const StateVectorKokkos<PrecisionT> &sv,
                 const std::vector<std::shared_ptr<ObservableKokkos<PrecisionT>>>
                     &observables,
-                const Pennylane::Algorithms::OpsData<PrecisionT> &operations,
+                const OpsData<PrecisionT> &operations,
                 const std::vector<size_t> &trainableParams) {
                  std::vector<std::vector<PrecisionT>> jac(
                      observables.size(),

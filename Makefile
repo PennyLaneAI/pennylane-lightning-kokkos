@@ -6,6 +6,16 @@ TESTRUNNER := -m pytest tests --tb=short
 
 LIGHTNING_KOKKOS_CPP_DIR := pennylane_lightning_kokkos/src/
 
+.PHONY: help
+help:
+	@echo "Please use \`make <target>' where <target> is one of"
+	@echo "  test-python        to run the PennyLane-Lightning-Kokkos Python test suite"
+	@echo "  test-cpp        	to run the PennyLane-Lightning-Kokkos C++ test suite"
+	@echo "  docs               to build the documentation for Catalyst"
+	@echo "  clean              to uninstall PennyLane-Lightning-Kokkos and delete all temporary, cache, and build files"
+	@echo "  format [check=1]   to apply C++ and Python formatter; use with 'check=1' to check instead of modify (requires black and clang-format)"
+	@echo "  format [version=?] to apply C++ and Python formatter; use with 'version={version}' to run clang-format-{version} instead of clang-format"
+
 .PHONY: format format-cpp format-python clean test-builtin test-cpp
 format: format-cpp format-python
 

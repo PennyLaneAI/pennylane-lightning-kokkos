@@ -10,8 +10,7 @@ using namespace Pennylane::Util;
 namespace KE = Kokkos::Experimental;
 } // namespace
 
-namespace Pennylane {
-namespace Functors {
+namespace Pennylane::Functors {
 
 template <class Precision, bool inverse = false> struct singleQubitOpFunctor {
 
@@ -3163,5 +3162,4 @@ template <class Precision, bool inverse = false> struct rotFunctor {
     }
 };
 
-} // namespace Functors
-} // namespace Pennylane
+} // namespace Pennylane::Functors

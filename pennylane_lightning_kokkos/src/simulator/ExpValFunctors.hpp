@@ -8,8 +8,7 @@ namespace {
 using namespace Pennylane::Util;
 }
 
-namespace Pennylane {
-namespace Functors {
+namespace Pennylane::Functors {
 
 template <class Precision> struct getExpectationValueIdentityFunctor {
 
@@ -342,5 +341,4 @@ template <class Precision> struct getExpectationValueSparseFunctor {
     }
 };
 
-} // namespace Functors
-} // namespace Pennylane
+} // namespace Pennylane::Functors

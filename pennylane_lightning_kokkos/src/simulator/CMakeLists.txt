@@ -2,7 +2,15 @@ project(lightning_kokkos_simulator)
 set(CMAKE_CXX_STANDARD 17)
 enable_language(CXX)
 
-set(SIMULATOR_FILES StateVectorKokkos.cpp StateVectorKokkos.hpp GateFunctors.hpp GatesHost.hpp MeasuresFunctors.hpp CACHE INTERNAL "" FORCE)
+set(SIMULATOR_FILES StateVectorKokkos.cpp
+                    StateVectorKokkos.hpp
+                    GateFunctors.hpp
+                    GatesHost.hpp
+                    ExpValFunctors.hpp
+                    MeasuresFunctors.hpp
+                    MeasuresKokkos.cpp
+                    MeasuresKokkos.hpp
+                    CACHE INTERNAL "" FORCE)
 add_library(lightning_kokkos_simulator STATIC ${SIMULATOR_FILES})
 target_include_directories(lightning_kokkos_simulator PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${kokkos_INC_DIR})
 target_link_libraries(lightning_kokkos_simulator PUBLIC lightning_kokkos_utils )

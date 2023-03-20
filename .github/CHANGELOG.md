@@ -2,6 +2,9 @@
 
 ### New features since last release
 
+* Add native support for `expval` and `var` of generic observables. Refactor measurements support.
+[(#47)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/47)
+
 ### Breaking changes
 
 ### Improvements
@@ -17,7 +20,7 @@
 
 This release contains contributions from (in alphabetical order):
 
-Vincent Michaud-Rioux
+Ali Asadi, Vincent Michaud-Rioux
 
 ---
 

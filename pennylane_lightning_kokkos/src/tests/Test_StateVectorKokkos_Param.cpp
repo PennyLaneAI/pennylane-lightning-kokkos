@@ -9,6 +9,7 @@
 #include <catch2/catch.hpp>
 
 #include "GatesHost.hpp"
+#include "MeasuresKokkos.hpp"
 #include "StateVectorKokkos.hpp"
 #include "TestHelpers.hpp"
 
@@ -1363,7 +1364,8 @@ TEMPLATE_TEST_CASE("Sample", "[StateVectorKokkosManaged_Param]", float,
     size_t N = std::pow(2, num_qubits);
     size_t num_samples = 100000;
 
-    auto samples = measure_sv.generate_samples(num_samples);
+    auto m = Simulators::MeasuresKokkos<TestType>(measure_sv);
+    auto samples = m.generate_samples(num_samples);
 
     std::vector<size_t> counts(N, 0);
     std::vector<size_t> samples_decimal(num_samples, 0);

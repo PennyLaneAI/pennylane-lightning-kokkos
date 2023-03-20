@@ -21,6 +21,7 @@
 #include <Kokkos_Core.hpp>
 
 namespace Pennylane::Util {
+
 /**
  * @brief @rst
  * Kokkos functor for :math:`y+=\alpha*x` operation.
@@ -144,6 +145,94 @@ inline void SparseMV_Kokkos(Kokkos::View<Kokkos::complex<Precision> *> x,
     Kokkos::parallel_for(indptr.size() - 1,
                          SparseMV_KokkosFunctor<Precision>(
                              x, y, kok_data, kok_indices, kok_indptr));
+}
+
+/**
+ * @brief @rst
+ * Kokkos functor of the :math:`real(conj(x)*y)` operation.
+ * @endrst
+ */
+template <class Precision> struct getRealOfComplexInnerProductFunctor {
+
+    Kokkos::View<Kokkos::complex<Precision> *> x;
+    Kokkos::View<Kokkos::complex<Precision> *> y;
+
+    getRealOfComplexInnerProductFunctor(
+        Kokkos::View<Kokkos::complex<Precision> *> x_,
+        Kokkos::View<Kokkos::complex<Precision> *> y_) {
+        x = x_;
+        y = y_;
+    }
+
+    KOKKOS_INLINE_FUNCTION
+    void operator()(const std::size_t k, Precision &inner) const {
+        inner += real(x[k]) * real(y[k]) + imag(x[k]) * imag(y[k]);
+    }
+};
+
+/**
+ * @brief @rst
+ * Kokkos implementation of the :math:`real(conj(x)*y)` operation.
+ * @endrst
+ * @param x Input vector
+ * @param y Input vector
+ * @return :math:`real(conj(x)*y)`
+ */
+template <class Precision>
+inline auto
+getRealOfComplexInnerProduct(Kokkos::View<Kokkos::complex<Precision> *> x,
+                             Kokkos::View<Kokkos::complex<Precision> *> y)
+    -> Precision {
+
+    assert(x.size() == y.size());
+    Precision inner = 0;
+    Kokkos::parallel_reduce(
+        x.size(), getRealOfComplexInnerProductFunctor<Precision>(x, y), inner);
+    return inner;
+}
+
+/**
+ * @brief @rstimagine
+ * Kokkos functor of the :math:`imag(conj(x)*y)` operation.
+ * @endrst
+ */
+template <class Precision> struct getImagOfComplexInnerProductFunctor {
+
+    Kokkos::View<Kokkos::complex<Precision> *> x;
+    Kokkos::View<Kokkos::complex<Precision> *> y;
+
+    getImagOfComplexInnerProductFunctor(
+        Kokkos::View<Kokkos::complex<Precision> *> x_,
+        Kokkos::View<Kokkos::complex<Precision> *> y_) {
+        x = x_;
+        y = y_;
+    }
+
+    KOKKOS_INLINE_FUNCTION
+    void operator()(const std::size_t k, Precision &inner) const {
+        inner += real(x[k]) * imag(y[k]) - imag(x[k]) * real(y[k]);
+    }
+};
+
+/**
+ * @brief @rst
+ * Kokkos implementation of the :math:`imag(conj(x)*y)` operation.
+ * @endrst
+ * @param x Input vector
+ * @param y Input vector
+ * @return :math:`imag(conj(x)*y)`
+ */
+template <class Precision>
+inline auto
+getImagOfComplexInnerProduct(Kokkos::View<Kokkos::complex<Precision> *> x,
+                             Kokkos::View<Kokkos::complex<Precision> *> y)
+    -> Precision {
+
+    assert(x.size() == y.size());
+    Precision inner = 0;
+    Kokkos::parallel_reduce(
+        x.size(), getImagOfComplexInnerProductFunctor<Precision>(x, y), inner);
+    return inner;
 }
 
 } // namespace Pennylane::Util
