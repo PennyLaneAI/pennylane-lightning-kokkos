@@ -17,6 +17,7 @@
  */
 
 #pragma once
+#include <cstdlib>
 #include <memory>
 #include <unordered_map>
 #include <unordered_set>
@@ -454,11 +455,10 @@ template <class Precision> class StateVectorKokkos {
         length_ = Pennylane::Util::exp2(num_qubits);
 
         {
-            const std::lock_guard<std::mutex> lock(counts_mutex_);
-            if (counts_ == 0 and !Kokkos::is_initialized()) {
+            const std::lock_guard<std::mutex> lock(init_mutex_);
+            if (!Kokkos::is_initialized()) {
                 Kokkos::initialize(kokkos_args);
             }
-            counts_++;
         }
 
         if (num_qubits > 0) {
@@ -552,10 +552,14 @@ template <class Precision> class StateVectorKokkos {
     ~StateVectorKokkos() {
         data_.reset();
         {
-            const std::lock_guard<std::mutex> lock(counts_mutex_);
-            counts_--;
-            if (counts_ == 0) {
-                Kokkos::finalize();
+            const std::lock_guard<std::mutex> lock(init_mutex_);
+            if (!is_exit_reg_) {
+                is_exit_reg_ = true;
+                std::atexit([]() {
+                    if (!Kokkos::is_finalized()) {
+                        Kokkos::finalize();
+                    }
+                });
             }
         }
     }
@@ -1606,8 +1610,6 @@ template <class Precision> class StateVectorKokkos {
         Kokkos::deep_copy(*data_, vector_to_copy);
     }
 
-    static const size_t &GetCounts() { return counts_; }
-
   private:
     using GateFunc = std::function<void(const std::vector<size_t> &, bool,
                                         const std::vector<Precision> &)>;
@@ -1621,9 +1623,9 @@ template <class Precision> class StateVectorKokkos {
 
     size_t num_qubits_;
     size_t length_;
-    std::mutex counts_mutex_;
-    inline static size_t counts_ = 0;
+    std::mutex init_mutex_;
     std::unique_ptr<KokkosVector> data_;
+    inline static bool is_exit_reg_ = false;
 };
 
 }; // namespace Pennylane

@@ -27,8 +27,6 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::CopyConstructor",
                                    {{false}, {false}, {false}});
         StateVectorKokkos<TestType> kokkos_sv_2{kokkos_sv_1};
 
-        // Counts should be 3 because of the dummy object in runner_main.cpp
-        CHECK(StateVectorKokkos<TestType>::GetCounts() == 3);
         CHECK(kokkos_sv_1.getLength() == kokkos_sv_2.getLength());
         CHECK(kokkos_sv_1.getNumQubits() == kokkos_sv_2.getNumQubits());
 

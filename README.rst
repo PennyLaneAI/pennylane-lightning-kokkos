@@ -3,7 +3,7 @@ PennyLane-Lightning-Kokkos Plugin
 
 .. header-start-inclusion-marker-do-not-remove
 
-The `PennyLane-Lightning-Kokkos <https://github.com/PennyLaneAI/pennylane-lightning-kokkos>`_ plugin extends the `Pennylane-Lightning <https://github.com/PennyLaneAI/pennylane-lightning>`_ state-vector simulator written in C++, and offloads to the `Kokkos library <https://github.com/kokkos/kokkos>`_ for accelerated circuit simulation.
+The `PennyLane-Lightning-Kokkos <https://github.com/PennyLaneAI/pennylane-lightning-kokkos>`_ plugin extends the `Pennylane-Lightning <https://github.com/PennyLaneAI/pennylane-lightning>`_ state-vector simulator written in C++, and offloads to the `Kokkos library <https://github.com/kokkos/kokkos>`__ for accelerated circuit simulation.
 
 `PennyLane <https://docs.pennylane.ai>`_ is a cross-platform Python library for quantum machine
 learning, automatic differentiation, and optimization of hybrid quantum-classical computations.
@@ -36,8 +36,8 @@ or for an editable `pip` installation with:
    BACKEND="OPENMP" python -m pip install -e .
 
 
-Supported backend options are "SERIAL", "OPENMP", "HIP" and "CUDA". For "HIP" and "CUDA", the appropriate software stacks are required to enable compilation and subsequent use.
-For explicit targeting of a given supported architecture, the environment variable `ARCH` can also be specified which directly sets the `-DKokkos_ARCH_{...}=ON` build option. Note that THREADS
+Supported backend options are "SERIAL", "OPENMP", "THREADS", "HIP" and "CUDA". For "HIP" and "CUDA", the appropriate software stacks are required to enable compilation and subsequent use.
+For explicit targeting of a given supported architecture, the environment variable `ARCH` can also be specified which directly sets the `-DKokkos_ARCH_{...}=ON` build option. Note that "THREADS"
 backend is not recommended since `Kokkos <https://github.com/kokkos/kokkos-core-wiki/blob/17f08a6483937c26e14ec3c93a2aa40e4ce081ce/docs/source/ProgrammingGuide/Initialization.md?plain=1#L67>`_ does not guarantee its safety.
 
 .. installation-end-inclusion-marker-do-not-remove
@@ -99,7 +99,7 @@ License
 
 The PennyLane-Lightning-Kokkos plugin is **free** and **open source**, released under
 the `Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>`_. 
-The PennyLane-Lightning-Kokkos plugin makes use of the `Kokkos <https://github.com/kokkos/kokkos>`_ library, which is held to their own respective licenses.
+The PennyLane-Lightning-Kokkos plugin makes use of the `Kokkos <https://github.com/kokkos/kokkos>`__ library, which is held to their own respective licenses.
 
 .. license-end-inclusion-marker-do-not-remove
 .. acknowledgements-start-inclusion-marker-do-not-remove

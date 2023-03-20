@@ -384,4 +384,5 @@ class TestLightningKokkosIntegration:
                                 "OPENMP",
                                 "HIP",
                                 "CUDA",
+                                "THREADS",
                             ]  # Need check for HIP & CUDA

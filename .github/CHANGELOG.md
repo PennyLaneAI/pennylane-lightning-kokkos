@@ -21,6 +21,26 @@ Vincent Michaud-Rioux
 
 ---
 
+# Release 0.29.1
+
+### Improvements
+
+* Use CMake `find_package` to bind pre-installed Kokkos libraries.
+[(#43)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/43)
+
+### Bug fixes
+
+* Ensure Kokkos finalize is only called at the end of process execution.
+[(#45)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/45)
+
+### Contributors
+
+This release contains contributions from (in alphabetical order):
+
+Vincent Michaud-Rioux, Lee James O'Riordan
+
+---
+
 # Release 0.29.0
 
 ### New features since last release
@@ -37,15 +57,18 @@ Vincent Michaud-Rioux
  >>> dev.kokkos_config["Backend"]
  {'Parallel': 'OpenMP'}
  ```
+[(#17)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/17)
 
- [(#14)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/14)
 
 ### Breaking changes
 
-* Change LightningKokkos to inherit from QubitDevice instead of LightningQubit. Numpy data initialization is decoupled. 
+* Change LightningKokkos to inherit from QubitDevice instead of LightningQubit. Numpy data initialization is decoupled.
 [(#31)] (https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/31)
 
 ### Improvements
+
+* Use CMake `find_package` to bind pre-installed Kokkos libraries.
+[(#43)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/43)
 
 * Update `inv()` methods in Python unit tests with `qml.adjoint()`.
 [(#33)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/33)
@@ -61,8 +84,6 @@ Vincent Michaud-Rioux
 
 * Add VJP support.
 [(#32)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/32)
-
-### Documentation
 
 ### Bug fixes
 
