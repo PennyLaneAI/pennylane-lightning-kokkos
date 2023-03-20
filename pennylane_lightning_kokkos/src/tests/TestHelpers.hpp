@@ -21,8 +21,8 @@ template <class T, class Alloc = std::allocator<T>> struct PLApprox {
 
     explicit PLApprox(const std::vector<T, Alloc> &comp) : comp_{comp} {}
 
-    Util::remove_complex_t<T> margin_{};
-    Util::remove_complex_t<T> epsilon_ =
+    LKokkos::Util::remove_complex_t<T> margin_{};
+    LKokkos::Util::remove_complex_t<T> epsilon_ =
         std::numeric_limits<float>::epsilon() * 100;
 
     template <class AllocA>
@@ -32,7 +32,7 @@ template <class T, class Alloc = std::allocator<T>> struct PLApprox {
         }
 
         for (size_t i = 0; i < lhs.size(); i++) {
-            if constexpr (Pennylane::Util::is_complex_v<T>) {
+            if constexpr (Pennylane::LKokkos::Util::is_complex_v<T>) {
                 if (lhs[i].real() != Approx(comp_[i].real())
                                          .epsilon(epsilon_)
                                          .margin(margin_) ||
@@ -61,11 +61,11 @@ template <class T, class Alloc = std::allocator<T>> struct PLApprox {
         return ss.str();
     }
 
-    PLApprox &epsilon(Pennylane::Util::remove_complex_t<T> eps) {
+    PLApprox &epsilon(Pennylane::LKokkos::Util::remove_complex_t<T> eps) {
         epsilon_ = eps;
         return *this;
     }
-    PLApprox &margin(Pennylane::Util::remove_complex_t<T> m) {
+    PLApprox &margin(Pennylane::LKokkos::Util::remove_complex_t<T> m) {
         margin_ = m;
         return *this;
     }

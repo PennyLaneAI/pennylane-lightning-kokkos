@@ -25,7 +25,7 @@
  * @param message string literal describing error
  */
 #define PL_ABORT(message)                                                      \
-    Pennylane::Util::Abort((message), __FILE__, __LINE__, __func__)
+    Pennylane::LKokkos::Util::Abort((message), __FILE__, __LINE__, __func__)
 /**
  * @brief Macro that throws `%LightningException` if expression evaluates to
  * true.
@@ -58,7 +58,7 @@
 #define PL_ASSERT(expression)                                                  \
     PL_ABORT_IF_NOT(expression, "Assertion failed: " #expression)
 
-namespace Pennylane::Util {
+namespace Pennylane::LKokkos::Util {
 
 /**
  * @brief `%LightningException` is the general exception thrown by PennyLane for
@@ -140,4 +140,4 @@ class LightningException : public std::exception {
     throw LightningException(err_msg.str());
 }
 
-} // namespace Pennylane::Util
+} // namespace Pennylane::LKokkos::Util

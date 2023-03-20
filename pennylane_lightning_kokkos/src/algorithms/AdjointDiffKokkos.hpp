@@ -281,7 +281,7 @@ template <class T = double> class AdjointJacobianKokkos {
      */
     inline void applyObservable(StateVectorKokkos<T> &state,
                                 const ObservableKokkos<T> &observable) {
-        using namespace Pennylane::Util;
+        using namespace Pennylane::LKokkos::Util;
         observable.applyInPlace(state);
     }
 

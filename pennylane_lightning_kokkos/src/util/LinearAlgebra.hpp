@@ -20,7 +20,7 @@
 
 #include <Kokkos_Core.hpp>
 
-namespace Pennylane::Util {
+namespace Pennylane::LKokkos::Util {
 /**
  * @brief @rst
  * Kokkos functor for :math:`y+=\alpha*x` operation.
@@ -146,4 +146,4 @@ inline void SparseMV_Kokkos(Kokkos::View<Kokkos::complex<Precision> *> x,
                              x, y, kok_data, kok_indices, kok_indptr));
 }
 
-} // namespace Pennylane::Util
+} // namespace Pennylane::LKokkos::Util

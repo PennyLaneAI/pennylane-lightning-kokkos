@@ -12,7 +12,7 @@ TEMPLATE_TEST_CASE("Linear Algebra::SparseMV", "[Linear Algebra]", float,
     using cp_t = Kokkos::complex<TestType>;
 
     std::size_t num_qubits = 3;
-    std::size_t data_size = Util::exp2(num_qubits);
+    std::size_t data_size = LKokkos::Util::exp2(num_qubits);
 
     std::vector<cp_t> vectors = {{0.0, 0.0}, {0.0, 0.1}, {0.1, 0.1},
                                  {0.1, 0.2}, {0.2, 0.2}, {0.3, 0.3},
@@ -38,11 +38,11 @@ TEMPLATE_TEST_CASE("Linear Algebra::SparseMV", "[Linear Algebra]", float,
 
     SECTION("Testing sparse matrix vector product:") {
         std::vector<cp_t> result(data_size);
-        Util::SparseMV_Kokkos<TestType>(
+        LKokkos::Util::SparseMV_Kokkos<TestType>(
             kokkos_vx.getData(), kokkos_vy.getData(), values, indices, indptr);
         kokkos_vy.DeviceToHost(result.data(), result.size());
 
-        for (std::size_t j = 0; j < Util::exp2(num_qubits); j++) {
+        for (std::size_t j = 0; j < LKokkos::Util::exp2(num_qubits); j++) {
             CHECK(imag(result[j]) == Approx(imag(result_refs[j])));
             CHECK(real(result[j]) == Approx(real(result_refs[j])));
         }
@@ -55,7 +55,7 @@ TEMPLATE_TEST_CASE("Linear Algebra::axpy_Kokkos", "[Linear Algebra]", float,
 
     std::size_t num_qubits = 3;
 
-    std::size_t data_size = Util::exp2(num_qubits);
+    std::size_t data_size = LKokkos::Util::exp2(num_qubits);
 
     cp_t alpha = {2.0, 0.5};
 
@@ -76,12 +76,12 @@ TEMPLATE_TEST_CASE("Linear Algebra::axpy_Kokkos", "[Linear Algebra]", float,
     kokkos_v1.HostToDevice(v1.data(), v1.size());
 
     SECTION("Testing imag of complex inner product:") {
-        Util::axpy_Kokkos<TestType>(alpha, kokkos_v0.getData(),
-                                    kokkos_v1.getData(), v0.size());
+        LKokkos::Util::axpy_Kokkos<TestType>(alpha, kokkos_v0.getData(),
+                                             kokkos_v1.getData(), v0.size());
         std::vector<cp_t> result(data_size);
         kokkos_v1.DeviceToHost(result.data(), result.size());
 
-        for (std::size_t j = 0; j < Util::exp2(num_qubits); j++) {
+        for (std::size_t j = 0; j < LKokkos::Util::exp2(num_qubits); j++) {
             CHECK(imag(result[j]) == Approx(imag(result_refs[j])));
             CHECK(real(result[j]) == Approx(real(result_refs[j])));
         }

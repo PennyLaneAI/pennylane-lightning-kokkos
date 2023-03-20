@@ -6,7 +6,7 @@
 #include "Util.hpp"
 
 namespace {
-using namespace Pennylane::Util;
+using namespace Pennylane::LKokkos::Util;
 namespace KE = Kokkos::Experimental;
 } // namespace
 

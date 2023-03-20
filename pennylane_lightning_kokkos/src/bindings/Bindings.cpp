@@ -741,7 +741,7 @@ void StateVectorKokkos_class_bindings(py::module &m) {
              const std::vector<bool> &,
              const std::vector<std::vector<std::complex<PrecisionT>>> &>())
         .def("__repr__", [](const OpsData<PrecisionT> &ops) {
-            using namespace Pennylane::Util;
+            using namespace Pennylane::LKokkos::Util;
             std::ostringstream ops_stream;
             for (size_t op = 0; op < ops.getSize(); op++) {
                 ops_stream << "{'name': " << ops.getOpsName()[op];
@@ -848,7 +848,7 @@ PYBIND11_MODULE(lightning_kokkos_qubit_ops, // NOLINT: No control over
         .def_readwrite("disable_warnings",
                        &Kokkos::InitArguments::disable_warnings)
         .def("__repr__", [](const Kokkos::InitArguments &args) {
-            using namespace Pennylane::Util;
+            using namespace Pennylane::LKokkos::Util;
             std::ostringstream args_stream;
             args_stream << args;
             return args_stream.str();
