@@ -32,8 +32,9 @@ template <class Precision, bool inverse = false> struct singleQubitOpFunctor {
         matrix = matrix_;
         rev_wire = num_qubits - wires[0] - 1;
         rev_wire_shift = (static_cast<size_t>(1U) << rev_wire);
-        wire_parity = fillTrailingOnes(rev_wire);
-        wire_parity_inv = fillLeadingOnes(rev_wire + 1);
+        wire_parity = Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire);
+        wire_parity_inv =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire + 1);
     }
 
     KOKKOS_INLINE_FUNCTION
@@ -103,10 +104,12 @@ template <class Precision, bool inverse = false> struct twoQubitOpFunctor {
         rev_wire_min = std::min(rev_wire0, rev_wire1);
         rev_wire_max = std::max(rev_wire0, rev_wire1);
 
-        parity_low = fillTrailingOnes(rev_wire_min);
-        parity_high = fillLeadingOnes(rev_wire_max + 1);
+        parity_low = Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_min);
+        parity_high =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_max + 1);
         parity_middle =
-            fillLeadingOnes(rev_wire_min + 1) & fillTrailingOnes(rev_wire_max);
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_min + 1) &
+            Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_max);
 
         arr = arr_;
         matrix = matrix_;
@@ -295,8 +298,9 @@ template <class Precision, bool inverse = false> struct hadamardFunctor {
         arr = arr_;
         rev_wire = num_qubits - wires[0] - 1;
         rev_wire_shift = (static_cast<size_t>(1U) << rev_wire);
-        wire_parity = fillTrailingOnes(rev_wire);
-        wire_parity_inv = fillLeadingOnes(rev_wire + 1);
+        wire_parity = Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire);
+        wire_parity_inv =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire + 1);
     }
 
     KOKKOS_INLINE_FUNCTION
@@ -342,8 +346,9 @@ template <class Precision, bool inverse = false> struct pauliXFunctor {
         arr = arr_;
         rev_wire = num_qubits - wires[0] - 1;
         rev_wire_shift = (static_cast<size_t>(1U) << rev_wire);
-        wire_parity = fillTrailingOnes(rev_wire);
-        wire_parity_inv = fillLeadingOnes(rev_wire + 1);
+        wire_parity = Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire);
+        wire_parity_inv =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire + 1);
     }
 
     KOKKOS_INLINE_FUNCTION
@@ -370,8 +375,9 @@ template <class Precision, bool inverse = false> struct pauliYFunctor {
         arr = arr_;
         rev_wire = num_qubits - wires[0] - 1;
         rev_wire_shift = (static_cast<size_t>(1U) << rev_wire);
-        wire_parity = fillTrailingOnes(rev_wire);
-        wire_parity_inv = fillLeadingOnes(rev_wire + 1);
+        wire_parity = Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire);
+        wire_parity_inv =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire + 1);
     }
 
     KOKKOS_INLINE_FUNCTION
@@ -401,8 +407,9 @@ template <class Precision, bool inverse = false> struct pauliZFunctor {
         arr = arr_;
         rev_wire = num_qubits - wires[0] - 1;
         rev_wire_shift = (static_cast<size_t>(1U) << rev_wire);
-        wire_parity = fillTrailingOnes(rev_wire);
-        wire_parity_inv = fillLeadingOnes(rev_wire + 1);
+        wire_parity = Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire);
+        wire_parity_inv =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire + 1);
     }
 
     KOKKOS_INLINE_FUNCTION
@@ -430,8 +437,9 @@ template <class Precision, bool inverse = false> struct sFunctor {
         arr = arr_;
         rev_wire = num_qubits - wires[0] - 1;
         rev_wire_shift = (static_cast<size_t>(1U) << rev_wire);
-        wire_parity = fillTrailingOnes(rev_wire);
-        wire_parity_inv = fillLeadingOnes(rev_wire + 1);
+        wire_parity = Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire);
+        wire_parity_inv =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire + 1);
         shift = (inverse) ? -Kokkos::complex(0, 1) : Kokkos::complex(0, 1);
     }
 
@@ -460,8 +468,9 @@ template <class Precision, bool inverse = false> struct tFunctor {
         arr = arr_;
         rev_wire = num_qubits - wires[0] - 1;
         rev_wire_shift = (static_cast<size_t>(1U) << rev_wire);
-        wire_parity = fillTrailingOnes(rev_wire);
-        wire_parity_inv = fillLeadingOnes(rev_wire + 1);
+        wire_parity = Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire);
+        wire_parity_inv =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire + 1);
         shift = (inverse) ? conj(exp(Kokkos::complex<Precision>(
                                 0, static_cast<Precision>(M_PI / 4))))
                           : exp(Kokkos::complex<Precision>(
@@ -493,8 +502,9 @@ template <class Precision, bool inverse = false> struct phaseShiftFunctor {
         arr = arr_;
         rev_wire = num_qubits - wires[0] - 1;
         rev_wire_shift = (static_cast<size_t>(1U) << rev_wire);
-        wire_parity = fillTrailingOnes(rev_wire);
-        wire_parity_inv = fillLeadingOnes(rev_wire + 1);
+        wire_parity = Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire);
+        wire_parity_inv =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire + 1);
         const Precision &angle = params[0];
 
         s = inverse ? exp(-Kokkos::complex<Precision>(0, angle))
@@ -526,8 +536,9 @@ template <class Precision, bool inverse = false> struct rxFunctor {
         arr = arr_;
         rev_wire = num_qubits - wires[0] - 1;
         rev_wire_shift = (static_cast<size_t>(1U) << rev_wire);
-        wire_parity = fillTrailingOnes(rev_wire);
-        wire_parity_inv = fillLeadingOnes(rev_wire + 1);
+        wire_parity = Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire);
+        wire_parity_inv =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire + 1);
         const Precision &angle = params[0];
         c = cos(angle * static_cast<Precision>(0.5));
         s = (inverse) ? sin(angle * static_cast<Precision>(0.5))
@@ -565,8 +576,9 @@ template <class Precision, bool inverse = false> struct ryFunctor {
         arr = arr_;
         rev_wire = num_qubits - wires[0] - 1;
         rev_wire_shift = (static_cast<size_t>(1U) << rev_wire);
-        wire_parity = fillTrailingOnes(rev_wire);
-        wire_parity_inv = fillLeadingOnes(rev_wire + 1);
+        wire_parity = Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire);
+        wire_parity_inv =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire + 1);
         const Precision &angle = params[0];
         c = cos(angle * static_cast<Precision>(0.5));
         s = (inverse) ? -sin(angle * static_cast<Precision>(0.5))
@@ -605,8 +617,9 @@ template <class Precision, bool inverse = false> struct rzFunctor {
         arr = arr_;
         rev_wire = num_qubits - wires[0] - 1;
         rev_wire_shift = (static_cast<size_t>(1U) << rev_wire);
-        wire_parity = fillTrailingOnes(rev_wire);
-        wire_parity_inv = fillLeadingOnes(rev_wire + 1);
+        wire_parity = Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire);
+        wire_parity_inv =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire + 1);
         const Precision &angle = params[0];
         Precision cos_angle = cos(angle * static_cast<Precision>(0.5));
         Precision sin_angle = sin(angle * static_cast<Precision>(0.5));
@@ -652,10 +665,12 @@ template <class Precision, bool inverse = false> struct cnotFunctor {
         rev_wire_min = std::min(rev_wire0, rev_wire1);
         rev_wire_max = std::max(rev_wire0, rev_wire1);
 
-        parity_low = fillTrailingOnes(rev_wire_min);
-        parity_high = fillLeadingOnes(rev_wire_max + 1);
+        parity_low = Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_min);
+        parity_high =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_max + 1);
         parity_middle =
-            fillLeadingOnes(rev_wire_min + 1) & fillTrailingOnes(rev_wire_max);
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_min + 1) &
+            Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_max);
 
         arr = arr_;
     }
@@ -697,10 +712,12 @@ template <class Precision, bool inverse = false> struct cyFunctor {
         rev_wire_min = std::min(rev_wire0, rev_wire1);
         rev_wire_max = std::max(rev_wire0, rev_wire1);
 
-        parity_low = fillTrailingOnes(rev_wire_min);
-        parity_high = fillLeadingOnes(rev_wire_max + 1);
+        parity_low = Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_min);
+        parity_high =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_max + 1);
         parity_middle =
-            fillLeadingOnes(rev_wire_min + 1) & fillTrailingOnes(rev_wire_max);
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_min + 1) &
+            Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_max);
 
         arr = arr_;
     }
@@ -743,10 +760,12 @@ template <class Precision, bool inverse = false> struct czFunctor {
         rev_wire_min = std::min(rev_wire0, rev_wire1);
         rev_wire_max = std::max(rev_wire0, rev_wire1);
 
-        parity_low = fillTrailingOnes(rev_wire_min);
-        parity_high = fillLeadingOnes(rev_wire_max + 1);
+        parity_low = Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_min);
+        parity_high =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_max + 1);
         parity_middle =
-            fillLeadingOnes(rev_wire_min + 1) & fillTrailingOnes(rev_wire_max);
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_min + 1) &
+            Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_max);
 
         arr = arr_;
     }
@@ -805,10 +824,12 @@ template <class Precision, bool inverse = false> struct cRotFunctor {
         rev_wire_min = std::min(rev_wire0, rev_wire1);
         rev_wire_max = std::max(rev_wire0, rev_wire1);
 
-        parity_low = fillTrailingOnes(rev_wire_min);
-        parity_high = fillLeadingOnes(rev_wire_max + 1);
+        parity_low = Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_min);
+        parity_high =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_max + 1);
         parity_middle =
-            fillLeadingOnes(rev_wire_min + 1) & fillTrailingOnes(rev_wire_max);
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_min + 1) &
+            Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_max);
 
         arr = arr_;
     }
@@ -854,10 +875,12 @@ template <class Precision, bool inverse = false> struct swapFunctor {
         rev_wire_min = std::min(rev_wire0, rev_wire1);
         rev_wire_max = std::max(rev_wire0, rev_wire1);
 
-        parity_low = fillTrailingOnes(rev_wire_min);
-        parity_high = fillLeadingOnes(rev_wire_max + 1);
+        parity_low = Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_min);
+        parity_high =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_max + 1);
         parity_middle =
-            fillLeadingOnes(rev_wire_min + 1) & fillTrailingOnes(rev_wire_max);
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_min + 1) &
+            Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_max);
 
         arr = arr_;
     }
@@ -901,10 +924,12 @@ template <class Precision, bool inverse = false> struct isingXXFunctor {
         rev_wire_min = std::min(rev_wire0, rev_wire1);
         rev_wire_max = std::max(rev_wire0, rev_wire1);
 
-        parity_low = fillTrailingOnes(rev_wire_min);
-        parity_high = fillLeadingOnes(rev_wire_max + 1);
+        parity_low = Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_min);
+        parity_high =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_max + 1);
         parity_middle =
-            fillLeadingOnes(rev_wire_min + 1) & fillTrailingOnes(rev_wire_max);
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_min + 1) &
+            Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_max);
 
         const Precision &angle = params[0];
 
@@ -967,10 +992,12 @@ template <class Precision, bool inverse = false> struct isingXYFunctor {
         rev_wire_min = std::min(rev_wire0, rev_wire1);
         rev_wire_max = std::max(rev_wire0, rev_wire1);
 
-        parity_low = fillTrailingOnes(rev_wire_min);
-        parity_high = fillLeadingOnes(rev_wire_max + 1);
+        parity_low = Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_min);
+        parity_high =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_max + 1);
         parity_middle =
-            fillLeadingOnes(rev_wire_min + 1) & fillTrailingOnes(rev_wire_max);
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_min + 1) &
+            Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_max);
 
         const Precision &angle = params[0];
 
@@ -1032,10 +1059,12 @@ template <class Precision, bool inverse = false> struct isingYYFunctor {
         rev_wire_min = std::min(rev_wire0, rev_wire1);
         rev_wire_max = std::max(rev_wire0, rev_wire1);
 
-        parity_low = fillTrailingOnes(rev_wire_min);
-        parity_high = fillLeadingOnes(rev_wire_max + 1);
+        parity_low = Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_min);
+        parity_high =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_max + 1);
         parity_middle =
-            fillLeadingOnes(rev_wire_min + 1) & fillTrailingOnes(rev_wire_max);
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_min + 1) &
+            Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_max);
 
         cr = std::cos(angle / 2);
         sj = inverse ? -std::sin(angle / 2) : std::sin(angle / 2);
@@ -1100,10 +1129,12 @@ template <class Precision, bool inverse = false> struct isingZZFunctor {
         rev_wire_min = std::min(rev_wire0, rev_wire1);
         rev_wire_max = std::max(rev_wire0, rev_wire1);
 
-        parity_low = fillTrailingOnes(rev_wire_min);
-        parity_high = fillLeadingOnes(rev_wire_max + 1);
+        parity_low = Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_min);
+        parity_high =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_max + 1);
         parity_middle =
-            fillLeadingOnes(rev_wire_min + 1) & fillTrailingOnes(rev_wire_max);
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_min + 1) &
+            Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_max);
 
         first = Kokkos::complex<Precision>{std::cos(angle / 2),
                                            -std::sin(angle / 2)};
@@ -1161,10 +1192,12 @@ struct singleExcitationFunctor {
         rev_wire_min = std::min(rev_wire0, rev_wire1);
         rev_wire_max = std::max(rev_wire0, rev_wire1);
 
-        parity_low = fillTrailingOnes(rev_wire_min);
-        parity_high = fillLeadingOnes(rev_wire_max + 1);
+        parity_low = Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_min);
+        parity_high =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_max + 1);
         parity_middle =
-            fillLeadingOnes(rev_wire_min + 1) & fillTrailingOnes(rev_wire_max);
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_min + 1) &
+            Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_max);
 
         const Precision &angle = params[0];
 
@@ -1221,10 +1254,12 @@ struct singleExcitationMinusFunctor {
         rev_wire_min = std::min(rev_wire0, rev_wire1);
         rev_wire_max = std::max(rev_wire0, rev_wire1);
 
-        parity_low = fillTrailingOnes(rev_wire_min);
-        parity_high = fillLeadingOnes(rev_wire_max + 1);
+        parity_low = Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_min);
+        parity_high =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_max + 1);
         parity_middle =
-            fillLeadingOnes(rev_wire_min + 1) & fillTrailingOnes(rev_wire_max);
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_min + 1) &
+            Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_max);
 
         const Precision &angle = params[0];
 
@@ -1286,10 +1321,12 @@ struct singleExcitationPlusFunctor {
         rev_wire_min = std::min(rev_wire0, rev_wire1);
         rev_wire_max = std::max(rev_wire0, rev_wire1);
 
-        parity_low = fillTrailingOnes(rev_wire_min);
-        parity_high = fillLeadingOnes(rev_wire_max + 1);
+        parity_low = Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_min);
+        parity_high =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_max + 1);
         parity_middle =
-            fillLeadingOnes(rev_wire_min + 1) & fillTrailingOnes(rev_wire_max);
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_min + 1) &
+            Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_max);
 
         const Precision &angle = params[0];
 
@@ -1406,14 +1443,18 @@ struct doubleExcitationFunctor {
             }
         }
 
-        parity_low = fillTrailingOnes(rev_wire_min);
-        parity_high = fillLeadingOnes(rev_wire_max + 1);
-        parity_lmiddle = fillLeadingOnes(rev_wire_min + 1) &
-                         fillTrailingOnes(rev_wire_min_mid);
-        parity_hmiddle = fillLeadingOnes(rev_wire_max_mid + 1) &
-                         fillTrailingOnes(rev_wire_max);
-        parity_middle = fillLeadingOnes(rev_wire_min_mid + 1) &
-                        fillTrailingOnes(rev_wire_max_mid);
+        parity_low = Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_min);
+        parity_high =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_max + 1);
+        parity_lmiddle =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_min + 1) &
+            Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_min_mid);
+        parity_hmiddle =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_max_mid + 1) &
+            Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_max);
+        parity_middle =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_min_mid + 1) &
+            Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_max_mid);
 
         cr = std::cos(angle / 2);
         sj = inverse ? -std::sin(angle / 2) : std::sin(angle / 2);
@@ -1525,14 +1566,18 @@ struct doubleExcitationMinusFunctor {
             }
         }
 
-        parity_low = fillTrailingOnes(rev_wire_min);
-        parity_high = fillLeadingOnes(rev_wire_max + 1);
-        parity_lmiddle = fillLeadingOnes(rev_wire_min + 1) &
-                         fillTrailingOnes(rev_wire_min_mid);
-        parity_hmiddle = fillLeadingOnes(rev_wire_max_mid + 1) &
-                         fillTrailingOnes(rev_wire_max);
-        parity_middle = fillLeadingOnes(rev_wire_min_mid + 1) &
-                        fillTrailingOnes(rev_wire_max_mid);
+        parity_low = Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_min);
+        parity_high =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_max + 1);
+        parity_lmiddle =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_min + 1) &
+            Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_min_mid);
+        parity_hmiddle =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_max_mid + 1) &
+            Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_max);
+        parity_middle =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_min_mid + 1) &
+            Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_max_mid);
 
         cr = std::cos(angle / 2);
         sj = inverse ? -std::sin(angle / 2) : std::sin(angle / 2);
@@ -1678,14 +1723,18 @@ struct doubleExcitationPlusFunctor {
             }
         }
 
-        parity_low = fillTrailingOnes(rev_wire_min);
-        parity_high = fillLeadingOnes(rev_wire_max + 1);
-        parity_lmiddle = fillLeadingOnes(rev_wire_min + 1) &
-                         fillTrailingOnes(rev_wire_min_mid);
-        parity_hmiddle = fillLeadingOnes(rev_wire_max_mid + 1) &
-                         fillTrailingOnes(rev_wire_max);
-        parity_middle = fillLeadingOnes(rev_wire_min_mid + 1) &
-                        fillTrailingOnes(rev_wire_max_mid);
+        parity_low = Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_min);
+        parity_high =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_max + 1);
+        parity_lmiddle =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_min + 1) &
+            Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_min_mid);
+        parity_hmiddle =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_max_mid + 1) &
+            Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_max);
+        parity_middle =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_min_mid + 1) &
+            Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_max_mid);
 
         cr = std::cos(angle / 2);
         sj = inverse ? -std::sin(angle / 2) : std::sin(angle / 2);
@@ -1776,10 +1825,12 @@ struct controlledPhaseShiftFunctor {
         rev_wire_min = std::min(rev_wire0, rev_wire1);
         rev_wire_max = std::max(rev_wire0, rev_wire1);
 
-        parity_low = fillTrailingOnes(rev_wire_min);
-        parity_high = fillLeadingOnes(rev_wire_max + 1);
+        parity_low = Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_min);
+        parity_high =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_max + 1);
         parity_middle =
-            fillLeadingOnes(rev_wire_min + 1) & fillTrailingOnes(rev_wire_max);
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_min + 1) &
+            Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_max);
 
         s = inverse ? exp(-Kokkos::complex<Precision>(0, angle))
                     : exp(Kokkos::complex<Precision>(0, angle));
@@ -1827,10 +1878,12 @@ template <class Precision, bool inverse = false> struct crxFunctor {
         rev_wire_min = std::min(rev_wire0, rev_wire1);
         rev_wire_max = std::max(rev_wire0, rev_wire1);
 
-        parity_low = fillTrailingOnes(rev_wire_min);
-        parity_high = fillLeadingOnes(rev_wire_max + 1);
+        parity_low = Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_min);
+        parity_high =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_max + 1);
         parity_middle =
-            fillLeadingOnes(rev_wire_min + 1) & fillTrailingOnes(rev_wire_max);
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_min + 1) &
+            Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_max);
 
         c = std::cos(angle / 2);
         js = (inverse) ? -std::sin(angle / 2) : std::sin(angle / 2);
@@ -1887,10 +1940,12 @@ template <class Precision, bool inverse = false> struct cryFunctor {
         rev_wire_min = std::min(rev_wire0, rev_wire1);
         rev_wire_max = std::max(rev_wire0, rev_wire1);
 
-        parity_low = fillTrailingOnes(rev_wire_min);
-        parity_high = fillLeadingOnes(rev_wire_max + 1);
+        parity_low = Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_min);
+        parity_high =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_max + 1);
         parity_middle =
-            fillLeadingOnes(rev_wire_min + 1) & fillTrailingOnes(rev_wire_max);
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_min + 1) &
+            Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_max);
 
         c = std::cos(angle / 2);
         s = (inverse) ? -std::sin(angle / 2) : std::sin(angle / 2);
@@ -1942,10 +1997,12 @@ template <class Precision, bool inverse = false> struct crzFunctor {
         rev_wire_min = std::min(rev_wire0, rev_wire1);
         rev_wire_max = std::max(rev_wire0, rev_wire1);
 
-        parity_low = fillTrailingOnes(rev_wire_min);
-        parity_high = fillLeadingOnes(rev_wire_max + 1);
+        parity_low = Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_min);
+        parity_high =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_max + 1);
         parity_middle =
-            fillLeadingOnes(rev_wire_min + 1) & fillTrailingOnes(rev_wire_max);
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_min + 1) &
+            Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_max);
 
         const Precision &angle = params[0];
 
@@ -2018,12 +2075,15 @@ template <class Precision, bool inverse = false> struct cSWAPFunctor {
             rev_wire_mid = rev_wire2;
         }
 
-        parity_low = fillTrailingOnes(rev_wire_min);
-        parity_high = fillLeadingOnes(rev_wire_max + 1);
+        parity_low = Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_min);
+        parity_high =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_max + 1);
         parity_lmiddle =
-            fillLeadingOnes(rev_wire_min + 1) & fillTrailingOnes(rev_wire_mid);
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_min + 1) &
+            Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_mid);
         parity_hmiddle =
-            fillLeadingOnes(rev_wire_mid + 1) & fillTrailingOnes(rev_wire_max);
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_mid + 1) &
+            Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_max);
 
         arr = arr_;
     }
@@ -2086,12 +2146,15 @@ template <class Precision, bool inverse = false> struct toffoliFunctor {
             rev_wire_mid = rev_wire2;
         }
 
-        parity_low = fillTrailingOnes(rev_wire_min);
-        parity_high = fillLeadingOnes(rev_wire_max + 1);
+        parity_low = Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_min);
+        parity_high =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_max + 1);
         parity_lmiddle =
-            fillLeadingOnes(rev_wire_min + 1) & fillTrailingOnes(rev_wire_mid);
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_min + 1) &
+            Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_mid);
         parity_hmiddle =
-            fillLeadingOnes(rev_wire_mid + 1) & fillTrailingOnes(rev_wire_max);
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_mid + 1) &
+            Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_max);
 
         arr = arr_;
     }
@@ -2165,8 +2228,9 @@ template <class Precision, bool adj = false> struct generatorPhaseShiftFunctor {
         arr = arr_;
         rev_wire = num_qubits - wires[0] - 1;
         rev_wire_shift = (static_cast<size_t>(1U) << rev_wire);
-        wire_parity = fillTrailingOnes(rev_wire);
-        wire_parity_inv = fillLeadingOnes(rev_wire + 1);
+        wire_parity = Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire);
+        wire_parity_inv =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire + 1);
     }
 
     KOKKOS_INLINE_FUNCTION
@@ -2204,10 +2268,12 @@ template <class Precision, bool adj = false> struct generatorIsingXXFunctor {
         rev_wire_min = std::min(rev_wire0, rev_wire1);
         rev_wire_max = std::max(rev_wire0, rev_wire1);
 
-        parity_low = fillTrailingOnes(rev_wire_min);
-        parity_high = fillLeadingOnes(rev_wire_max + 1);
+        parity_low = Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_min);
+        parity_high =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_max + 1);
         parity_middle =
-            fillLeadingOnes(rev_wire_min + 1) & fillTrailingOnes(rev_wire_max);
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_min + 1) &
+            Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_max);
 
         arr = arr_;
     }
@@ -2252,10 +2318,12 @@ template <class Precision, bool adj = false> struct generatorIsingXYFunctor {
         rev_wire_min = std::min(rev_wire0, rev_wire1);
         rev_wire_max = std::max(rev_wire0, rev_wire1);
 
-        parity_low = fillTrailingOnes(rev_wire_min);
-        parity_high = fillLeadingOnes(rev_wire_max + 1);
+        parity_low = Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_min);
+        parity_high =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_max + 1);
         parity_middle =
-            fillLeadingOnes(rev_wire_min + 1) & fillTrailingOnes(rev_wire_max);
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_min + 1) &
+            Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_max);
 
         arr = arr_;
     }
@@ -2301,10 +2369,12 @@ template <class Precision, bool adj = false> struct generatorIsingYYFunctor {
         rev_wire_min = std::min(rev_wire0, rev_wire1);
         rev_wire_max = std::max(rev_wire0, rev_wire1);
 
-        parity_low = fillTrailingOnes(rev_wire_min);
-        parity_high = fillLeadingOnes(rev_wire_max + 1);
+        parity_low = Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_min);
+        parity_high =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_max + 1);
         parity_middle =
-            fillLeadingOnes(rev_wire_min + 1) & fillTrailingOnes(rev_wire_max);
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_min + 1) &
+            Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_max);
 
         arr = arr_;
     }
@@ -2351,10 +2421,12 @@ template <class Precision, bool adj = false> struct generatorIsingZZFunctor {
         rev_wire_min = std::min(rev_wire0, rev_wire1);
         rev_wire_max = std::max(rev_wire0, rev_wire1);
 
-        parity_low = fillTrailingOnes(rev_wire_min);
-        parity_high = fillLeadingOnes(rev_wire_max + 1);
+        parity_low = Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_min);
+        parity_high =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_max + 1);
         parity_middle =
-            fillLeadingOnes(rev_wire_min + 1) & fillTrailingOnes(rev_wire_max);
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_min + 1) &
+            Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_max);
         arr = arr_;
     }
 
@@ -2398,10 +2470,12 @@ struct generatorSingleExcitationFunctor {
         rev_wire_min = std::min(rev_wire0, rev_wire1);
         rev_wire_max = std::max(rev_wire0, rev_wire1);
 
-        parity_low = fillTrailingOnes(rev_wire_min);
-        parity_high = fillLeadingOnes(rev_wire_max + 1);
+        parity_low = Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_min);
+        parity_high =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_max + 1);
         parity_middle =
-            fillLeadingOnes(rev_wire_min + 1) & fillTrailingOnes(rev_wire_max);
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_min + 1) &
+            Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_max);
 
         arr = arr_;
     }
@@ -2451,10 +2525,12 @@ struct generatorSingleExcitationMinusFunctor {
         rev_wire_min = std::min(rev_wire0, rev_wire1);
         rev_wire_max = std::max(rev_wire0, rev_wire1);
 
-        parity_low = fillTrailingOnes(rev_wire_min);
-        parity_high = fillLeadingOnes(rev_wire_max + 1);
+        parity_low = Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_min);
+        parity_high =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_max + 1);
         parity_middle =
-            fillLeadingOnes(rev_wire_min + 1) & fillTrailingOnes(rev_wire_max);
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_min + 1) &
+            Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_max);
 
         arr = arr_;
     }
@@ -2501,10 +2577,12 @@ struct generatorSingleExcitationPlusFunctor {
         rev_wire_min = std::min(rev_wire0, rev_wire1);
         rev_wire_max = std::max(rev_wire0, rev_wire1);
 
-        parity_low = fillTrailingOnes(rev_wire_min);
-        parity_high = fillLeadingOnes(rev_wire_max + 1);
+        parity_low = Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_min);
+        parity_high =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_max + 1);
         parity_middle =
-            fillLeadingOnes(rev_wire_min + 1) & fillTrailingOnes(rev_wire_max);
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_min + 1) &
+            Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_max);
 
         arr = arr_;
     }
@@ -2609,14 +2687,18 @@ struct generatorDoubleExcitationFunctor {
             }
         }
 
-        parity_low = fillTrailingOnes(rev_wire_min);
-        parity_high = fillLeadingOnes(rev_wire_max + 1);
-        parity_lmiddle = fillLeadingOnes(rev_wire_min + 1) &
-                         fillTrailingOnes(rev_wire_min_mid);
-        parity_hmiddle = fillLeadingOnes(rev_wire_max_mid + 1) &
-                         fillTrailingOnes(rev_wire_max);
-        parity_middle = fillLeadingOnes(rev_wire_min_mid + 1) &
-                        fillTrailingOnes(rev_wire_max_mid);
+        parity_low = Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_min);
+        parity_high =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_max + 1);
+        parity_lmiddle =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_min + 1) &
+            Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_min_mid);
+        parity_hmiddle =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_max_mid + 1) &
+            Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_max);
+        parity_middle =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_min_mid + 1) &
+            Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_max_mid);
 
         arr = arr_;
     }
@@ -2752,14 +2834,18 @@ struct generatorDoubleExcitationMinusFunctor {
             }
         }
 
-        parity_low = fillTrailingOnes(rev_wire_min);
-        parity_high = fillLeadingOnes(rev_wire_max + 1);
-        parity_lmiddle = fillLeadingOnes(rev_wire_min + 1) &
-                         fillTrailingOnes(rev_wire_min_mid);
-        parity_hmiddle = fillLeadingOnes(rev_wire_max_mid + 1) &
-                         fillTrailingOnes(rev_wire_max);
-        parity_middle = fillLeadingOnes(rev_wire_min_mid + 1) &
-                        fillTrailingOnes(rev_wire_max_mid);
+        parity_low = Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_min);
+        parity_high =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_max + 1);
+        parity_lmiddle =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_min + 1) &
+            Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_min_mid);
+        parity_hmiddle =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_max_mid + 1) &
+            Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_max);
+        parity_middle =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_min_mid + 1) &
+            Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_max_mid);
 
         arr = arr_;
     }
@@ -2862,14 +2948,18 @@ struct generatorDoubleExcitationPlusFunctor {
             }
         }
 
-        parity_low = fillTrailingOnes(rev_wire_min);
-        parity_high = fillLeadingOnes(rev_wire_max + 1);
-        parity_lmiddle = fillLeadingOnes(rev_wire_min + 1) &
-                         fillTrailingOnes(rev_wire_min_mid);
-        parity_hmiddle = fillLeadingOnes(rev_wire_max_mid + 1) &
-                         fillTrailingOnes(rev_wire_max);
-        parity_middle = fillLeadingOnes(rev_wire_min_mid + 1) &
-                        fillTrailingOnes(rev_wire_max_mid);
+        parity_low = Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_min);
+        parity_high =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_max + 1);
+        parity_lmiddle =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_min + 1) &
+            Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_min_mid);
+        parity_hmiddle =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_max_mid + 1) &
+            Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_max);
+        parity_middle =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_min_mid + 1) &
+            Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_max_mid);
 
         arr = arr_;
     }
@@ -2918,10 +3008,12 @@ struct generatorControlledPhaseShiftFunctor {
         rev_wire_min = std::min(rev_wire0, rev_wire1);
         rev_wire_max = std::max(rev_wire0, rev_wire1);
 
-        parity_low = fillTrailingOnes(rev_wire_min);
-        parity_high = fillLeadingOnes(rev_wire_max + 1);
+        parity_low = Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_min);
+        parity_high =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_max + 1);
         parity_middle =
-            fillLeadingOnes(rev_wire_min + 1) & fillTrailingOnes(rev_wire_max);
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_min + 1) &
+            Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_max);
         arr = arr_;
     }
 
@@ -2965,10 +3057,12 @@ template <class Precision, bool adj = false> struct generatorCRXFunctor {
         rev_wire_min = std::min(rev_wire0, rev_wire1);
         rev_wire_max = std::max(rev_wire0, rev_wire1);
 
-        parity_low = fillTrailingOnes(rev_wire_min);
-        parity_high = fillLeadingOnes(rev_wire_max + 1);
+        parity_low = Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_min);
+        parity_high =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_max + 1);
         parity_middle =
-            fillLeadingOnes(rev_wire_min + 1) & fillTrailingOnes(rev_wire_max);
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_min + 1) &
+            Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_max);
         arr = arr_;
     }
 
@@ -3013,10 +3107,12 @@ template <class Precision, bool adj = false> struct generatorCRYFunctor {
         rev_wire_min = std::min(rev_wire0, rev_wire1);
         rev_wire_max = std::max(rev_wire0, rev_wire1);
 
-        parity_low = fillTrailingOnes(rev_wire_min);
-        parity_high = fillLeadingOnes(rev_wire_max + 1);
+        parity_low = Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_min);
+        parity_high =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_max + 1);
         parity_middle =
-            fillLeadingOnes(rev_wire_min + 1) & fillTrailingOnes(rev_wire_max);
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_min + 1) &
+            Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_max);
         arr = arr_;
     }
 
@@ -3066,10 +3162,12 @@ template <class Precision, bool adj = false> struct generatorCRZFunctor {
         rev_wire_min = std::min(rev_wire0, rev_wire1);
         rev_wire_max = std::max(rev_wire0, rev_wire1);
 
-        parity_low = fillTrailingOnes(rev_wire_min);
-        parity_high = fillLeadingOnes(rev_wire_max + 1);
+        parity_low = Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_min);
+        parity_high =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_max + 1);
         parity_middle =
-            fillLeadingOnes(rev_wire_min + 1) & fillTrailingOnes(rev_wire_max);
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_min + 1) &
+            Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_max);
         arr = arr_;
     }
 
@@ -3145,8 +3243,9 @@ template <class Precision, bool inverse = false> struct rotFunctor {
         arr = arr_;
         rev_wire = num_qubits - wires[0] - 1;
         rev_wire_shift = (static_cast<size_t>(1U) << rev_wire);
-        wire_parity = fillTrailingOnes(rev_wire);
-        wire_parity_inv = fillLeadingOnes(rev_wire + 1);
+        wire_parity = Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire);
+        wire_parity_inv =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire + 1);
     }
 
     KOKKOS_INLINE_FUNCTION

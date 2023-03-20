@@ -43,8 +43,9 @@ template <class Precision> struct getExpectationValuePauliXFunctor {
         arr = arr_;
         rev_wire = num_qubits - wires[0] - 1;
         rev_wire_shift = (static_cast<size_t>(1U) << rev_wire);
-        wire_parity = fillTrailingOnes(rev_wire);
-        wire_parity_inv = fillLeadingOnes(rev_wire + 1);
+        wire_parity = Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire);
+        wire_parity_inv =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire + 1);
     }
 
     KOKKOS_INLINE_FUNCTION
@@ -73,8 +74,9 @@ template <class Precision> struct getExpectationValuePauliYFunctor {
         arr = arr_;
         rev_wire = num_qubits - wires[0] - 1;
         rev_wire_shift = (static_cast<size_t>(1U) << rev_wire);
-        wire_parity = fillTrailingOnes(rev_wire);
-        wire_parity_inv = fillLeadingOnes(rev_wire + 1);
+        wire_parity = Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire);
+        wire_parity_inv =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire + 1);
     }
 
     KOKKOS_INLINE_FUNCTION
@@ -107,8 +109,9 @@ template <class Precision> struct getExpectationValuePauliZFunctor {
         arr = arr_;
         rev_wire = num_qubits - wires[0] - 1;
         rev_wire_shift = (static_cast<size_t>(1U) << rev_wire);
-        wire_parity = fillTrailingOnes(rev_wire);
-        wire_parity_inv = fillLeadingOnes(rev_wire + 1);
+        wire_parity = Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire);
+        wire_parity_inv =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire + 1);
     }
 
     KOKKOS_INLINE_FUNCTION
@@ -136,8 +139,9 @@ template <class Precision> struct getExpectationValueHadamardFunctor {
         arr = arr_;
         rev_wire = num_qubits - wires[0] - 1;
         rev_wire_shift = (static_cast<size_t>(1U) << rev_wire);
-        wire_parity = fillTrailingOnes(rev_wire);
-        wire_parity_inv = fillLeadingOnes(rev_wire + 1);
+        wire_parity = Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire);
+        wire_parity_inv =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire + 1);
     }
 
     KOKKOS_INLINE_FUNCTION
@@ -172,8 +176,9 @@ template <class Precision> struct getExpectationValueSingleQubitOpFunctor {
         matrix = matrix_;
         rev_wire = num_qubits - wires[0] - 1;
         rev_wire_shift = (static_cast<size_t>(1U) << rev_wire);
-        wire_parity = fillTrailingOnes(rev_wire);
-        wire_parity_inv = fillLeadingOnes(rev_wire + 1);
+        wire_parity = Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire);
+        wire_parity_inv =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire + 1);
     }
 
     KOKKOS_INLINE_FUNCTION
@@ -217,10 +222,12 @@ template <class Precision> struct getExpectationValueTwoQubitOpFunctor {
         rev_wire_min = std::min(rev_wire0, rev_wire1);
         rev_wire_max = std::max(rev_wire0, rev_wire1);
 
-        parity_low = fillTrailingOnes(rev_wire_min);
-        parity_high = fillLeadingOnes(rev_wire_max + 1);
+        parity_low = Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_min);
+        parity_high =
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_max + 1);
         parity_middle =
-            fillLeadingOnes(rev_wire_min + 1) & fillTrailingOnes(rev_wire_max);
+            Pennylane::LKokkos::Util::fillLeadingOnes(rev_wire_min + 1) &
+            Pennylane::LKokkos::Util::fillTrailingOnes(rev_wire_max);
 
         arr = arr_;
         matrix = matrix_;
