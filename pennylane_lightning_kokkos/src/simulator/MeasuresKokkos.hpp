@@ -70,7 +70,7 @@ template <class Precision> class MeasuresKokkos {
                         }}} {};
 
     /**
-     * @brief Calculate the expectation value of a named observable
+     * @brief Calculate the expectation value of a named observable.
      *
      * @param obsName observable name
      * @param wires wires the observable acts on
@@ -372,7 +372,7 @@ template <class Precision> class MeasuresKokkos {
     }
 
     /**
-     * @brief Calculate variance of a general Observable
+     * @brief Calculate variance of a general Observable.
      *
      * @param ob Observable.
      * @return Variance with respect to the given observable.

@@ -512,7 +512,7 @@ template <class Precision> class StateVectorKokkos {
     }
 
     /**
-     * @brief Reset the data back to the \f$\ket{0}\f$ state
+     * @brief Reset the data back to the \f$\ket{0}\f$ state.
      *
      * @param num_qubits Number of qubits
      */
@@ -523,7 +523,7 @@ template <class Precision> class StateVectorKokkos {
     }
 
     /**
-     * @brief Create a new state vector from data on the host
+     * @brief Create a new state vector from data on the host.
      *
      * @param num_qubits Number of qubits
      */
@@ -1555,7 +1555,7 @@ template <class Precision> class StateVectorKokkos {
     }
 
     /**
-     * @brief Get the number of qubits of the state vector
+     * @brief Get the number of qubits of the state vector.
      *
      * @return The number of qubits of the state vector
      */
@@ -1573,7 +1573,7 @@ template <class Precision> class StateVectorKokkos {
     }
 
     /**
-     * @brief Get the Kokkos data of the state vector
+     * @brief Get the Kokkos data of the state vector.
      *
      * @return The pointer to the data of state vector
      */
@@ -1587,7 +1587,7 @@ template <class Precision> class StateVectorKokkos {
     [[nodiscard]] auto getData() -> KokkosVector & { return *data_; }
 
     /**
-     * @brief Copy data from the host space to the device space
+     * @brief Copy data from the host space to the device space.
      *
      */
     inline void HostToDevice(Kokkos::complex<Precision> *sv, size_t length) {
@@ -1595,7 +1595,7 @@ template <class Precision> class StateVectorKokkos {
     }
 
     /**
-     * @brief Copy data from the device space to the host space
+     * @brief Copy data from the device space to the host space.
      *
      */
     inline void DeviceToHost(Kokkos::complex<Precision> *sv, size_t length) {
@@ -1603,7 +1603,7 @@ template <class Precision> class StateVectorKokkos {
     }
 
     /**
-     * @brief Copy data from the device space to the device space
+     * @brief Copy data from the device space to the device space.
      *
      */
     inline void DeviceToDevice(KokkosVector vector_to_copy) {
