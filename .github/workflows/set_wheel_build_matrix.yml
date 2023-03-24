@@ -50,10 +50,10 @@ jobs:
         run: echo "::set-output name=cpu_exec_model::[\"SERIAL\",\"OPENMP\"]"
 
       - name: Kokkos version
-        id: kokkos_version
+        id: kokkos_ver
         run: echo "::set-output name=kokkos_version::[\"3.7.00\"]"
 
     outputs:
       python_version: ${{ steps.pyver.outputs.python_version }}
       cpu_exec_model: ${{ steps.cpu_exec_model.outputs.cpu_exec_model }}
-      kokkos_version: ${{ steps.kokkos_version.outputs.kokkos_version }}
+      kokkos_version: ${{ steps.kokkos_ver.outputs.kokkos_version }}
