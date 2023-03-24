@@ -154,7 +154,7 @@ jobs:
           CIBW_BEFORE_TEST: pip install git+https://github.com/PennyLaneAI/pennylane.git@master
 
           CIBW_TEST_COMMAND: |
-            OMP_PROC_BIND=false OMP_PLACES=threads pl-device-test --device=lightning.kokkos --skip-ops -x --tb=short --no-flaky-report
+            pl-device-test --device=lightning.kokkos --skip-ops -x --tb=short --no-flaky-report
 
           CIBW_BUILD_VERBOSITY: 3
 
