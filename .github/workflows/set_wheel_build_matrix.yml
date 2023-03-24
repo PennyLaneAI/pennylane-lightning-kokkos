@@ -51,7 +51,7 @@ jobs:
 
       - name: Kokkos version
         id: kokkos_ver
-        run: echo "::set-output name=kokkos_version::[\"3.7.00\"]"
+        run: echo "::set-output name=kokkos_version::[3.7.00]"
 
     outputs:
       python_version: ${{ steps.pyver.outputs.python_version }}
