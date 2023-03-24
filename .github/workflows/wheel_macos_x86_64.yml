@@ -49,7 +49,9 @@ jobs:
           key: ${{ matrix.os }}-kokkos${{ matrix.kokkos_version }}-${{ matrix.exec_model }}
 
       - name: Install clang
-        run: brew install llvm
+        run: |
+          brew install libomp
+          brew install llvm
 
       - name: Clone Kokkos libs
         if: steps.kokkos-cache.outputs.cache-hit != 'true'
