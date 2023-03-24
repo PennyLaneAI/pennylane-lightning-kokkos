@@ -23,7 +23,7 @@ jobs:
     with:
       event_name: ${{ github.event_name }}
 
-  macos-wheels-x86-64:
+  build_dependencies:
     needs: [set_wheel_build_matrix]
     strategy:
       matrix:
