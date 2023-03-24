@@ -78,6 +78,7 @@ jobs:
 
           cmake -BBuild . -DCMAKE_INSTALL_PREFIX=${{ github.workspace}}/Kokkos_install/${{ matrix.exec_model }} \
                           -DKokkos_ENABLE_COMPLEX_ALIGN=ON \
+                          -DKokkos_ENABLE_SERIAL=ON \
                           -DKokkos_ENABLE_${{ matrix.exec_model }}=ON \
                           -DKokkos_ENABLE_DEPRECATION_WARNINGS=OFF \
                           -DCMAKE_CXX_STANDARD=20 \
@@ -151,7 +152,7 @@ jobs:
           CIBW_BEFORE_TEST: pip install git+https://github.com/PennyLaneAI/pennylane.git@master
 
           CIBW_TEST_COMMAND: |
-            pl-device-test --device=lightning.kokkos --skip-ops -x --tb=short --no-flaky-report
+            OMP_PROC_BIND=false OMP_PLACES=threads pl-device-test --device=lightning.kokkos --skip-ops -x --tb=short --no-flaky-report
 
           CIBW_BUILD_VERBOSITY: 3
 
