@@ -7,7 +7,7 @@
 
 /// @cond DEV
 namespace {
-namespace Simulators = Pennylane::Simulators;
+namespace Simulators = Pennylane::LKokkos::Simulators;
 using namespace Simulators;
 } // namespace
 /// @endcond

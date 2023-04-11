@@ -9,7 +9,7 @@
 #include "ObservablesKokkos.hpp"
 #include "StateVectorKokkos.hpp"
 
-namespace Pennylane::Simulators {
+namespace Pennylane::LKokkos::Simulators {
 
 template <class Precision> class MeasuresKokkos {
 
@@ -578,4 +578,4 @@ template <class Precision> class MeasuresKokkos {
     }
 };
 
-} // namespace Pennylane::Simulators
+} // namespace Pennylane::LKokkos::Simulators
