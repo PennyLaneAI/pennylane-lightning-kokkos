@@ -31,7 +31,7 @@
 /// @cond DEV
 namespace {
 using namespace Pennylane;
-using namespace Pennylane::Algorithms;
+using namespace Pennylane::LKokkos::Algorithms;
 using namespace Pennylane::LKokkos::Simulators;
 using std::complex;
 using std::set;
