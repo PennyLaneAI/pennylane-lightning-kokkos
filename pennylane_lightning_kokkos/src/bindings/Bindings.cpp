@@ -32,7 +32,7 @@
 namespace {
 using namespace Pennylane;
 using namespace Pennylane::Algorithms;
-using namespace Pennylane::Simulators;
+using namespace Pennylane::LKokkos::Simulators;
 using std::complex;
 using std::set;
 using std::string;

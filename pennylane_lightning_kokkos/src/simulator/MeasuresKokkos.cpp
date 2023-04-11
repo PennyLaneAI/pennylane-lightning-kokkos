@@ -1,5 +1,5 @@
 #include "MeasuresKokkos.hpp"
 
 // explicit instantiation
-template class Pennylane::Simulators::MeasuresKokkos<float>;
-template class Pennylane::Simulators::MeasuresKokkos<double>;
+template class Pennylane::LKokkos::Simulators::MeasuresKokkos<float>;
+template class Pennylane::LKokkos::Simulators::MeasuresKokkos<double>;
