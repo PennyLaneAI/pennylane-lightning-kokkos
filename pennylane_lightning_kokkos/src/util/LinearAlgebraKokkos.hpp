@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 /**
- * @file LinearAlgebra.hpp
+ * @file LinearAlgebraKokkos.hpp
  * Contains uncategorised utility functions.
  */
 
@@ -20,7 +20,7 @@
 
 #include <Kokkos_Core.hpp>
 
-namespace Pennylane::Util {
+namespace Pennylane::LKokkos::Util {
 
 /**
  * @brief @rst
@@ -235,4 +235,4 @@ getImagOfComplexInnerProduct(Kokkos::View<Kokkos::complex<Precision> *> x,
     return inner;
 }
 
-} // namespace Pennylane::Util
+} // namespace Pennylane::LKokkos::Util

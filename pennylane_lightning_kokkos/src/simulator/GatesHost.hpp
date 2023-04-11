@@ -18,12 +18,12 @@
 #include <complex>
 #include <vector>
 
-#include "Util.hpp"
+#include "UtilKokkos.hpp"
 #include <Kokkos_Core.hpp>
 
 /// @cond DEV
 namespace {
-namespace Util = Pennylane::Util;
+namespace Util = Pennylane::LKokkos::Util;
 using namespace Util;
 } // namespace
 /// @endcond
