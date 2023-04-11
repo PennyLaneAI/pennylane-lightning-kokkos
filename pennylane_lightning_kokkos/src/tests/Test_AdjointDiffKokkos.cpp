@@ -15,7 +15,7 @@
 #include "TestHelpers.hpp"
 #include "UtilKokkos.hpp"
 
-using namespace Pennylane::Algorithms;
+using namespace Pennylane::LKokkos::Algorithms;
 
 /**
  * @brief Tests the constructability of the AdjointDiff.hpp classes.
