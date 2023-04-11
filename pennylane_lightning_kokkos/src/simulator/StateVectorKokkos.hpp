@@ -462,8 +462,8 @@ template <class Precision> class StateVectorKokkos {
         }
 
         if (num_qubits > 0) {
-            data_ =
-                std::make_unique<KokkosVector>("data_", LKokkos::Util::exp2(num_qubits));
+            data_ = std::make_unique<KokkosVector>(
+                "data_", LKokkos::Util::exp2(num_qubits));
             Kokkos::parallel_for(length_, InitView(*data_));
         }
     };
@@ -1204,15 +1204,15 @@ template <class Precision> class StateVectorKokkos {
         auto &&num_qubits = getNumQubits();
 
         if (!inverse) {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(0, LKokkos::Util::exp2(num_qubits)),
-                multiRZFunctor<Precision, false>(*data_, num_qubits, wires,
-                                                 params));
+            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
+                                     0, LKokkos::Util::exp2(num_qubits)),
+                                 multiRZFunctor<Precision, false>(
+                                     *data_, num_qubits, wires, params));
         } else {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(0, LKokkos::Util::exp2(num_qubits)),
-                multiRZFunctor<Precision, true>(*data_, num_qubits, wires,
-                                                params));
+            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
+                                     0, LKokkos::Util::exp2(num_qubits)),
+                                 multiRZFunctor<Precision, true>(
+                                     *data_, num_qubits, wires, params));
         }
     }
 
@@ -1541,15 +1541,15 @@ template <class Precision> class StateVectorKokkos {
         auto &&num_qubits = getNumQubits();
 
         if (inverse == false) {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(0, LKokkos::Util::exp2(num_qubits)),
-                generatorMultiRZFunctor<Precision, false>(*data_, num_qubits,
-                                                          wires));
+            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
+                                     0, LKokkos::Util::exp2(num_qubits)),
+                                 generatorMultiRZFunctor<Precision, false>(
+                                     *data_, num_qubits, wires));
         } else {
-            Kokkos::parallel_for(
-                Kokkos::RangePolicy<KokkosExecSpace>(0, LKokkos::Util::exp2(num_qubits)),
-                generatorMultiRZFunctor<Precision, true>(*data_, num_qubits,
-                                                         wires));
+            Kokkos::parallel_for(Kokkos::RangePolicy<KokkosExecSpace>(
+                                     0, LKokkos::Util::exp2(num_qubits)),
+                                 generatorMultiRZFunctor<Precision, true>(
+                                     *data_, num_qubits, wires));
         }
         return -static_cast<Precision>(0.5);
     }

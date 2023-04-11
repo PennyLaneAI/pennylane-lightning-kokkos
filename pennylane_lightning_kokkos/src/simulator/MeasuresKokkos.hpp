@@ -383,8 +383,8 @@ template <class Precision> class MeasuresKokkos {
         ob.applyInPlace(ob_sv);
 
         const Precision mean_square =
-            Pennylane::LKokkos::Util::getRealOfComplexInnerProduct(ob_sv.getData(),
-                                                          ob_sv.getData());
+            Pennylane::LKokkos::Util::getRealOfComplexInnerProduct(
+                ob_sv.getData(), ob_sv.getData());
         const Precision squared_mean = static_cast<Precision>(
             std::pow(Pennylane::LKokkos::Util::getRealOfComplexInnerProduct(
                          original_sv.getData(), ob_sv.getData()),

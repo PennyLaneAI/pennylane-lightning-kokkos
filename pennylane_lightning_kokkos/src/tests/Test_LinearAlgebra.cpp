@@ -77,7 +77,7 @@ TEMPLATE_TEST_CASE("Linear Algebra::axpy_Kokkos", "[Linear Algebra]", float,
 
     SECTION("Testing imag of complex inner product:") {
         LKokkos::Util::axpy_Kokkos<TestType>(alpha, kokkos_v0.getData(),
-                                    kokkos_v1.getData(), v0.size());
+                                             kokkos_v1.getData(), v0.size());
         std::vector<cp_t> result(data_size);
         kokkos_v1.DeviceToHost(result.data(), result.size());
 

@@ -365,9 +365,9 @@ class HamiltonianKokkos final : public ObservableKokkos<T> {
         for (size_t term_idx = 0; term_idx < coeffs_.size(); term_idx++) {
             StateVectorKokkos<T> tmp(sv);
             obs_[term_idx]->applyInPlace(tmp);
-            LKokkos::Util::axpy_Kokkos<T>(Kokkos::complex<T>{coeffs_[term_idx], 0.0},
-                                 tmp.getData(), buffer.getData(),
-                                 tmp.getLength());
+            LKokkos::Util::axpy_Kokkos<T>(
+                Kokkos::complex<T>{coeffs_[term_idx], 0.0}, tmp.getData(),
+                buffer.getData(), tmp.getLength());
         }
         sv.updateData(buffer);
     }
@@ -487,8 +487,8 @@ class SparseHamiltonianKokkos final : public ObservableKokkos<T> {
 
         StateVectorKokkos<T> d_sv_prime(sv.getNumQubits());
 
-        LKokkos::Util::SparseMV_Kokkos<T>(sv.getData(), d_sv_prime.getData(), data_,
-                                 indices_, indptr_);
+        LKokkos::Util::SparseMV_Kokkos<T>(sv.getData(), d_sv_prime.getData(),
+                                          data_, indices_, indptr_);
 
         sv.updateData(d_sv_prime);
     }

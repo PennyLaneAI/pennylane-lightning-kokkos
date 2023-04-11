@@ -267,7 +267,8 @@ TEST_CASE("AdjointJacobianKokkos::adjointJacobian Decomposed Rot gate, non "
         const size_t num_params = 3;
         const size_t num_obs = 1;
 
-        const auto thetas = Pennylane::LKokkos::Util::linspace(-2 * M_PI, 2 * M_PI, 7);
+        const auto thetas =
+            Pennylane::LKokkos::Util::linspace(-2 * M_PI, 2 * M_PI, 7);
         std::unordered_map<double, std::vector<double>> expec_results{
             {thetas[0], {0, -9.90819496e-01, 0}},
             {thetas[1], {-8.18996553e-01, 1.62526544e-01, 0}},
@@ -285,7 +286,8 @@ TEST_CASE("AdjointJacobianKokkos::adjointJacobian Decomposed Rot gate, non "
 
             std::vector<Kokkos::complex<double>> cdata{
                 {Pennylane::LKokkos::Util::INVSQRT2<Kokkos::complex, double>()},
-                {-Pennylane::LKokkos::Util::INVSQRT2<Kokkos::complex, double>()}};
+                {-Pennylane::LKokkos::Util::INVSQRT2<Kokkos::complex,
+                                                     double>()}};
             std::vector<Kokkos::complex<double>> new_data{cdata.begin(),
                                                           cdata.end()};
             StateVectorKokkos<double> psi(new_data.data(), new_data.size());
@@ -320,7 +322,8 @@ TEST_CASE("AdjointJacobianKokkos::adjointJacobian Mixed Ops, Obs and TParams",
         const std::vector<size_t> t_params{1, 2, 3};
         const size_t num_obs = 1;
 
-        const auto thetas = Pennylane::LKokkos::Util::linspace(-2 * M_PI, 2 * M_PI, 8);
+        const auto thetas =
+            Pennylane::LKokkos::Util::linspace(-2 * M_PI, 2 * M_PI, 8);
 
         std::vector<double> local_params{0.543, 0.54, 0.1,  0.5, 1.3,
                                          -2.3,  0.5,  -0.5, 0.5};

@@ -1127,7 +1127,8 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::SetStateVector",
         };
         auto expected_state = init_state;
 
-        for (size_t i = 0; i < Pennylane::LKokkos::Util::exp2(num_qubits - 1); i++) {
+        for (size_t i = 0; i < Pennylane::LKokkos::Util::exp2(num_qubits - 1);
+             i++) {
             std::swap(expected_state[i * 2], expected_state[i * 2 + 1]);
         }
 

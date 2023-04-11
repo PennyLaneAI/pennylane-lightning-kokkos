@@ -201,8 +201,8 @@ template <class T = double> class AdjointJacobianKokkos {
                                size_t param_index) {
         jac[obs_index][param_index] =
             -2 * scaling_coeff *
-            Pennylane::LKokkos::Util::getImagOfComplexInnerProduct<T>(sv1.getData(),
-                                                             sv2.getData());
+            Pennylane::LKokkos::Util::getImagOfComplexInnerProduct<T>(
+                sv1.getData(), sv2.getData());
     }
 
     /**
