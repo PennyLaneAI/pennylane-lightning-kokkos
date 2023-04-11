@@ -3,10 +3,10 @@
 #include <Kokkos_Core.hpp>
 #include <Kokkos_StdAlgorithms.hpp>
 
-#include "Util.hpp"
+#include "UtilKokkos.hpp"
 
 namespace {
-using namespace Pennylane::Util;
+using namespace Pennylane::LKokkos::Util;
 namespace KE = Kokkos::Experimental;
 } // namespace
 
@@ -220,7 +220,7 @@ template <class Precision, bool inverse = false> struct multiQubitOpFunctor {
     KOKKOS_INLINE_FUNCTION
     void operator()(std::size_t kp) const {
         const std::size_t k = kp * dim;
-        using Pennylane::Util::bitswap;
+        using Pennylane::LKokkos::Util::bitswap;
         if constexpr (inverse) {
 
             for (size_t inner_idx = 0; inner_idx < dim; inner_idx++) {
