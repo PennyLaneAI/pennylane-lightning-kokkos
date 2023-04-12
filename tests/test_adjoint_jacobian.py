@@ -677,7 +677,7 @@ def test_integration(returns):
 
     def circuit(params):
         circuit_ansatz(params, wires=range(4))
-        return qml.expval(returns), qml.expval(qml.PauliY(1))
+        return np.array([qml.expval(returns), qml.expval(qml.PauliY(1))])
 
     n_params = 30
     params = np.linspace(0, 10, n_params)
@@ -720,7 +720,7 @@ def test_integration_custom_wires(returns):
 
     def circuit(params):
         circuit_ansatz(params, wires=custom_wires)
-        return qml.expval(returns), qml.expval(qml.PauliY(custom_wires[1]))
+        return np.array([qml.expval(returns), qml.expval(qml.PauliY(custom_wires[1]))])
 
     n_params = 30
     params = np.linspace(0, 10, n_params)

@@ -23,6 +23,7 @@ from itertools import product
 import re
 import numpy as np
 from pennylane import (
+    active_return
     math,
     QubitDevice,
     BasisState,
@@ -676,9 +677,8 @@ if CPP_BINARY_AVAILABLE:
             all_params = 0
 
             for op_idx, tp in enumerate(trainable_params):
-                op, _ = tape.get_operation(
-                    op_idx
-                )  # get op_idx-th operator among differentiable operators
+                # get op_idx-th operator among differentiable operators
+                op, _, _= tape.get_operation(op_idx, return_op_index=True)  
 
                 if isinstance(op, Operation) and not isinstance(op, (BasisState, QubitStateVector)):
                     # We now just ignore non-op or state preps
@@ -696,7 +696,7 @@ if CPP_BINARY_AVAILABLE:
             jac = jac.reshape(-1, len(tp_shift))
             jac_r = np.zeros((jac.shape[0], all_params))
             jac_r[:, record_tp_rows] = jac
-            return jac_r
+            return self._adjoint_jacobian_processing(jac_r) if active_return() else jac_r
 
         def vjp(self, measurements, dy, starting_state=None, use_device_state=False):
             """Generate the processing function required to compute the vector-Jacobian products of a tape."""
@@ -737,7 +737,7 @@ if CPP_BINARY_AVAILABLE:
 
                     return self.adjoint_jacobian(
                         new_tape, starting_state, use_device_state
-                    ).reshape(-1)
+                    )
 
                 return processing_fn
 
