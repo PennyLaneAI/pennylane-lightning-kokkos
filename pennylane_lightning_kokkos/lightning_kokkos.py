@@ -23,7 +23,7 @@ from itertools import product
 import re
 import numpy as np
 from pennylane import (
-    active_return
+    active_return,
     math,
     QubitDevice,
     BasisState,
@@ -678,7 +678,7 @@ if CPP_BINARY_AVAILABLE:
 
             for op_idx, tp in enumerate(trainable_params):
                 # get op_idx-th operator among differentiable operators
-                op, _, _= tape.get_operation(op_idx, return_op_index=True)  
+                op, _, _ = tape.get_operation(op_idx, return_op_index=True)
 
                 if isinstance(op, Operation) and not isinstance(op, (BasisState, QubitStateVector)):
                     # We now just ignore non-op or state preps
@@ -735,9 +735,7 @@ if CPP_BINARY_AVAILABLE:
                     new_tape = tape.copy()
                     new_tape._measurements = [qml.expval(ham)]
 
-                    return self.adjoint_jacobian(
-                        new_tape, starting_state, use_device_state
-                    )
+                    return self.adjoint_jacobian(new_tape, starting_state, use_device_state)
 
                 return processing_fn
 
