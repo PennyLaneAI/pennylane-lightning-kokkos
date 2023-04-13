@@ -73,7 +73,7 @@ def Rz(theta):
 class TestAdjointJacobian:
     """Tests for the adjoint_jacobian method"""
 
-    from pennylane_lightning_kokkos import LightningKokkos as lg
+    from pennylane_lightning_kokkos import LightningKokkos as lk
     from pennylane_lightning import LightningQubit as lq
 
     @pytest.fixture(params=[None, InitArguments(2)])
@@ -113,7 +113,7 @@ class TestAdjointJacobian:
         ):
             dev.adjoint_jacobian(tape)
 
-    @pytest.mark.skipif(not lg._CPP_BINARY_AVAILABLE, reason="LightningKokkos support required")
+    @pytest.mark.skipif(not lk._CPP_BINARY_AVAILABLE, reason="LightningKokkos support required")
     def test_unsupported_op(self, dev_kokkos):
         """Test if a QuantumFunctionError is raised for an unsupported operation, i.e.,
         multi-parameter operations that are not qml.Rot"""
@@ -129,7 +129,7 @@ class TestAdjointJacobian:
             dev_kokkos.adjoint_jacobian(tape)
 
     @pytest.mark.skipif(not lq._CPP_BINARY_AVAILABLE, reason="Lightning binary required")
-    @pytest.mark.skipif(not lg._CPP_BINARY_AVAILABLE, reason="LightningKokkos unsupported")
+    @pytest.mark.skipif(not lk._CPP_BINARY_AVAILABLE, reason="LightningKokkos unsupported")
     def test_proj_unsupported(self, dev_kokkos):
         """Test if a QuantumFunctionError is raised for a Projector observable"""
         with qml.tape.QuantumTape() as tape:
@@ -153,7 +153,7 @@ class TestAdjointJacobian:
             dev_kokkos.adjoint_jacobian(tape)
 
     @pytest.mark.skipif(not lq._CPP_BINARY_AVAILABLE, reason="Lightning binary required")
-    @pytest.mark.skipif(not lg._CPP_BINARY_AVAILABLE, reason="LightningKokkos unsupported")
+    @pytest.mark.skipif(not lk._CPP_BINARY_AVAILABLE, reason="LightningKokkos unsupported")
     def test_unsupported_hermitian_expectation(self, dev_kokkos):
         obs = np.array([[1, 0], [0, -1]], dtype=np.complex128, requires_grad=False)
 
@@ -324,7 +324,8 @@ class TestAdjointJacobian:
         grad_PS = fn(qml.execute(gtapes, dev_kokkos, gradient_fn=None))
 
         # gradient has the correct shape and every element is nonzero
-        assert grad_D.shape == (1, 3)
+        assert len(grad_D) == 3
+        assert all(isinstance(v, np.ndarray) for v in grad_D)
         assert np.count_nonzero(grad_D) == 3
         # the different methods agree
         assert np.allclose(grad_D, grad_PS, atol=tol, rtol=0)
@@ -877,3 +878,52 @@ def test_adjoint_SparseHamiltonian(returns):
     j_default = qml.jacobian(qnode_default)(params)
 
     assert np.allclose(j_kokkos, j_default)
+
+
+@pytest.mark.parametrize(
+    "returns",
+    [
+        (qml.PauliZ(custom_wires[0]),),
+        (qml.PauliZ(custom_wires[0]), qml.PauliZ(custom_wires[1])),
+        (qml.PauliZ(custom_wires[0]), qml.PauliZ(custom_wires[1]), qml.PauliZ(custom_wires[3])),
+        (
+            qml.PauliZ(custom_wires[0]),
+            qml.PauliZ(custom_wires[1]),
+            qml.PauliZ(custom_wires[3]),
+            qml.PauliZ(custom_wires[2]),
+        ),
+        (
+            qml.PauliZ(custom_wires[0]) @ qml.PauliY(custom_wires[3]),
+            qml.PauliZ(custom_wires[1]) @ qml.PauliY(custom_wires[2]),
+        ),
+        (qml.PauliZ(custom_wires[0]) @ qml.PauliY(custom_wires[3]), qml.PauliZ(custom_wires[1])),
+    ],
+)
+def test_integration_custom_wires_batching(returns):
+    """Integration tests that compare to default.qubit for a large circuit containing parametrized
+    operations and when using custom wire labels"""
+
+    dev_lightning = qml.device("lightning.qubit", wires=custom_wires)
+    dev_kokkos = qml.device("lightning.kokkos", wires=custom_wires, batch_obs=True)
+
+    def circuit(params):
+        circuit_ansatz(params, wires=custom_wires)
+        return [qml.expval(r) for r in returns] + [qml.expval(qml.PauliY(custom_wires[1]))]
+
+    n_params = 30
+    np.random.seed(1337)
+    params = np.random.rand(n_params)
+
+    qnode_kokkos = qml.QNode(circuit, dev_kokkos, diff_method="adjoint")
+    qnode_lightning = qml.QNode(circuit, dev_lightning, diff_method="adjoint")
+
+    def convert_to_array_kokkos(params):
+        return np.hstack(qnode_kokkos(params))
+
+    def convert_to_array_lightning(params):
+        return np.hstack(qnode_lightning(params))
+
+    j_kokkos = qml.jacobian(convert_to_array_kokkos)(params)
+    j_lightning = qml.jacobian(convert_to_array_lightning)(params)
+
+    assert np.allclose(j_kokkos, j_lightning, atol=1e-7)
