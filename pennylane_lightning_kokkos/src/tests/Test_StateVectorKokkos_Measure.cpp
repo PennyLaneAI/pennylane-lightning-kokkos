@@ -50,7 +50,8 @@ TEMPLATE_TEST_CASE("Probabilities", "[Measures]", float, double) {
     auto measure_sv = Initializing_StateVector<TestType>(num_qubits);
 
     SECTION("Looping over different wire configurations:") {
-        auto m = LKokkos::Simulators::MeasuresKokkos<TestType>(measure_sv);
+        auto m =
+            Lightning::Kokkos::Simulators::MeasuresKokkos<TestType>(measure_sv);
         for (const auto &term : input) {
             auto probabilities = m.probs(term.first);
             REQUIRE_THAT(term.second,

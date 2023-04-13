@@ -1364,7 +1364,8 @@ TEMPLATE_TEST_CASE("Sample", "[StateVectorKokkosManaged_Param]", float,
     size_t N = std::pow(2, num_qubits);
     size_t num_samples = 100000;
 
-    auto m = LKokkos::Simulators::MeasuresKokkos<TestType>(measure_sv);
+    auto m =
+        Lightning::Kokkos::Simulators::MeasuresKokkos<TestType>(measure_sv);
     auto samples = m.generate_samples(num_samples);
 
     std::vector<size_t> counts(N, 0);
