@@ -43,7 +43,7 @@
 #include <numbers>
 #endif
 
-namespace Pennylane::LKokkos::Util {
+namespace Pennylane::Lightning::Kokkos::Util {
 template <typename T> struct remove_complex { using type = T; };
 template <typename T> struct remove_complex<std::complex<T>> {
     using type = T;
@@ -604,4 +604,4 @@ inline auto operator<<(std::ostream &os, const Kokkos::InitArguments &args)
     return os;
 }
 
-} // namespace Pennylane::LKokkos::Util
+} // namespace Pennylane::Lightning::Kokkos::Util

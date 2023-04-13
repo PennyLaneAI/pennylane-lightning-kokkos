@@ -14,7 +14,7 @@
 #include "TestHelpers.hpp"
 
 using namespace Pennylane;
-using namespace Pennylane::LKokkos::Simulators;
+using namespace Pennylane::Lightning::Kokkos::Simulators;
 
 TEMPLATE_TEST_CASE("Test variance of NamedObs", "[StateVectorKokkos_Var]",
                    float, double) {

@@ -23,7 +23,7 @@
 
 /// @cond DEV
 namespace {
-namespace Util = Pennylane::LKokkos::Util;
+namespace Util = Pennylane::Lightning::Kokkos::Util;
 using namespace Util;
 } // namespace
 /// @endcond
