@@ -69,8 +69,9 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install pytest pytest-mock flaky
-          pip uninstall pennylane -y
-          pip install git+https://github.com/PennyLaneAI/pennylane.git@master
+          python -m pip uninstall pennylane -y
+          python -m pip install git+https://github.com/PennyLaneAI/pennylane.git@master
+          python -m pip install --index-url https://test.pypi.org/simple/ pennylane-lightning --pre --force-reinstall --no-deps
 
       - name: Install lightning.kokkos device
         run: |
