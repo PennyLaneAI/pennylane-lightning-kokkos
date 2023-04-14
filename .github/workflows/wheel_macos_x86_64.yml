@@ -27,7 +27,7 @@ jobs:
     needs: [set_wheel_build_matrix]
     strategy:
       matrix:
-        os: [macos-12]
+        os: [macos-11]
         arch: [x86_64]
         exec_model: ${{ fromJson(needs.set_wheel_build_matrix.outputs.cpu_exec_model) }}
         kokkos_version: ${{ fromJson(needs.set_wheel_build_matrix.outputs.kokkos_version) }}
@@ -50,11 +50,11 @@ jobs:
 
       - name: Install clang
         run: |
-          brew install libomp
-          brew install llvm
+          brew install libomp@14
+          brew install llvm@14
 
       - name: Clone Kokkos libs
-        if: steps.kokkos-cache.outputs.cache-hit != 'true'
+        # if: steps.kokkos-cache.outputs.cache-hit != 'true'
         run: |
           git clone https://github.com/kokkos/kokkos.git
           cd kokkos
@@ -67,7 +67,7 @@ jobs:
           python-version: '3.8'
 
       - name: Build Kokkos core library
-        if: steps.kokkos-cache.outputs.cache-hit != 'true'
+        # if: steps.kokkos-cache.outputs.cache-hit != 'true'
         run: |
           mkdir -p ${{ github.workspace}}/Kokkos_install/${{ matrix.exec_model }}
           cd kokkos
@@ -92,7 +92,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-12]
+        os: [macos-11]
         arch: [x86_64]
         cibw_build: ${{ fromJson(needs.set_wheel_build_matrix.outputs.python_version) }}
         exec_model: ${{ fromJson(needs.set_wheel_build_matrix.outputs.cpu_exec_model) }}
@@ -137,8 +137,8 @@ jobs:
           # MacOS specific build settings
           CIBW_BEFORE_ALL_MACOS: |
             brew uninstall --force oclint
-            brew install libomp
-            brew install llvm
+            brew install libomp@14
+            brew install llvm@14
 
           # Python build settings
           CIBW_BEFORE_BUILD: |
@@ -151,7 +151,10 @@ jobs:
             python -m pip install git+https://github.com/PennyLaneAI/pennylane.git@v0.29.1
 
           CIBW_TEST_COMMAND: |
-            OMP_PROC_BIND=false pl-device-test --device=lightning.kokkos --skip-ops --tb=short --no-flaky-report | OMP_PROC_BIND=false pl-device-test --device=lightning.kokkos --skip-ops --tb=short --no-flaky-report | OMP_PROC_BIND=false pl-device-test --device=lightning.kokkos --skip-ops --tb=short --no-flaky-report | OMP_PROC_BIND=false pl-device-test --device=lightning.kokkos --skip-ops --tb=short --no-flaky-report
+            OMP_PROC_BIND=false pl-device-test --device=lightning.kokkos --skip-ops --tb=short --no-flaky-report 2> /dev/null \
+            | OMP_PROC_BIND=false pl-device-test --device=lightning.kokkos --skip-ops --tb=short --no-flaky-report 2> /dev/null \
+            | OMP_PROC_BIND=false pl-device-test --device=lightning.kokkos --skip-ops --tb=short --no-flaky-report 2> /dev/null \
+            | OMP_PROC_BIND=false pl-device-test --device=lightning.kokkos --skip-ops --tb=short --no-flaky-report
 
           CIBW_BUILD_VERBOSITY: 3
 
