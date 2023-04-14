@@ -51,6 +51,7 @@ jobs:
       - name: Install clang
         run: |
           brew install libomp
+          brew install llvm
 
       - name: Clone Kokkos libs
         # if: steps.kokkos-cache.outputs.cache-hit != 'true'
@@ -80,8 +81,7 @@ jobs:
                           -DKokkos_ENABLE_DEPRECATION_WARNINGS=OFF \
                           -DCMAKE_CXX_STANDARD=20 \
                           -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
-                          -DOpenMP_ROOT=$(brew --prefix libomp)/ \
-                          -DCMAKE_CXX_COMPILER=g++ \
+                          -DCMAKE_CXX_COMPILER=$(brew --prefix llvm)/bin/clang++ \
                           -G Ninja
           cmake --build ./Build --verbose
           cmake --install ./Build
