@@ -18,7 +18,7 @@ using namespace Pennylane;
 TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyIsingXY",
                    "[StateVectorKokkosManaged_Param]", float, double) {
     {
-        using cp_t = Kokkos::complex<TestType>;
+        using cp_t = ::Kokkos::complex<TestType>;
         const std::size_t num_qubits = 4;
 
         std::vector<cp_t> ini_st{
@@ -92,7 +92,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyIsingXY",
 TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyRX",
                    "[StateVectorKokkosManaged_Param]", float, double) {
     {
-        using cp_t = Kokkos::complex<TestType>;
+        using cp_t = ::Kokkos::complex<TestType>;
         size_t num_qubits = 1;
         std::vector<TestType> angles = {0.1, 0.6};
         std::vector<std::vector<cp_t>> expected_results{
@@ -150,7 +150,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyRX",
 TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyRY",
                    "[StateVectorKokkosManaged_Param]", float, double) {
     {
-        using cp_t = Kokkos::complex<TestType>;
+        using cp_t = ::Kokkos::complex<TestType>;
         size_t num_qubits = 1;
         const std::vector<TestType> angles{0.2, 0.7, 2.9};
         std::vector<std::vector<cp_t>> expected_results{
@@ -212,7 +212,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyRY",
 TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyRZ",
                    "[StateVectorKokkosManaged_Param]", float, double) {
     {
-        using cp_t = Kokkos::complex<TestType>;
+        using cp_t = ::Kokkos::complex<TestType>;
         size_t num_qubits = 3;
         const std::vector<TestType> angles{0.2, 0.7, 2.9};
         const cp_t coef(1.0 / (2 * std::sqrt(2)), 0);
@@ -221,7 +221,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyRZ",
 
         rz_data.reserve(angles.size());
         for (auto &a : angles) {
-            rz_data.push_back(Gates::getRZ<Kokkos::complex, TestType>(a));
+            rz_data.push_back(Gates::getRZ<::Kokkos::complex, TestType>(a));
         }
 
         std::vector<std::vector<cp_t>> expected_results = {
@@ -282,7 +282,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyRZ",
 
 TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyPhaseShift",
                    "[StateVectorKokkosManaged_Param]", double) {
-    using cp_t = Kokkos::complex<TestType>;
+    using cp_t = ::Kokkos::complex<TestType>;
     const size_t num_qubits = 3;
 
     const std::vector<TestType> angles{0.3, 0.8, 2.4};
@@ -291,7 +291,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyPhaseShift",
     std::vector<std::vector<cp_t>> ps_data;
     ps_data.reserve(angles.size());
     for (auto &a : angles) {
-        ps_data.push_back(Gates::getPhaseShift<Kokkos::complex, TestType>(a));
+        ps_data.push_back(Gates::getPhaseShift<::Kokkos::complex, TestType>(a));
     }
 
     std::vector<std::vector<cp_t>> expected_results = {
@@ -352,7 +352,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyPhaseShift",
 
 TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyControlledPhaseShift",
                    "[StateVectorKokkosManaged_Param]", double) {
-    using cp_t = Kokkos::complex<TestType>;
+    using cp_t = ::Kokkos::complex<TestType>;
     const size_t num_qubits = 3;
 
     const std::vector<TestType> angles{0.3, 2.4};
@@ -361,7 +361,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyControlledPhaseShift",
     std::vector<std::vector<cp_t>> ps_data;
     ps_data.reserve(angles.size());
     for (auto &a : angles) {
-        ps_data.push_back(Gates::getPhaseShift<Kokkos::complex, TestType>(a));
+        ps_data.push_back(Gates::getPhaseShift<::Kokkos::complex, TestType>(a));
     }
 
     std::vector<std::vector<cp_t>> expected_results = {
@@ -405,7 +405,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyControlledPhaseShift",
 
 TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyRot",
                    "[StateVectorKokkosManaged_Param]", float, double) {
-    using cp_t = Kokkos::complex<TestType>;
+    using cp_t = ::Kokkos::complex<TestType>;
     const size_t num_qubits = 3;
     const std::vector<std::vector<TestType>> angles{
         std::vector<TestType>{0.3, 0.8, 2.4},
@@ -418,7 +418,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyRot",
         std::vector<cp_t>(0b1 << num_qubits)};
 
     for (size_t i = 0; i < angles.size(); i++) {
-        const auto rot_mat = Gates::getRot<Kokkos::complex, TestType>(
+        const auto rot_mat = Gates::getRot<::Kokkos::complex, TestType>(
             angles[i][0], angles[i][1], angles[i][2]);
         expected_results[i][0] = rot_mat[0];
         expected_results[i][0b1 << (num_qubits - i - 1)] = rot_mat[2];
@@ -460,12 +460,12 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyRot",
 
 TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyCRot",
                    "[StateVectorKokkosManaged_Param]", float, double) {
-    using cp_t = Kokkos::complex<TestType>;
+    using cp_t = ::Kokkos::complex<TestType>;
     const size_t num_qubits = 3;
 
     const std::vector<TestType> angles{0.3, 0.8, 2.4};
     std::vector<cp_t> expected_results(8);
-    const auto rot_mat = Gates::getRot<Kokkos::complex, TestType>(
+    const auto rot_mat = Gates::getRot<::Kokkos::complex, TestType>(
         angles[0], angles[1], angles[2]);
     expected_results[0b1 << (num_qubits - 1)] = rot_mat[0];
     expected_results[(0b1 << num_qubits) - 2] = rot_mat[2];
@@ -507,7 +507,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyCRot",
 
 TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyIsingXX",
                    "[StateVectorKokkosManaged_Param]", float, double) {
-    using cp_t = Kokkos::complex<TestType>;
+    using cp_t = ::Kokkos::complex<TestType>;
     const size_t num_qubits = 3;
 
     const std::vector<TestType> angles{0.3, 0.8};
@@ -631,7 +631,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyIsingXX",
 
 TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyIsingYY",
                    "[StateVectorKokkosManaged_Param]", float, double) {
-    using cp_t = Kokkos::complex<TestType>;
+    using cp_t = ::Kokkos::complex<TestType>;
     const size_t num_qubits = 3;
 
     const std::vector<TestType> angles{0.3, 0.8};
@@ -755,7 +755,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyIsingYY",
 
 TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyIsingZZ",
                    "[StateVectorKokkosManaged_Param]", float, double) {
-    using cp_t = Kokkos::complex<TestType>;
+    using cp_t = ::Kokkos::complex<TestType>;
     const size_t num_qubits = 3;
 
     const std::vector<TestType> angles{0.3, 0.8};
@@ -855,7 +855,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyIsingZZ",
 
 TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyMultiRZ",
                    "[StateVectorKokkosManaged_Param]", float, double) {
-    using cp_t = Kokkos::complex<TestType>;
+    using cp_t = ::Kokkos::complex<TestType>;
     const size_t num_qubits = 3;
 
     const std::vector<TestType> angles{0.3, 0.8};
@@ -954,7 +954,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyMultiRZ",
 TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applySingleExcitation",
                    "[StateVectorKokkosManaged_Param]", float, double) {
     {
-        using cp_t = Kokkos::complex<TestType>;
+        using cp_t = ::Kokkos::complex<TestType>;
         const std::size_t num_qubits = 3;
 
         std::vector<cp_t> ini_st{
@@ -1009,7 +1009,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applySingleExcitation",
 TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applySingleExcitationMinus",
                    "[StateVectorKokkosManaged_Param]", float, double) {
     {
-        using cp_t = Kokkos::complex<TestType>;
+        using cp_t = ::Kokkos::complex<TestType>;
         const std::size_t num_qubits = 3;
 
         std::vector<cp_t> ini_st{
@@ -1065,7 +1065,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applySingleExcitationMinus",
 TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applySingleExcitationPlus",
                    "[StateVectorKokkosManaged_Param]", float, double) {
     {
-        using cp_t = Kokkos::complex<TestType>;
+        using cp_t = ::Kokkos::complex<TestType>;
         const std::size_t num_qubits = 3;
 
         std::vector<cp_t> ini_st{
@@ -1121,7 +1121,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applySingleExcitationPlus",
 TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyDoubleExcitation",
                    "[StateVectorKokkosManaged_Param]", float, double) {
     {
-        using cp_t = Kokkos::complex<TestType>;
+        using cp_t = ::Kokkos::complex<TestType>;
         const std::size_t num_qubits = 4;
 
         std::vector<cp_t> ini_st{
@@ -1189,7 +1189,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyDoubleExcitation",
 TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyDoubleExcitationMinus",
                    "[StateVectorKokkosManaged_Param]", float, double) {
     {
-        using cp_t = Kokkos::complex<TestType>;
+        using cp_t = ::Kokkos::complex<TestType>;
         const std::size_t num_qubits = 4;
 
         std::vector<cp_t> ini_st{
@@ -1257,7 +1257,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyDoubleExcitationMinus",
 TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyDoubleExcitationPlus",
                    "[StateVectorKokkosManaged_Param]", float, double) {
     {
-        using cp_t = Kokkos::complex<TestType>;
+        using cp_t = ::Kokkos::complex<TestType>;
         const std::size_t num_qubits = 4;
 
         std::vector<cp_t> ini_st{

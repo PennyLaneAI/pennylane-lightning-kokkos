@@ -65,21 +65,21 @@ void StateVectorKokkos_class_bindings(py::module &m) {
             return new StateVectorKokkos<PrecisionT>(num_qubits);
         }))
         .def(py::init([](std::size_t num_qubits,
-                         const Kokkos::InitArguments &kokkos_args) {
+                         const ::Kokkos::InitArguments &kokkos_args) {
             return new StateVectorKokkos<PrecisionT>(num_qubits, kokkos_args);
         }))
         .def(py::init([](const np_arr_c &arr) {
             py::buffer_info numpyArrayInfo = arr.request();
-            auto *data_ptr =
-                static_cast<Kokkos::complex<PrecisionT> *>(numpyArrayInfo.ptr);
+            auto *data_ptr = static_cast<::Kokkos::complex<PrecisionT> *>(
+                numpyArrayInfo.ptr);
             return new StateVectorKokkos<PrecisionT>(
                 data_ptr, static_cast<std::size_t>(arr.size()));
         }))
         .def(py::init([](const np_arr_c &arr,
-                         const Kokkos::InitArguments &kokkos_args) {
+                         const ::Kokkos::InitArguments &kokkos_args) {
             py::buffer_info numpyArrayInfo = arr.request();
-            auto *data_ptr =
-                static_cast<Kokkos::complex<PrecisionT> *>(numpyArrayInfo.ptr);
+            auto *data_ptr = static_cast<::Kokkos::complex<PrecisionT> *>(
+                numpyArrayInfo.ptr);
             return new StateVectorKokkos<PrecisionT>(
                 data_ptr, static_cast<std::size_t>(arr.size()), kokkos_args);
         }))
@@ -94,12 +94,12 @@ void StateVectorKokkos_class_bindings(py::module &m) {
             [](StateVectorKokkos<PrecisionT> &sv,
                const std::vector<std::size_t> &indices, const np_arr_c &state) {
                 const auto buffer = state.request();
-                std::vector<Kokkos::complex<ParamT>> state_kok;
+                std::vector<::Kokkos::complex<ParamT>> state_kok;
                 if (buffer.size) {
                     const auto ptr =
-                        static_cast<const Kokkos::complex<ParamT> *>(
+                        static_cast<const ::Kokkos::complex<ParamT> *>(
                             buffer.ptr);
-                    state_kok = std::vector<Kokkos::complex<ParamT>>{
+                    state_kok = std::vector<::Kokkos::complex<ParamT>>{
                         ptr, ptr + buffer.size};
                 }
                 sv.setStateVector(indices, state_kok);
@@ -247,12 +247,12 @@ void StateVectorKokkos_class_bindings(py::module &m) {
                [[maybe_unused]] const std::vector<std::vector<ParamT>> &params,
                [[maybe_unused]] const np_arr_c &gate_matrix) {
                 const auto m_buffer = gate_matrix.request();
-                std::vector<Kokkos::complex<ParamT>> conv_matrix;
+                std::vector<::Kokkos::complex<ParamT>> conv_matrix;
                 if (m_buffer.size) {
                     const auto m_ptr =
-                        static_cast<const Kokkos::complex<ParamT> *>(
+                        static_cast<const ::Kokkos::complex<ParamT> *>(
                             m_buffer.ptr);
-                    conv_matrix = std::vector<Kokkos::complex<ParamT>>{
+                    conv_matrix = std::vector<::Kokkos::complex<ParamT>>{
                         m_ptr, m_ptr + m_buffer.size};
                 }
                 sv.applyOperation_std(str, wires, inv, std::vector<ParamT>{},
@@ -438,11 +438,11 @@ void StateVectorKokkos_class_bindings(py::module &m) {
                [[maybe_unused]] const std::vector<ParamT> &params,
                [[maybe_unused]] const np_arr_c &gate_matrix) {
                 const auto m_buffer = gate_matrix.request();
-                std::vector<Kokkos::complex<ParamT>> conv_matrix;
+                std::vector<::Kokkos::complex<ParamT>> conv_matrix;
                 if (m_buffer.size) {
                     auto m_ptr =
-                        static_cast<Kokkos::complex<ParamT> *>(m_buffer.ptr);
-                    conv_matrix = std::vector<Kokkos::complex<ParamT>>{
+                        static_cast<::Kokkos::complex<ParamT> *>(m_buffer.ptr);
+                    conv_matrix = std::vector<::Kokkos::complex<ParamT>>{
                         m_ptr, m_ptr + m_buffer.size};
                 }
                 // Return the real component only
@@ -462,12 +462,12 @@ void StateVectorKokkos_class_bindings(py::module &m) {
                     obs_concat += sub;
                 }
                 const auto m_buffer = gate_matrix.request();
-                std::vector<Kokkos::complex<ParamT>> conv_matrix;
+                std::vector<::Kokkos::complex<ParamT>> conv_matrix;
                 if (m_buffer.size) {
                     const auto m_ptr =
-                        static_cast<const Kokkos::complex<ParamT> *>(
+                        static_cast<const ::Kokkos::complex<ParamT> *>(
                             m_buffer.ptr);
-                    conv_matrix = std::vector<Kokkos::complex<ParamT>>{
+                    conv_matrix = std::vector<::Kokkos::complex<ParamT>>{
                         m_ptr, m_ptr + m_buffer.size};
                 }
                 // Return the real component only & ignore params
@@ -481,12 +481,12 @@ void StateVectorKokkos_class_bindings(py::module &m) {
                const std::vector<std::size_t> &wires,
                const np_arr_c &gate_matrix) {
                 const auto m_buffer = gate_matrix.request();
-                std::vector<Kokkos::complex<ParamT>> conv_matrix;
+                std::vector<::Kokkos::complex<ParamT>> conv_matrix;
                 if (m_buffer.size) {
                     const auto m_ptr =
-                        static_cast<const Kokkos::complex<ParamT> *>(
+                        static_cast<const ::Kokkos::complex<ParamT> *>(
                             m_buffer.ptr);
-                    conv_matrix = std::vector<Kokkos::complex<ParamT>>{
+                    conv_matrix = std::vector<::Kokkos::complex<ParamT>>{
                         m_ptr, m_ptr + m_buffer.size};
                 }
                 // Return the real component only & ignore params
@@ -501,12 +501,12 @@ void StateVectorKokkos_class_bindings(py::module &m) {
                const std::vector<std::size_t> &indices,
                const std::vector<std::size_t> &index_ptr) {
                 const auto m_buffer = gate_data.request();
-                std::vector<Kokkos::complex<ParamT>> conv_data;
+                std::vector<::Kokkos::complex<ParamT>> conv_data;
                 if (m_buffer.size) {
                     const auto m_ptr =
-                        static_cast<const Kokkos::complex<ParamT> *>(
+                        static_cast<const ::Kokkos::complex<ParamT> *>(
                             m_buffer.ptr);
-                    conv_data = std::vector<Kokkos::complex<ParamT>>{
+                    conv_data = std::vector<::Kokkos::complex<ParamT>>{
                         m_ptr, m_ptr + m_buffer.size};
                 }
                 // Return the real component only & ignore params
@@ -555,7 +555,7 @@ void StateVectorKokkos_class_bindings(py::module &m) {
             "DeviceToHost",
             [](StateVectorKokkos<PrecisionT> &device_sv, np_arr_c &host_sv) {
                 py::buffer_info numpyArrayInfo = host_sv.request();
-                auto *data_ptr = static_cast<Kokkos::complex<PrecisionT> *>(
+                auto *data_ptr = static_cast<::Kokkos::complex<PrecisionT> *>(
                     numpyArrayInfo.ptr);
                 if (host_sv.size()) {
                     device_sv.DeviceToHost(data_ptr, host_sv.size());
@@ -563,7 +563,7 @@ void StateVectorKokkos_class_bindings(py::module &m) {
             },
             "Synchronize data from the GPU device to host.")
         .def("HostToDevice",
-             py::overload_cast<Kokkos::complex<PrecisionT> *, size_t>(
+             py::overload_cast<::Kokkos::complex<PrecisionT> *, size_t>(
                  &StateVectorKokkos<PrecisionT>::HostToDevice),
              "Synchronize data from the host device to GPU.")
         .def(
@@ -571,7 +571,7 @@ void StateVectorKokkos_class_bindings(py::module &m) {
             [](StateVectorKokkos<PrecisionT> &device_sv,
                const np_arr_c &host_sv) {
                 const py::buffer_info numpyArrayInfo = host_sv.request();
-                auto *data_ptr = static_cast<Kokkos::complex<PrecisionT> *>(
+                auto *data_ptr = static_cast<::Kokkos::complex<PrecisionT> *>(
                     numpyArrayInfo.ptr);
                 const auto length =
                     static_cast<size_t>(numpyArrayInfo.shape[0]);
@@ -839,11 +839,11 @@ PYBIND11_MODULE(lightning_kokkos_qubit_ops, // NOLINT: No control over
     StateVectorKokkos_class_bindings<float, float>(m);
     StateVectorKokkos_class_bindings<double, double>(m);
 
-    m.def("kokkos_start", []() { Kokkos::initialize(); });
-    m.def("kokkos_end", []() { Kokkos::finalize(); });
+    m.def("kokkos_start", []() { ::Kokkos::initialize(); });
+    m.def("kokkos_end", []() { ::Kokkos::finalize(); });
     m.def("kokkos_config_info", &getConfig, "Kokkos configurations query.");
 
-    py::class_<Kokkos::InitArguments>(m, "InitArguments")
+    py::class_<::Kokkos::InitArguments>(m, "InitArguments")
         .def(py::init<>())
         .def(py::init<const int &>())
         .def_readwrite("num_threads", &Kokkos::InitArguments::num_threads)
@@ -853,7 +853,7 @@ PYBIND11_MODULE(lightning_kokkos_qubit_ops, // NOLINT: No control over
         .def_readwrite("skip_device", &Kokkos::InitArguments::skip_device)
         .def_readwrite("disable_warnings",
                        &Kokkos::InitArguments::disable_warnings)
-        .def("__repr__", [](const Kokkos::InitArguments &args) {
+        .def("__repr__", [](const ::Kokkos::InitArguments &args) {
             using namespace Pennylane::Lightning::Kokkos::Util;
             std::ostringstream args_stream;
             args_stream << args;

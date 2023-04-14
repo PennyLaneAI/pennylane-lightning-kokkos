@@ -17,7 +17,7 @@ using namespace Pennylane;
 TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorPhaseShift",
                    "[StateVectorKokkosManaged_Generator]", float, double) {
     {
-        using cp_t = Kokkos::complex<TestType>;
+        using cp_t = ::Kokkos::complex<TestType>;
         const std::size_t num_qubits = 4;
         const TestType ep = 1e-3;
         const TestType EP = 1e-4;
@@ -133,7 +133,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorPhaseShift",
 TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorIsingXX",
                    "[StateVectorKokkosManaged_Generator]", float, double) {
     {
-        using cp_t = Kokkos::complex<TestType>;
+        using cp_t = ::Kokkos::complex<TestType>;
         const std::size_t num_qubits = 4;
         const TestType ep = 1e-3;
         const TestType EP = 1e-4;
@@ -249,7 +249,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorIsingXX",
 TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorIsingXY",
                    "[StateVectorKokkosManaged_Generator]", float, double) {
     {
-        using cp_t = Kokkos::complex<TestType>;
+        using cp_t = ::Kokkos::complex<TestType>;
         const std::size_t num_qubits = 4;
         const TestType ep = 1e-3;
         const TestType EP = 1e-4;
@@ -365,7 +365,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorIsingXY",
 TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorIsingYY",
                    "[StateVectorKokkosManaged_Generator]", float, double) {
     {
-        using cp_t = Kokkos::complex<TestType>;
+        using cp_t = ::Kokkos::complex<TestType>;
         const std::size_t num_qubits = 4;
         const TestType ep = 1e-3;
         const TestType EP = 1e-4;
@@ -481,7 +481,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorIsingYY",
 TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorIsingZZ",
                    "[StateVectorKokkosManaged_Generator]", float, double) {
     {
-        using cp_t = Kokkos::complex<TestType>;
+        using cp_t = ::Kokkos::complex<TestType>;
         const std::size_t num_qubits = 4;
         const TestType ep = 1e-3;
         const TestType EP = 1e-4;
@@ -598,7 +598,7 @@ TEMPLATE_TEST_CASE(
     "StateVectorKokkosManaged::applyGeneratorControlledPhaseShift",
     "[StateVectorKokkosManaged_Generator]", float, double) {
     {
-        using cp_t = Kokkos::complex<TestType>;
+        using cp_t = ::Kokkos::complex<TestType>;
         const std::size_t num_qubits = 4;
         const TestType ep = 1e-3;
         const TestType EP = 1e-4;
@@ -715,7 +715,7 @@ TEMPLATE_TEST_CASE(
 TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorCRX",
                    "[StateVectorKokkosManaged_Generator]", float, double) {
     {
-        using cp_t = Kokkos::complex<TestType>;
+        using cp_t = ::Kokkos::complex<TestType>;
         const std::size_t num_qubits = 4;
         const TestType ep = 1e-3;
         const TestType EP = 1e-4;
@@ -830,7 +830,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorCRX",
 TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorCRY",
                    "[StateVectorKokkosManaged_Generator]", float, double) {
     {
-        using cp_t = Kokkos::complex<TestType>;
+        using cp_t = ::Kokkos::complex<TestType>;
         const std::size_t num_qubits = 4;
         const TestType ep = 1e-3;
         const TestType EP = 1e-4;
@@ -945,7 +945,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorCRY",
 TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorCRZ",
                    "[StateVectorKokkosManaged_Generator]", float, double) {
     {
-        using cp_t = Kokkos::complex<TestType>;
+        using cp_t = ::Kokkos::complex<TestType>;
         const std::size_t num_qubits = 4;
         const TestType ep = 1e-3;
         const TestType EP = 1e-4;
@@ -1060,7 +1060,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorCRZ",
 TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorMultiRZ",
                    "[StateVectorKokkosManaged_Generator]", float, double) {
     {
-        using cp_t = Kokkos::complex<TestType>;
+        using cp_t = ::Kokkos::complex<TestType>;
         const std::size_t num_qubits = 4;
         const TestType ep = 1e-3;
         const TestType EP = 1e-4;
@@ -1175,7 +1175,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorMultiRZ",
 TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorRX",
                    "[StateVectorKokkosManaged_Generator]", float, double) {
     {
-        using cp_t = Kokkos::complex<TestType>;
+        using cp_t = ::Kokkos::complex<TestType>;
         const std::size_t num_qubits = 4;
         const TestType ep = 1e-3;
         const TestType EP = 1e-4;
@@ -1291,7 +1291,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorRX",
 TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorRY",
                    "[StateVectorKokkosManaged_Generator]", float, double) {
     {
-        using cp_t = Kokkos::complex<TestType>;
+        using cp_t = ::Kokkos::complex<TestType>;
         const std::size_t num_qubits = 4;
         const TestType ep = 1e-3;
         const TestType EP = 1e-4;
@@ -1406,7 +1406,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorRY",
 TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorRZ",
                    "[StateVectorKokkosManaged_Generator]", float, double) {
     {
-        using cp_t = Kokkos::complex<TestType>;
+        using cp_t = ::Kokkos::complex<TestType>;
         const std::size_t num_qubits = 4;
         const TestType ep = 1e-3;
         const TestType EP = 1e-4;
@@ -1521,7 +1521,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorRZ",
 TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorSingleExcitation",
                    "[StateVectorKokkosManaged_Generator]", float, double) {
     {
-        using cp_t = Kokkos::complex<TestType>;
+        using cp_t = ::Kokkos::complex<TestType>;
         const std::size_t num_qubits = 4;
         const TestType ep = 1e-3;
         const TestType EP = 1e-4;
@@ -1639,7 +1639,7 @@ TEMPLATE_TEST_CASE(
     "StateVectorKokkosManaged::applyGeneratorSingleExcitationMinus",
     "[StateVectorKokkosManaged_Generator]", float, double) {
     {
-        using cp_t = Kokkos::complex<TestType>;
+        using cp_t = ::Kokkos::complex<TestType>;
         const std::size_t num_qubits = 4;
         const TestType ep = 1e-3;
         const TestType EP = 1e-4;
@@ -1757,7 +1757,7 @@ TEMPLATE_TEST_CASE(
     "StateVectorKokkosManaged::applyGeneratorSingleExcitationPlus",
     "[StateVectorKokkosManaged_Generator]", float, double) {
     {
-        using cp_t = Kokkos::complex<TestType>;
+        using cp_t = ::Kokkos::complex<TestType>;
         const std::size_t num_qubits = 4;
         const TestType ep = 1e-3;
         const TestType EP = 1e-4;
@@ -1873,7 +1873,7 @@ TEMPLATE_TEST_CASE(
 TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyGeneratorDoubleExcitation",
                    "[StateVectorKokkosManaged_Generator]", float, double) {
     {
-        using cp_t = Kokkos::complex<TestType>;
+        using cp_t = ::Kokkos::complex<TestType>;
         const std::size_t num_qubits = 4;
         const TestType ep = 1e-3;
         const TestType EP = 1e-4;
@@ -1991,7 +1991,7 @@ TEMPLATE_TEST_CASE(
     "StateVectorKokkosManaged::applyGeneratorDoubleExcitationMinus",
     "[StateVectorKokkosManaged_Generator]", float, double) {
     {
-        using cp_t = Kokkos::complex<TestType>;
+        using cp_t = ::Kokkos::complex<TestType>;
         const std::size_t num_qubits = 4;
         const TestType ep = 1e-3;
         const TestType EP = 1e-4;
@@ -2113,7 +2113,7 @@ TEMPLATE_TEST_CASE(
     "StateVectorKokkosManaged::applyGeneratorDoubleExcitationPlus",
     "[StateVectorKokkosManaged_Generator]", float, double) {
     {
-        using cp_t = Kokkos::complex<TestType>;
+        using cp_t = ::Kokkos::complex<TestType>;
         const std::size_t num_qubits = 4;
         const TestType ep = 1e-3;
         const TestType EP = 1e-4;

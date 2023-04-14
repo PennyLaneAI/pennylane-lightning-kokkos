@@ -586,13 +586,13 @@ inline auto generateBitsPatterns(const std::vector<size_t> &qubitIndices,
 }
 
 /**
- * @brief Streaming operator for Kokkos::InitArguments structs.
+ * @brief Streaming operator for ::Kokkos::InitArguments structs.
  *
  * @param os Output stream.
- * @param args Kokkos::InitArguments struct.
+ * @param args ::Kokkos::InitArguments struct.
  * @return std::ostream&
  */
-inline auto operator<<(std::ostream &os, const Kokkos::InitArguments &args)
+inline auto operator<<(std::ostream &os, const ::Kokkos::InitArguments &args)
     -> std::ostream & {
     os << "<InitArguments with\n";
     os << "num_threads = " << args.num_threads << '\n';

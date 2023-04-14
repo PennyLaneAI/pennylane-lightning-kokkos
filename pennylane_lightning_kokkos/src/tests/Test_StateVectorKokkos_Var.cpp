@@ -124,7 +124,7 @@ TEMPLATE_TEST_CASE("Test variance of TensorProdObs", "[StateVectorKokkos_Var]",
 TEMPLATE_TEST_CASE("Test variance of HamiltonianObs", "[StateVectorKokkos_Var]",
                    float, double) {
     SECTION("Using var") {
-        std::vector<Kokkos::complex<TestType>> init_state{
+        std::vector<::Kokkos::complex<TestType>> init_state{
             {0.0, 0.0}, {0.0, 0.1}, {0.1, 0.1}, {0.1, 0.2},
             {0.2, 0.2}, {0.3, 0.3}, {0.3, 0.4}, {0.4, 0.5}};
         StateVectorKokkos<TestType> kokkos_sv{init_state.data(),

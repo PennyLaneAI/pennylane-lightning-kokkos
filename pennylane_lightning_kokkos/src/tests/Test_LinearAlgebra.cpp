@@ -9,7 +9,7 @@
 
 TEMPLATE_TEST_CASE("Linear Algebra::SparseMV", "[Linear Algebra]", float,
                    double) {
-    using cp_t = Kokkos::complex<TestType>;
+    using cp_t = ::Kokkos::complex<TestType>;
 
     std::size_t num_qubits = 3;
     std::size_t data_size = Lightning::Kokkos::Util::exp2(num_qubits);
@@ -52,7 +52,7 @@ TEMPLATE_TEST_CASE("Linear Algebra::SparseMV", "[Linear Algebra]", float,
 
 TEMPLATE_TEST_CASE("Linear Algebra::axpy_Kokkos", "[Linear Algebra]", float,
                    double) {
-    using cp_t = Kokkos::complex<TestType>;
+    using cp_t = ::Kokkos::complex<TestType>;
 
     std::size_t num_qubits = 3;
 

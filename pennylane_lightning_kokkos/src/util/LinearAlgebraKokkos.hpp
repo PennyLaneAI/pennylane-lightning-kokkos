@@ -28,12 +28,12 @@ namespace Pennylane::Lightning::Kokkos::Util {
  * @endrst
  */
 template <class Precision> struct axpy_KokkosFunctor {
-    Kokkos::complex<Precision> alpha;
-    Kokkos::View<Kokkos::complex<Precision> *> x;
-    Kokkos::View<Kokkos::complex<Precision> *> y;
-    axpy_KokkosFunctor(Kokkos::complex<Precision> alpha_,
-                       Kokkos::View<Kokkos::complex<Precision> *> x_,
-                       Kokkos::View<Kokkos::complex<Precision> *> y_) {
+    ::Kokkos::complex<Precision> alpha;
+    ::Kokkos::View<::Kokkos::complex<Precision> *> x;
+    ::Kokkos::View<::Kokkos::complex<Precision> *> y;
+    axpy_KokkosFunctor(::Kokkos::complex<Precision> alpha_,
+                       ::Kokkos::View<::Kokkos::complex<Precision> *> x_,
+                       ::Kokkos::View<::Kokkos::complex<Precision> *> y_) {
         alpha = alpha_;
         x = x_;
         y = y_;
@@ -53,11 +53,11 @@ template <class Precision> struct axpy_KokkosFunctor {
  * @param length number of elements in x
  * */
 template <class Precision>
-inline auto axpy_Kokkos(Kokkos::complex<Precision> alpha,
-                        Kokkos::View<Kokkos::complex<Precision> *> x,
-                        Kokkos::View<Kokkos::complex<Precision> *> y,
+inline auto axpy_Kokkos(::Kokkos::complex<Precision> alpha,
+                        ::Kokkos::View<::Kokkos::complex<Precision> *> x,
+                        ::Kokkos::View<::Kokkos::complex<Precision> *> y,
                         std::size_t length) {
-    Kokkos::parallel_for(length, axpy_KokkosFunctor<Precision>(alpha, x, y));
+    ::Kokkos::parallel_for(length, axpy_KokkosFunctor<Precision>(alpha, x, y));
 }
 
 /**
@@ -67,8 +67,8 @@ inline auto axpy_Kokkos(Kokkos::complex<Precision> alpha,
  */
 template <class Precision> struct SparseMV_KokkosFunctor {
 
-    using KokkosVector = Kokkos::View<Kokkos::complex<Precision> *>;
-    using KokkosSizeTVector = Kokkos::View<std::size_t *>;
+    using KokkosVector = ::Kokkos::View<::Kokkos::complex<Precision> *>;
+    using KokkosSizeTVector = ::Kokkos::View<std::size_t *>;
 
     KokkosVector x;
     KokkosVector y;
@@ -89,7 +89,7 @@ template <class Precision> struct SparseMV_KokkosFunctor {
 
     KOKKOS_INLINE_FUNCTION
     void operator()(const std::size_t row) const {
-        Kokkos::complex<Precision> tmp = {0.0, 0.0};
+        ::Kokkos::complex<Precision> tmp = {0.0, 0.0};
         for (size_t j = indptr[row]; j < indptr[row + 1]; j++) {
             tmp += data[j] * x[indices[j]];
         }
@@ -108,43 +108,44 @@ template <class Precision> struct SparseMV_KokkosFunctor {
  * @param indptr Vector of offsets.
  */
 template <class Precision>
-inline void SparseMV_Kokkos(Kokkos::View<Kokkos::complex<Precision> *> x,
-                            Kokkos::View<Kokkos::complex<Precision> *> y,
+inline void SparseMV_Kokkos(::Kokkos::View<::Kokkos::complex<Precision> *> x,
+                            ::Kokkos::View<::Kokkos::complex<Precision> *> y,
                             const std::vector<std::complex<Precision>> &data,
                             const std::vector<std::size_t> &indices,
                             const std::vector<std::size_t> &indptr) {
 
     using ConstComplexHostView =
-        Kokkos::View<const Kokkos::complex<Precision> *, Kokkos::HostSpace,
-                     Kokkos::MemoryTraits<Kokkos::Unmanaged>>;
+        ::Kokkos::View<const ::Kokkos::complex<Precision> *,
+                       ::Kokkos::HostSpace,
+                       ::Kokkos::MemoryTraits<::Kokkos::Unmanaged>>;
     using ConstSizeTHostView =
-        Kokkos::View<const size_t *, Kokkos::HostSpace,
-                     Kokkos::MemoryTraits<Kokkos::Unmanaged>>;
-    using KokkosSizeTVector = Kokkos::View<size_t *>;
-    using KokkosVector = Kokkos::View<Kokkos::complex<Precision> *>;
+        ::Kokkos::View<const size_t *, ::Kokkos::HostSpace,
+                       ::Kokkos::MemoryTraits<::Kokkos::Unmanaged>>;
+    using KokkosSizeTVector = ::Kokkos::View<size_t *>;
+    using KokkosVector = ::Kokkos::View<::Kokkos::complex<Precision> *>;
 
     KokkosVector kok_data("kokkos_sparese_matrix_vals", data.size());
     KokkosSizeTVector kok_indices("kokkos_indices", indices.size());
     KokkosSizeTVector kok_indptr("kokkos_offsets", indptr.size());
 
     auto data_ptr =
-        reinterpret_cast<const Kokkos::complex<Precision> *>(data.data());
+        reinterpret_cast<const ::Kokkos::complex<Precision> *>(data.data());
 
-    const std::vector<Kokkos::complex<Precision>> kok_complex_data =
-        std::vector<Kokkos::complex<Precision>>{data_ptr,
-                                                data_ptr + data.size()};
+    const std::vector<::Kokkos::complex<Precision>> kok_complex_data =
+        std::vector<::Kokkos::complex<Precision>>{data_ptr,
+                                                  data_ptr + data.size()};
 
-    Kokkos::deep_copy(
+    ::Kokkos::deep_copy(
         kok_data, ConstComplexHostView(kok_complex_data.data(), data.size()));
 
-    Kokkos::deep_copy(kok_indices,
-                      ConstSizeTHostView(indices.data(), indices.size()));
-    Kokkos::deep_copy(kok_indptr,
-                      ConstSizeTHostView(indptr.data(), indptr.size()));
+    ::Kokkos::deep_copy(kok_indices,
+                        ConstSizeTHostView(indices.data(), indices.size()));
+    ::Kokkos::deep_copy(kok_indptr,
+                        ConstSizeTHostView(indptr.data(), indptr.size()));
 
-    Kokkos::parallel_for(indptr.size() - 1,
-                         SparseMV_KokkosFunctor<Precision>(
-                             x, y, kok_data, kok_indices, kok_indptr));
+    ::Kokkos::parallel_for(indptr.size() - 1,
+                           SparseMV_KokkosFunctor<Precision>(
+                               x, y, kok_data, kok_indices, kok_indptr));
 }
 
 /**
@@ -154,12 +155,12 @@ inline void SparseMV_Kokkos(Kokkos::View<Kokkos::complex<Precision> *> x,
  */
 template <class Precision> struct getRealOfComplexInnerProductFunctor {
 
-    Kokkos::View<Kokkos::complex<Precision> *> x;
-    Kokkos::View<Kokkos::complex<Precision> *> y;
+    ::Kokkos::View<::Kokkos::complex<Precision> *> x;
+    ::Kokkos::View<::Kokkos::complex<Precision> *> y;
 
     getRealOfComplexInnerProductFunctor(
-        Kokkos::View<Kokkos::complex<Precision> *> x_,
-        Kokkos::View<Kokkos::complex<Precision> *> y_) {
+        ::Kokkos::View<::Kokkos::complex<Precision> *> x_,
+        ::Kokkos::View<::Kokkos::complex<Precision> *> y_) {
         x = x_;
         y = y_;
     }
@@ -180,13 +181,13 @@ template <class Precision> struct getRealOfComplexInnerProductFunctor {
  */
 template <class Precision>
 inline auto
-getRealOfComplexInnerProduct(Kokkos::View<Kokkos::complex<Precision> *> x,
-                             Kokkos::View<Kokkos::complex<Precision> *> y)
+getRealOfComplexInnerProduct(::Kokkos::View<::Kokkos::complex<Precision> *> x,
+                             ::Kokkos::View<::Kokkos::complex<Precision> *> y)
     -> Precision {
 
     assert(x.size() == y.size());
     Precision inner = 0;
-    Kokkos::parallel_reduce(
+    ::Kokkos::parallel_reduce(
         x.size(), getRealOfComplexInnerProductFunctor<Precision>(x, y), inner);
     return inner;
 }
@@ -198,12 +199,12 @@ getRealOfComplexInnerProduct(Kokkos::View<Kokkos::complex<Precision> *> x,
  */
 template <class Precision> struct getImagOfComplexInnerProductFunctor {
 
-    Kokkos::View<Kokkos::complex<Precision> *> x;
-    Kokkos::View<Kokkos::complex<Precision> *> y;
+    ::Kokkos::View<::Kokkos::complex<Precision> *> x;
+    ::Kokkos::View<::Kokkos::complex<Precision> *> y;
 
     getImagOfComplexInnerProductFunctor(
-        Kokkos::View<Kokkos::complex<Precision> *> x_,
-        Kokkos::View<Kokkos::complex<Precision> *> y_) {
+        ::Kokkos::View<::Kokkos::complex<Precision> *> x_,
+        ::Kokkos::View<::Kokkos::complex<Precision> *> y_) {
         x = x_;
         y = y_;
     }
@@ -224,13 +225,13 @@ template <class Precision> struct getImagOfComplexInnerProductFunctor {
  */
 template <class Precision>
 inline auto
-getImagOfComplexInnerProduct(Kokkos::View<Kokkos::complex<Precision> *> x,
-                             Kokkos::View<Kokkos::complex<Precision> *> y)
+getImagOfComplexInnerProduct(::Kokkos::View<::Kokkos::complex<Precision> *> x,
+                             ::Kokkos::View<::Kokkos::complex<Precision> *> y)
     -> Precision {
 
     assert(x.size() == y.size());
     Precision inner = 0;
-    Kokkos::parallel_reduce(
+    ::Kokkos::parallel_reduce(
         x.size(), getImagOfComplexInnerProductFunctor<Precision>(x, y), inner);
     return inner;
 }

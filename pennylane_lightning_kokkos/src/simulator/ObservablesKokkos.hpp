@@ -171,10 +171,10 @@ class HermitianObsKokkos final : public ObservableKokkos<T> {
      */
     void applyInPlace(StateVectorKokkos<T> &sv) const override {
         const auto *matrix_ptr =
-            reinterpret_cast<const Kokkos::complex<T> *>(matrix_.data());
-        std::vector<Kokkos::complex<T>> conv_matrix =
-            std::vector<Kokkos::complex<T>>{matrix_ptr,
-                                            matrix_ptr + matrix_.size()};
+            reinterpret_cast<const ::Kokkos::complex<T> *>(matrix_.data());
+        std::vector<::Kokkos::complex<T>> conv_matrix =
+            std::vector<::Kokkos::complex<T>>{matrix_ptr,
+                                              matrix_ptr + matrix_.size()};
         sv.applyOperation_std(getObsName(), wires_, false, {}, conv_matrix);
     }
 };
@@ -366,7 +366,7 @@ class HamiltonianKokkos final : public ObservableKokkos<T> {
             StateVectorKokkos<T> tmp(sv);
             obs_[term_idx]->applyInPlace(tmp);
             Lightning::Kokkos::Util::axpy_Kokkos<T>(
-                Kokkos::complex<T>{coeffs_[term_idx], 0.0}, tmp.getData(),
+                ::Kokkos::complex<T>{coeffs_[term_idx], 0.0}, tmp.getData(),
                 buffer.getData(), tmp.getLength());
         }
         sv.updateData(buffer);
