@@ -59,11 +59,6 @@ jobs:
           cd kokkos
           git checkout ${{ matrix.kokkos_version }}
           cd -
-          pushd . &> /dev/null
-          git clone https://github.com/kokkos/kokkos-kernels.git
-          cd kokkos-kernels
-          git checkout ${{ matrix.kokkos_version }}
-          cd -
 
       - uses: actions/setup-python@v4
         name: Install Python
