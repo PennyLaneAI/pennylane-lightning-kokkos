@@ -3,7 +3,7 @@ on:
   push:
     branches:
       - master
-  # pull_request:
+  pull_request:
 
 env:
   PY_VERSION: 3.8
