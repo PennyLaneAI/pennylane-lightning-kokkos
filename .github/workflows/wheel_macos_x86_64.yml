@@ -27,7 +27,7 @@ jobs:
     needs: [set_wheel_build_matrix]
     strategy:
       matrix:
-        os: [macos-11]
+        os: [macos-12]
         arch: [x86_64]
         exec_model: ${{ fromJson(needs.set_wheel_build_matrix.outputs.cpu_exec_model) }}
         kokkos_version: ${{ fromJson(needs.set_wheel_build_matrix.outputs.kokkos_version) }}
@@ -51,7 +51,6 @@ jobs:
       - name: Install clang
         run: |
           brew install libomp
-          brew install llvm@14
 
       - name: Clone Kokkos libs
         # if: steps.kokkos-cache.outputs.cache-hit != 'true'
@@ -81,7 +80,7 @@ jobs:
                           -DKokkos_ENABLE_DEPRECATION_WARNINGS=OFF \
                           -DCMAKE_CXX_STANDARD=20 \
                           -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
-                          -DCMAKE_CXX_COMPILER=$(brew --prefix llvm)/bin/clang++ \
+                          -DCMAKE_CXX_COMPILER=g++ \
                           -G Ninja
           cmake --build ./Build --verbose
           cmake --install ./Build
@@ -92,7 +91,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-11]
+        os: [macos-12]
         arch: [x86_64]
         cibw_build: ${{ fromJson(needs.set_wheel_build_matrix.outputs.python_version) }}
         exec_model: ${{ fromJson(needs.set_wheel_build_matrix.outputs.cpu_exec_model) }}
@@ -138,7 +137,6 @@ jobs:
           CIBW_BEFORE_ALL_MACOS: |
             brew uninstall --force oclint
             brew install libomp
-            brew install llvm@14
 
           # Python build settings
           CIBW_BEFORE_BUILD: |
