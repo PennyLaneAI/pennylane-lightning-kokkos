@@ -180,7 +180,7 @@ template <class T> class OpsData {
  */
 template <class T = double> class AdjointJacobianKokkos {
   private:
-    using CFP_t = Kokkos::complex<T>;
+    using CFP_t = ::Kokkos::complex<T>;
     using scalar_type_t = T;
 
     /**

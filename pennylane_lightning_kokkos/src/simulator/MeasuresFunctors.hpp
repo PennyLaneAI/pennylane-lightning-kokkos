@@ -14,11 +14,11 @@ namespace Pennylane::Functors {
  */
 template <class Precision> struct getProbFunctor {
 
-    Kokkos::View<Kokkos::complex<Precision> *> arr;
-    Kokkos::View<Precision *> probability;
+    ::Kokkos::View<::Kokkos::complex<Precision> *> arr;
+    ::Kokkos::View<Precision *> probability;
 
-    getProbFunctor(Kokkos::View<Kokkos::complex<Precision> *> arr_,
-                   Kokkos::View<Precision *> probability_)
+    getProbFunctor(::Kokkos::View<::Kokkos::complex<Precision> *> arr_,
+                   ::Kokkos::View<Precision *> probability_)
         : arr(arr_), probability(probability_) {}
 
     KOKKOS_INLINE_FUNCTION
@@ -38,9 +38,9 @@ template <class Precision> struct getProbFunctor {
  */
 template <class Precision> struct getCDFFunctor {
 
-    Kokkos::View<Precision *> probability;
+    ::Kokkos::View<Precision *> probability;
 
-    getCDFFunctor(Kokkos::View<Precision *> probability_)
+    getCDFFunctor(::Kokkos::View<Precision *> probability_)
         : probability(probability_) {}
 
     KOKKOS_INLINE_FUNCTION
@@ -58,25 +58,25 @@ template <class Precision> struct getCDFFunctor {
 /**
  *@brief Sampling using Random_XorShift64_Pool
  *
- * @param samples_ Kokkos::View of the generated samples.
- * @param cdf_  Kokkos::View of cumulative probability distribution.
+ * @param samples_ ::Kokkos::View of the generated samples.
+ * @param cdf_  ::Kokkos::View of cumulative probability distribution.
  * @param rand_pool_ The generatorPool.
  * @param num_qubits_ Number of qubits.
  * @param length_ Length of cumulative probability distribution.
  */
 
 template <class Precision, template <class ExecutionSpace> class GeneratorPool,
-          class ExecutionSpace = Kokkos::DefaultExecutionSpace>
+          class ExecutionSpace = ::Kokkos::DefaultExecutionSpace>
 struct Sampler {
 
-    Kokkos::View<size_t *> samples;
-    Kokkos::View<Precision *> cdf;
+    ::Kokkos::View<size_t *> samples;
+    ::Kokkos::View<Precision *> cdf;
     GeneratorPool<ExecutionSpace> rand_pool;
 
     const size_t num_qubits;
     const size_t length;
 
-    Sampler(Kokkos::View<size_t *> samples_, Kokkos::View<Precision *> cdf_,
+    Sampler(::Kokkos::View<size_t *> samples_, ::Kokkos::View<Precision *> cdf_,
             GeneratorPool<ExecutionSpace> rand_pool_, const size_t num_qubits_,
             const size_t length_)
         : samples(samples_), cdf(cdf_), rand_pool(rand_pool_),
@@ -129,15 +129,15 @@ struct Sampler {
  */
 template <class Precision> struct getSubProbFunctor {
 
-    Kokkos::View<Kokkos::complex<Precision> *> arr;
-    Kokkos::View<Precision *> probability;
-    Kokkos::View<size_t *> all_indices;
-    Kokkos::View<size_t *> all_offsets;
+    ::Kokkos::View<::Kokkos::complex<Precision> *> arr;
+    ::Kokkos::View<Precision *> probability;
+    ::Kokkos::View<size_t *> all_indices;
+    ::Kokkos::View<size_t *> all_offsets;
 
-    getSubProbFunctor(Kokkos::View<Kokkos::complex<Precision> *> arr_,
-                      Kokkos::View<Precision *> probability_,
-                      Kokkos::View<size_t *> all_indices_,
-                      Kokkos::View<size_t *> all_offsets_)
+    getSubProbFunctor(::Kokkos::View<::Kokkos::complex<Precision> *> arr_,
+                      ::Kokkos::View<Precision *> probability_,
+                      ::Kokkos::View<size_t *> all_indices_,
+                      ::Kokkos::View<size_t *> all_offsets_)
         : arr(arr_), probability(probability_), all_indices(all_indices_),
           all_offsets(all_offsets_) {}
 
@@ -147,7 +147,7 @@ template <class Precision> struct getSubProbFunctor {
         Precision REAL = arr[index].real();
         Precision IMAG = arr[index].imag();
         Precision value = REAL * REAL + IMAG * IMAG;
-        Kokkos::atomic_add(&probability[i], value);
+        ::Kokkos::atomic_add(&probability[i], value);
     }
 };
 
@@ -161,11 +161,11 @@ template <class Precision> struct getSubProbFunctor {
  */
 struct getTransposedIndexFunctor {
 
-    Kokkos::View<size_t *> sorted_ind_wires;
-    Kokkos::View<size_t *> trans_index;
+    ::Kokkos::View<size_t *> sorted_ind_wires;
+    ::Kokkos::View<size_t *> trans_index;
     const size_t max_index_sorted_ind_wires;
-    getTransposedIndexFunctor(Kokkos::View<size_t *> sorted_ind_wires_,
-                              Kokkos::View<size_t *> trans_index_,
+    getTransposedIndexFunctor(::Kokkos::View<size_t *> sorted_ind_wires_,
+                              ::Kokkos::View<size_t *> trans_index_,
                               const int length_sorted_ind_wires_)
         : sorted_ind_wires(sorted_ind_wires_), trans_index(trans_index_),
           max_index_sorted_ind_wires(length_sorted_ind_wires_ - 1) {}
@@ -177,7 +177,7 @@ struct getTransposedIndexFunctor {
         size_t index = i / (1L << (max_index_sorted_ind_wires - j));
         size_t sub_index = (index % 2) << (max_index_sorted_ind_wires - axis);
 
-        Kokkos::atomic_add(&trans_index[i], sub_index);
+        ::Kokkos::atomic_add(&trans_index[i], sub_index);
     }
 };
 
@@ -192,12 +192,12 @@ struct getTransposedIndexFunctor {
  */
 template <class Precision> struct getTransposedFunctor {
 
-    Kokkos::View<Precision *> transProb;
-    Kokkos::View<Precision *> probability;
-    Kokkos::View<size_t *> trans_index;
-    getTransposedFunctor(Kokkos::View<Precision *> transProb_,
-                         Kokkos::View<Precision *> probability_,
-                         Kokkos::View<size_t *> trans_index_)
+    ::Kokkos::View<Precision *> transProb;
+    ::Kokkos::View<Precision *> probability;
+    ::Kokkos::View<size_t *> trans_index;
+    getTransposedFunctor(::Kokkos::View<Precision *> transProb_,
+                         ::Kokkos::View<Precision *> probability_,
+                         ::Kokkos::View<size_t *> trans_index_)
         : transProb(transProb_), probability(probability_),
           trans_index(trans_index_) {}
 

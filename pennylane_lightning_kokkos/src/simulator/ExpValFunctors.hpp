@@ -12,10 +12,10 @@ namespace Pennylane::Functors {
 
 template <class Precision> struct getExpectationValueIdentityFunctor {
 
-    Kokkos::View<Kokkos::complex<Precision> *> arr;
+    ::Kokkos::View<::Kokkos::complex<Precision> *> arr;
 
     getExpectationValueIdentityFunctor(
-        Kokkos::View<Kokkos::complex<Precision> *> arr_,
+        ::Kokkos::View<::Kokkos::complex<Precision> *> arr_,
         [[maybe_unused]] std::size_t num_qubits,
         [[maybe_unused]] const std::vector<size_t> &wires) {
         arr = arr_;
@@ -29,7 +29,7 @@ template <class Precision> struct getExpectationValueIdentityFunctor {
 
 template <class Precision> struct getExpectationValuePauliXFunctor {
 
-    Kokkos::View<Kokkos::complex<Precision> *> arr;
+    ::Kokkos::View<::Kokkos::complex<Precision> *> arr;
 
     std::size_t rev_wire;
     std::size_t rev_wire_shift;
@@ -37,8 +37,8 @@ template <class Precision> struct getExpectationValuePauliXFunctor {
     std::size_t wire_parity_inv;
 
     getExpectationValuePauliXFunctor(
-        Kokkos::View<Kokkos::complex<Precision> *> arr_, std::size_t num_qubits,
-        const std::vector<size_t> &wires) {
+        ::Kokkos::View<::Kokkos::complex<Precision> *> arr_,
+        std::size_t num_qubits, const std::vector<size_t> &wires) {
         arr = arr_;
         rev_wire = num_qubits - wires[0] - 1;
         rev_wire_shift = (static_cast<size_t>(1U) << rev_wire);
@@ -59,7 +59,7 @@ template <class Precision> struct getExpectationValuePauliXFunctor {
 
 template <class Precision> struct getExpectationValuePauliYFunctor {
 
-    Kokkos::View<Kokkos::complex<Precision> *> arr;
+    ::Kokkos::View<::Kokkos::complex<Precision> *> arr;
 
     std::size_t rev_wire;
     std::size_t rev_wire_shift;
@@ -67,8 +67,8 @@ template <class Precision> struct getExpectationValuePauliYFunctor {
     std::size_t wire_parity_inv;
 
     getExpectationValuePauliYFunctor(
-        Kokkos::View<Kokkos::complex<Precision> *> arr_, std::size_t num_qubits,
-        const std::vector<size_t> &wires) {
+        ::Kokkos::View<::Kokkos::complex<Precision> *> arr_,
+        std::size_t num_qubits, const std::vector<size_t> &wires) {
         arr = arr_;
         rev_wire = num_qubits - wires[0] - 1;
         rev_wire_shift = (static_cast<size_t>(1U) << rev_wire);
@@ -85,15 +85,15 @@ template <class Precision> struct getExpectationValuePauliYFunctor {
         const auto v1 = arr[i1];
 
         expval += real(conj(arr[i0]) *
-                       Kokkos::complex<Precision>{imag(v1), -real(v1)});
+                       ::Kokkos::complex<Precision>{imag(v1), -real(v1)});
         expval += real(conj(arr[i1]) *
-                       Kokkos::complex<Precision>{-imag(v0), real(v0)});
+                       ::Kokkos::complex<Precision>{-imag(v0), real(v0)});
     }
 };
 
 template <class Precision> struct getExpectationValuePauliZFunctor {
 
-    Kokkos::View<Kokkos::complex<Precision> *> arr;
+    ::Kokkos::View<::Kokkos::complex<Precision> *> arr;
 
     std::size_t rev_wire;
     std::size_t rev_wire_shift;
@@ -101,8 +101,8 @@ template <class Precision> struct getExpectationValuePauliZFunctor {
     std::size_t wire_parity_inv;
 
     getExpectationValuePauliZFunctor(
-        Kokkos::View<Kokkos::complex<Precision> *> arr_, std::size_t num_qubits,
-        const std::vector<size_t> &wires) {
+        ::Kokkos::View<::Kokkos::complex<Precision> *> arr_,
+        std::size_t num_qubits, const std::vector<size_t> &wires) {
         arr = arr_;
         rev_wire = num_qubits - wires[0] - 1;
         rev_wire_shift = (static_cast<size_t>(1U) << rev_wire);
@@ -122,7 +122,7 @@ template <class Precision> struct getExpectationValuePauliZFunctor {
 
 template <class Precision> struct getExpectationValueHadamardFunctor {
 
-    Kokkos::View<Kokkos::complex<Precision> *> arr;
+    ::Kokkos::View<::Kokkos::complex<Precision> *> arr;
 
     std::size_t rev_wire;
     std::size_t rev_wire_shift;
@@ -130,8 +130,8 @@ template <class Precision> struct getExpectationValueHadamardFunctor {
     std::size_t wire_parity_inv;
 
     getExpectationValueHadamardFunctor(
-        Kokkos::View<Kokkos::complex<Precision> *> arr_, std::size_t num_qubits,
-        const std::vector<size_t> &wires) {
+        ::Kokkos::View<::Kokkos::complex<Precision> *> arr_,
+        std::size_t num_qubits, const std::vector<size_t> &wires) {
         arr = arr_;
         rev_wire = num_qubits - wires[0] - 1;
         rev_wire_shift = (static_cast<size_t>(1U) << rev_wire);
@@ -144,8 +144,8 @@ template <class Precision> struct getExpectationValueHadamardFunctor {
         const std::size_t i0 =
             ((k << 1U) & wire_parity_inv) | (wire_parity & k);
         const std::size_t i1 = i0 | rev_wire_shift;
-        const Kokkos::complex<Precision> v0 = arr[i0];
-        const Kokkos::complex<Precision> v1 = arr[i1];
+        const ::Kokkos::complex<Precision> v0 = arr[i0];
+        const ::Kokkos::complex<Precision> v1 = arr[i1];
 
         expval += real(M_SQRT1_2 *
                        (conj(arr[i0]) * (v0 + v1) + conj(arr[i1]) * (v0 - v1)));
@@ -154,8 +154,8 @@ template <class Precision> struct getExpectationValueHadamardFunctor {
 
 template <class Precision> struct getExpectationValueSingleQubitOpFunctor {
 
-    Kokkos::View<Kokkos::complex<Precision> *> arr;
-    Kokkos::View<Kokkos::complex<Precision> *> matrix;
+    ::Kokkos::View<::Kokkos::complex<Precision> *> arr;
+    ::Kokkos::View<::Kokkos::complex<Precision> *> matrix;
 
     std::size_t rev_wire;
     std::size_t rev_wire_shift;
@@ -163,9 +163,9 @@ template <class Precision> struct getExpectationValueSingleQubitOpFunctor {
     std::size_t wire_parity_inv;
 
     getExpectationValueSingleQubitOpFunctor(
-        Kokkos::View<Kokkos::complex<Precision> *> &arr_,
+        ::Kokkos::View<::Kokkos::complex<Precision> *> &arr_,
         std::size_t num_qubits,
-        const Kokkos::View<Kokkos::complex<Precision> *> &matrix_,
+        const ::Kokkos::View<::Kokkos::complex<Precision> *> &matrix_,
         const std::vector<size_t> &wires) {
         arr = arr_;
         matrix = matrix_;
@@ -189,8 +189,8 @@ template <class Precision> struct getExpectationValueSingleQubitOpFunctor {
 
 template <class Precision> struct getExpectationValueTwoQubitOpFunctor {
 
-    Kokkos::View<Kokkos::complex<Precision> *> arr;
-    Kokkos::View<Kokkos::complex<Precision> *> matrix;
+    ::Kokkos::View<::Kokkos::complex<Precision> *> arr;
+    ::Kokkos::View<::Kokkos::complex<Precision> *> matrix;
 
     std::size_t rev_wire0;
     std::size_t rev_wire1;
@@ -203,9 +203,9 @@ template <class Precision> struct getExpectationValueTwoQubitOpFunctor {
     std::size_t parity_middle;
 
     getExpectationValueTwoQubitOpFunctor(
-        Kokkos::View<Kokkos::complex<Precision> *> &arr_,
+        ::Kokkos::View<::Kokkos::complex<Precision> *> &arr_,
         std::size_t num_qubits,
-        const Kokkos::View<Kokkos::complex<Precision> *> &matrix_,
+        const ::Kokkos::View<::Kokkos::complex<Precision> *> &matrix_,
         const std::vector<size_t> &wires) {
         rev_wire0 = num_qubits - wires[1] - 1;
         rev_wire1 = num_qubits - wires[0] - 1;
@@ -252,8 +252,8 @@ template <class Precision> struct getExpectationValueTwoQubitOpFunctor {
 template <class Precision, bool inverse = false>
 struct getExpectationValueMultiQubitOpFunctor {
 
-    using KokkosComplexVector = Kokkos::View<Kokkos::complex<Precision> *>;
-    using KokkosSizeTVector = Kokkos::View<std::size_t *>;
+    using KokkosComplexVector = ::Kokkos::View<::Kokkos::complex<Precision> *>;
+    using KokkosSizeTVector = ::Kokkos::View<std::size_t *>;
 
     KokkosComplexVector arr;
     KokkosComplexVector matrix;
@@ -301,7 +301,7 @@ struct getExpectationValueMultiQubitOpFunctor {
             const auto idx = indices[i];
             const std::size_t base_idx = i * dim;
 
-            Kokkos::complex<Precision> arr_idx_new = 0.0;
+            ::Kokkos::complex<Precision> arr_idx_new = 0.0;
             for (size_t j = 0; j < dim; j++) {
                 arr_idx_new += (matrix[base_idx + j] * coeffs_in[j]);
             }
@@ -313,8 +313,8 @@ struct getExpectationValueMultiQubitOpFunctor {
 
 template <class Precision> struct getExpectationValueSparseFunctor {
 
-    using KokkosComplexVector = Kokkos::View<Kokkos::complex<Precision> *>;
-    using KokkosSizeTVector = Kokkos::View<std::size_t *>;
+    using KokkosComplexVector = ::Kokkos::View<::Kokkos::complex<Precision> *>;
+    using KokkosSizeTVector = ::Kokkos::View<std::size_t *>;
 
     KokkosComplexVector arr;
     KokkosComplexVector data;

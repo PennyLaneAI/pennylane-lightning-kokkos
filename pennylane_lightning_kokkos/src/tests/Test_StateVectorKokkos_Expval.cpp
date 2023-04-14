@@ -251,20 +251,21 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::getExpectationValueSingleQubitOp",
         SECTION("Apply directly") {
             StateVectorKokkos<TestType> kokkos_sv{num_qubits};
             auto m = MeasuresKokkos<TestType>(kokkos_sv);
-            Kokkos::View<Kokkos::complex<TestType> *> opMatDevice("opMat", 4);
-            Kokkos::View<Kokkos::complex<TestType> *, Kokkos::HostSpace> opMat(
-                "opMatHost", 4);
+            ::Kokkos::View<::Kokkos::complex<TestType> *> opMatDevice("opMat",
+                                                                      4);
+            ::Kokkos::View<::Kokkos::complex<TestType> *, ::Kokkos::HostSpace>
+                opMat("opMatHost", 4);
 
             const TestType theta = M_PI / 2;
             const TestType c = std::cos(theta / 2);
             const TestType js = std::sin(-theta / 2);
 
             opMat[0] = c;
-            opMat[1] = Kokkos::complex(static_cast<TestType>(0), js);
-            opMat[2] = Kokkos::complex(static_cast<TestType>(0), js);
+            opMat[1] = ::Kokkos::complex(static_cast<TestType>(0), js);
+            opMat[2] = ::Kokkos::complex(static_cast<TestType>(0), js);
             opMat[3] = c;
 
-            Kokkos::deep_copy(opMatDevice, opMat);
+            ::Kokkos::deep_copy(opMatDevice, opMat);
             auto res = m.getExpectationValueSingleQubitOp(opMatDevice, {0});
             CHECK(res == INVSQRT2);
         }
@@ -294,22 +295,27 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::getExpectationValueTwoQubitOp",
             StateVectorKokkos<TestType> kokkos_sv{num_qubits};
             auto m = MeasuresKokkos<TestType>(kokkos_sv);
 
-            Kokkos::View<Kokkos::complex<TestType> *> opMatDevice("opMat", 16);
-            Kokkos::View<Kokkos::complex<TestType> *, Kokkos::HostSpace> opMat(
-                "opMatHost", 16);
+            ::Kokkos::View<::Kokkos::complex<TestType> *> opMatDevice("opMat",
+                                                                      16);
+            ::Kokkos::View<::Kokkos::complex<TestType> *, ::Kokkos::HostSpace>
+                opMat("opMatHost", 16);
 
             const TestType theta = M_PI / 2;
             const TestType c = std::cos(theta / 2);
             const TestType js = std::sin(-theta / 2);
 
             opMat[0] = c;
-            opMat[1] = Kokkos::complex<TestType>(static_cast<TestType>(0), js);
-            opMat[4] = Kokkos::complex<TestType>(static_cast<TestType>(0), js);
+            opMat[1] =
+                ::Kokkos::complex<TestType>(static_cast<TestType>(0), js);
+            opMat[4] =
+                ::Kokkos::complex<TestType>(static_cast<TestType>(0), js);
             opMat[5] = c;
-            opMat[10] = Kokkos::complex<TestType>(static_cast<TestType>(1), 0);
-            opMat[15] = Kokkos::complex<TestType>(static_cast<TestType>(1), 0);
+            opMat[10] =
+                ::Kokkos::complex<TestType>(static_cast<TestType>(1), 0);
+            opMat[15] =
+                ::Kokkos::complex<TestType>(static_cast<TestType>(1), 0);
 
-            Kokkos::deep_copy(opMatDevice, opMat);
+            ::Kokkos::deep_copy(opMatDevice, opMat);
             auto res = m.getExpectationValueTwoQubitOp(opMatDevice, {0, 1});
             CHECK(res == INVSQRT2);
         }
@@ -337,7 +343,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkosManaged::getExpectationValueTwoQubitOp",
 
 TEMPLATE_TEST_CASE("StateVectorKokkos::Hamiltonian_expval",
                    "[StateVectorKokkos_Expval]", float, double) {
-    using cp_t = Kokkos::complex<TestType>;
+    using cp_t = ::Kokkos::complex<TestType>;
     const std::size_t num_qubits = 3;
     SECTION("GetExpectionIdentity") {
         StateVectorKokkos<TestType> kokkos_sv{num_qubits};
@@ -364,7 +370,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::Hamiltonian_expval",
     }
 
     SECTION("GetExpectionHermitianMatrix") {
-        using cp_t = Kokkos::complex<TestType>;
+        using cp_t = ::Kokkos::complex<TestType>;
         std::vector<cp_t> init_state{{0.0, 0.0}, {0.0, 0.1}, {0.1, 0.1},
                                      {0.1, 0.2}, {0.2, 0.2}, {0.3, 0.3},
                                      {0.3, 0.4}, {0.4, 0.5}};
@@ -392,7 +398,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::Hamiltonian_expval",
         CHECK(real(expected) == Approx(results).epsilon(1e-7));
     }
     SECTION("Using expval") {
-        std::vector<Kokkos::complex<TestType>> init_state{
+        std::vector<::Kokkos::complex<TestType>> init_state{
             {0.0, 0.0}, {0.0, 0.1}, {0.1, 0.1}, {0.1, 0.2},
             {0.2, 0.2}, {0.3, 0.3}, {0.3, 0.4}, {0.4, 0.5}};
         StateVectorKokkos<TestType> kokkos_sv{init_state.data(),
@@ -422,7 +428,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::Hamiltonian_expval",
 
 TEMPLATE_TEST_CASE("StateVectorKokkos::Hamiltonian_expval_Sparse",
                    "[StateVectorKokkos_Expval]", float, double) {
-    using cp_t = Kokkos::complex<TestType>;
+    using cp_t = ::Kokkos::complex<TestType>;
     SECTION("GetExpectionSparse") {
         std::vector<cp_t> init_state{{0.0, 0.0}, {0.0, 0.1}, {0.1, 0.1},
                                      {0.1, 0.2}, {0.2, 0.2}, {0.3, 0.3},
@@ -434,7 +440,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::Hamiltonian_expval_Sparse",
         std::vector<size_t> index_ptr = {0, 2, 4, 6, 8, 10, 12, 14, 16};
         std::vector<size_t> indices = {0, 3, 1, 2, 1, 2, 0, 3,
                                        4, 7, 5, 6, 5, 6, 4, 7};
-        std::vector<Kokkos::complex<TestType>> values = {
+        std::vector<::Kokkos::complex<TestType>> values = {
             {3.1415, 0.0},  {0.0, -3.1415}, {3.1415, 0.0}, {0.0, 3.1415},
             {0.0, -3.1415}, {3.1415, 0.0},  {0.0, 3.1415}, {3.1415, 0.0},
             {3.1415, 0.0},  {0.0, -3.1415}, {3.1415, 0.0}, {0.0, 3.1415},
@@ -449,7 +455,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::Hamiltonian_expval_Sparse",
 TEMPLATE_TEST_CASE("Test expectation value of HamiltonianObs",
                    "[StateVectorKokkos_Expval]", float, double) {
     SECTION("Using expval") {
-        std::vector<Kokkos::complex<TestType>> init_state{
+        std::vector<::Kokkos::complex<TestType>> init_state{
             {0.0, 0.0}, {0.0, 0.1}, {0.1, 0.1}, {0.1, 0.2},
             {0.2, 0.2}, {0.3, 0.3}, {0.3, 0.4}, {0.4, 0.5}};
         StateVectorKokkos<TestType> kokkos_sv{init_state.data(),
@@ -471,7 +477,7 @@ TEMPLATE_TEST_CASE("Test expectation value of HamiltonianObs",
 TEMPLATE_TEST_CASE("Test expectation value of TensorProdObs",
                    "[StateVectorKokkos_Expval]", float, double) {
     SECTION("Using expval") {
-        std::vector<Kokkos::complex<TestType>> init_state{
+        std::vector<::Kokkos::complex<TestType>> init_state{
             {0.0, 0.0}, {0.0, 0.1}, {0.1, 0.1}, {0.1, 0.2},
             {0.2, 0.2}, {0.3, 0.3}, {0.3, 0.4}, {0.4, 0.5}};
         StateVectorKokkos<TestType> kokkos_sv{init_state.data(),

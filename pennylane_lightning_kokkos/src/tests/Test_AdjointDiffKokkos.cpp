@@ -36,7 +36,7 @@ TEST_CASE("AdjointJacobianKokkos::AdjointJacobianKokkos Op=RX, Obs=Z",
     AdjointJacobianKokkos<double> adj;
     std::vector<double> param{-M_PI / 7, M_PI / 5, 2 * M_PI / 3};
 
-    const Kokkos::InitArguments num_threads_2 = {2};
+    const ::Kokkos::InitArguments num_threads_2 = {2};
     const size_t num_qubits = 1;
     const size_t num_params = 3;
     const size_t num_obs = 1;
@@ -284,13 +284,13 @@ TEST_CASE("AdjointJacobianKokkos::adjointJacobian Decomposed Rot gate, non "
             std::vector<std::vector<double>> jacobian(
                 num_obs, std::vector<double>(num_params, 0));
 
-            std::vector<Kokkos::complex<double>> cdata{
-                {Pennylane::Lightning::Kokkos::Util::INVSQRT2<Kokkos::complex,
+            std::vector<::Kokkos::complex<double>> cdata{
+                {Pennylane::Lightning::Kokkos::Util::INVSQRT2<::Kokkos::complex,
                                                               double>()},
-                {-Pennylane::Lightning::Kokkos::Util::INVSQRT2<Kokkos::complex,
-                                                               double>()}};
-            std::vector<Kokkos::complex<double>> new_data{cdata.begin(),
-                                                          cdata.end()};
+                {-Pennylane::Lightning::Kokkos::Util::INVSQRT2<
+                    ::Kokkos::complex, double>()}};
+            std::vector<::Kokkos::complex<double>> new_data{cdata.begin(),
+                                                            cdata.end()};
             StateVectorKokkos<double> psi(new_data.data(), new_data.size());
 
             auto obs = std::make_shared<NamedObsKokkos<double>>(
@@ -331,17 +331,17 @@ TEST_CASE("AdjointJacobianKokkos::adjointJacobian Mixed Ops, Obs and TParams",
         std::vector<std::vector<double>> jacobian(
             num_obs, std::vector<double>(t_params.size(), 0));
 
-        std::vector<Kokkos::complex<double>> cdata{
-            {Pennylane::Lightning::Kokkos::Util::ONE<Kokkos::complex,
+        std::vector<::Kokkos::complex<double>> cdata{
+            {Pennylane::Lightning::Kokkos::Util::ONE<::Kokkos::complex,
                                                      double>()},
-            {Pennylane::Lightning::Kokkos::Util::ZERO<Kokkos::complex,
+            {Pennylane::Lightning::Kokkos::Util::ZERO<::Kokkos::complex,
                                                       double>()},
-            {Pennylane::Lightning::Kokkos::Util::ZERO<Kokkos::complex,
+            {Pennylane::Lightning::Kokkos::Util::ZERO<::Kokkos::complex,
                                                       double>()},
-            {Pennylane::Lightning::Kokkos::Util::ZERO<Kokkos::complex,
+            {Pennylane::Lightning::Kokkos::Util::ZERO<::Kokkos::complex,
                                                       double>()}};
-        std::vector<Kokkos::complex<double>> new_data{cdata.begin(),
-                                                      cdata.end()};
+        std::vector<::Kokkos::complex<double>> new_data{cdata.begin(),
+                                                        cdata.end()};
         StateVectorKokkos<double> psi(new_data.data(), new_data.size());
 
         const auto obs = std::make_shared<TensorProdObsKokkos<double>>(
