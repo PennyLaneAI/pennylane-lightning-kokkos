@@ -9,8 +9,14 @@
 
 ### Improvements
 
+* `setup.py` works on MacOS without `brew` (which is required by Conda-Forge runners).
+[(#48)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/48)
+
+* MacOS::Intel wheels are built for the SERIAL and THREADS Kokkos backends.
+[(#48)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/48)
+
 * Wheels are now checked with `twine check` post-creation for PyPI compatibility.
-  [(#50)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/50)
+[(#50)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/50)
 
 * Template n-qubit gate methods.
 [(#40)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/40)
@@ -23,7 +29,7 @@
 
 This release contains contributions from (in alphabetical order):
 
-Ali Asadi, Vincent Michaud-Rioux
+Ali Asadi, Lee James O'Riordan, Vincent Michaud-Rioux
 
 ---
 
