@@ -78,6 +78,7 @@ jobs:
           python -m pip install cmake ninja
 
           cmake -BBuild . -DCMAKE_INSTALL_PREFIX=${{ github.workspace}}/Kokkos_install/${{ matrix.exec_model }} \
+                          -DCMAKE_BUILD_TYPE=Release \
                           -DKokkos_ENABLE_COMPLEX_ALIGN=OFF \
                           -DKokkos_ENABLE_SERIAL=ON \
                           -DKokkos_ENABLE_${{ matrix.exec_model }}=ON \
