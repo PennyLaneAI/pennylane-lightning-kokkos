@@ -80,7 +80,12 @@ jobs:
                           -DKokkos_ENABLE_DEPRECATION_WARNINGS=OFF \
                           -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
                           -DOpenMP_ROOT=$(brew --prefix libomp) \
-                          -DCMAKE_CXX_FLAGS="-I$(brew --prefix libomp)/include -Xpreprocessor -fopenmp" \
+                          -DOpenMP_CXX_FLAGS="-Xclang -fopenmp -I$(brew --prefix libomp)/include" \
+                          -DOpenMP_C_FLAGS="-Xclang -fopenmp -I$(brew --prefix libomp)/include" \
+                          -DOpenMP_CXX_LIB_NAMES=libomp \
+                          -DOpenMP_C_LIB_NAMES=libomp \
+                          -DOpenMP_libomp_LIBRARY=$(brew --prefix libomp)/lib/libomp.dylib \
+                          -DCMAKE_SHARED_LINKER_FLAGS="-L$(brew --prefix libomp)/lib -lomp -Wl,-rpath,$(brew --prefix libomp)/lib" \
                           -DCMAKE_CXX_STANDARD=17 \
                           -DCMAKE_CXX_COMPILER=g++ \
                           -G Ninja
