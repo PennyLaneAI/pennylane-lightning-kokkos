@@ -9,6 +9,9 @@
 
 ### Improvements
 
+* Wheels are now checked with `twine check` post-creation for PyPI compatibility.
+  [(#50)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/50)
+
 * Template n-qubit gate methods.
 [(#40)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/40)
 
