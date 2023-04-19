@@ -55,9 +55,9 @@ jobs:
         id: cpu_exec_model
         run: echo "::set-output name=cpu_exec_model::[\"SERIAL\",\"OPENMP\"]"
 
-      - name: Kokkos execution strategy (OSX)
-        id: osx_exec_model
-        run: echo "::set-output name=osx_exec_model::[\"SERIAL\",\"THREADS\"]"
+      - name: Kokkos execution strategy (MacOS)
+        id: macos_exec_model
+        run: echo "::set-output name=macos_exec_model::[\"SERIAL\",\"THREADS\"]"
 
       - name: Kokkos version
         id: kokkos_version
