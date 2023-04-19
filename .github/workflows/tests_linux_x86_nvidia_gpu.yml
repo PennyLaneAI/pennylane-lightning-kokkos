@@ -93,6 +93,7 @@ jobs:
         run: |
           export PATH=/usr/local/cuda-11.8/bin:$PATH
           export LD_LIBRARY_PATH=/usr/local/cuda-11.8/lib64:$LD_LIBRARY_PATH
+          python -m pip install cmake~=3.24.3
           BACKEND="CUDA" python -m pip install -e .
       - name: Run PennyLane-Lightning-Kokkos unit tests
         run: |
