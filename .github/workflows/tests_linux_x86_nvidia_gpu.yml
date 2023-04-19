@@ -80,8 +80,8 @@ jobs:
 
       - name: Install required packages
         run: |
-          sudo apt-get update && sudo apt-get -y -q install gcc-${{ env.GCC_VERSION }} g++-${{ env.GCC_VERSION }} gcovr lcov
           python -m pip install ninja cmake~=3.24.3 pytest pytest-mock flaky pytest-cov
+          sudo apt-get update && sudo apt-get -y -q install gcc-${{ env.GCC_VERSION }} g++-${{ env.GCC_VERSION }} gcovr lcov
           # Sync with latest master branches
           python -m pip install git+https://github.com/PennyLaneAI/pennylane.git@master
           python -m pip install --index-url https://test.pypi.org/simple/ pennylane-lightning --pre --force-reinstall --no-deps
