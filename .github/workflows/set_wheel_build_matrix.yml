@@ -17,9 +17,9 @@ on:
       cpu_exec_model:
         description: "Kokkos' cpu execution model."
         value: ${{ jobs.set-builder-matrix.outputs.cpu_exec_model }}
-      osx_exec_model:
-        description: "Kokkos' osx execution model."
-        value: ${{ jobs.set-builder-matrix.outputs.osx_exec_model }}
+      macos_exec_model:
+        description: "Kokkos' MacOS execution model."
+        value: ${{ jobs.set-builder-matrix.outputs.macos_exec_model }}
       kokkos_version:
         description: "Kokkos version"
         value: ${{ jobs.set-builder-matrix.outputs.kokkos_version }}
