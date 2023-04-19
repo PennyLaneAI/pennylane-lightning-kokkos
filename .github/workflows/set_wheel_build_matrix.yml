@@ -66,5 +66,5 @@ jobs:
     outputs:
       python_version: ${{ steps.pyver.outputs.python_version }}
       cpu_exec_model: ${{ steps.cpu_exec_model.outputs.cpu_exec_model }}
-      osx_exec_model: ${{ steps.osx_exec_model.outputs.osx_exec_model }}
+      macos_exec_model: ${{ steps.macos_exec_model.outputs.macos_exec_model }}
       kokkos_version: ${{ steps.kokkos_version.outputs.kokkos_version }}
