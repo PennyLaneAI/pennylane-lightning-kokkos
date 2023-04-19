@@ -324,7 +324,7 @@ class TestAdjointJacobian:
         grad_PS = fn(qml.execute(gtapes, dev_kokkos, gradient_fn=None))
 
         # gradient has the correct shape and every element is nonzero
-        assert len(grad_D) == 3
+        assert np.size(grad_D) == 3
         assert all(isinstance(v, np.ndarray) for v in grad_D)
         assert np.count_nonzero(grad_D) == 3
         # the different methods agree
