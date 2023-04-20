@@ -16,11 +16,14 @@
 
 ### Bug fixes
 
+* Updates to use the new call signature for `QuantumScript.get_operation`.
+  [(#52)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/52)
+
 ### Contributors
 
 This release contains contributions from (in alphabetical order):
 
-Ali Asadi, Vincent Michaud-Rioux
+Ali Asadi, Vincent Michaud-Rioux, Romain Moyard
 
 ---
 
