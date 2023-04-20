@@ -24,6 +24,80 @@ jobs:
     with:
       event_name: ${{ github.event_name }}
 
+  build_dependencies:
+    needs: [set_wheel_build_matrix]
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        arch: [x86_64]
+        exec_model: ${{ fromJson(needs.set_wheel_build_matrix.outputs.cpu_exec_model) }}
+        kokkos_version: ${{ fromJson(needs.set_wheel_build_matrix.outputs.kokkos_version) }}
+        container_img: ["quay.io/pypa/manylinux2014_x86_64"]
+
+    name: Kokkos core (${{ matrix.exec_model }}::${{ matrix.arch }} )
+    runs-on: ${{ matrix.os }}
+    container: ${{ matrix.container_img }}
+
+    steps:
+      - name: Cancel previous runs
+        uses: styfle/cancel-workflow-action@0.11.0
+        with:
+          access_token: ${{ github.token }}
+
+      - name: Cache installation directories
+        id: kokkos-cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ github.workspace}}/Kokkos_install/${{ matrix.exec_model }}
+          key: ${{ matrix.container_img }}-kokkos${{ matrix.kokkos_version }}-${{ matrix.exec_model }}
+
+      - name: Install dependencies (Ubuntu)
+        if: ${{ (matrix.container_img == 'ubuntu-latest') && (steps.kokkos-cache.outputs.cache-hit != 'true') }}
+        run: |
+          apt-get update && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get -y -q install cmake gcc-$GCC_VERSION g++-$GCC_VERSION ninja-build git
+          echo "COMPILER=g++-11" >> $GITHUB_ENV
+
+      - name: Install dependencies (CentOS)
+        if: ${{ (matrix.container_img == 'quay.io/pypa/manylinux2014_x86_64') && (steps.kokkos-cache.outputs.cache-hit != 'true') }}
+        run: |
+          yum update -y && yum install -y cmake ninja-build
+          echo "COMPILER=g++" >> $GITHUB_ENV
+
+      - name: Clone Kokkos libs
+        if: steps.kokkos-cache.outputs.cache-hit != 'true'
+        run: |
+          git clone https://github.com/kokkos/kokkos.git
+          cd kokkos
+          git checkout ${{ matrix.kokkos_version }}
+          cd -
+
+      - uses: actions/setup-python@v4
+        name: Install Python
+        with:
+          python-version: '3.8'
+
+      - name: Build Kokkos core library
+        if: steps.kokkos-cache.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ${{ github.workspace}}/Kokkos_install/${{ matrix.exec_model }}
+          cd kokkos
+          python -m pip install cmake ninja
+
+          cmake -BBuild . -DCMAKE_INSTALL_PREFIX=${{ github.workspace}}/Kokkos_install/${{ matrix.exec_model }} \
+                          -DCMAKE_BUILD_TYPE=Release \
+                          -DKokkos_ENABLE_COMPLEX_ALIGN=OFF \
+                          -DKokkos_ENABLE_SERIAL=ON \
+                          -DKokkos_ENABLE_${{ matrix.exec_model }}=ON \
+                          -DKokkos_ENABLE_DEPRECATED_CODE_3:BOOL=ON \
+                          -DKokkos_ENABLE_DEPRECATION_WARNINGS=OFF \
+                          -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+                          -DCMAKE_CXX_STANDARD=20 \
+                          -DCMAKE_CXX_COMPILER=$(brew --prefix llvm)/bin/clang++ \
+                          -G Ninja
+          cmake --build ./Build --verbose
+          cmake --install ./Build
+          cd -
+
   linux-wheels-x86-64:
     needs: [set_wheel_build_matrix]
     strategy:
@@ -45,8 +119,20 @@ jobs:
         with:
           access_token: ${{ github.token }}
 
+      - name: Restoring cached dependencies
+        id: kokkos-cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ github.workspace }}/Kokkos_install/${{ matrix.exec_model }}
+          key: ${{ matrix.container_img }}-kokkos${{ matrix.kokkos_version }}-${{ matrix.exec_model }}
+
       - name: Checkout PennyLane-Lightning-Kokkos
         uses: actions/checkout@v3
+
+      - name: Copy cached libraries
+        run: |
+          mkdir Kokkos
+          cp -rf ${{ github.workspace }}/Kokkos_install/${{ matrix.exec_model }}/* Kokkos/
 
       - name: Install dependencies (CentOS)
         if: ${{ (matrix.container_img == 'quay.io/pypa/manylinux2014_x86_64') }}

@@ -53,7 +53,7 @@ jobs:
           brew install llvm
 
       - name: Clone Kokkos libs
-        # if: steps.kokkos-cache.outputs.cache-hit != 'true'
+        if: steps.kokkos-cache.outputs.cache-hit != 'true'
         run: |
           git clone https://github.com/kokkos/kokkos.git
           cd kokkos
@@ -66,7 +66,7 @@ jobs:
           python-version: '3.8'
 
       - name: Build Kokkos core library
-        # if: steps.kokkos-cache.outputs.cache-hit != 'true'
+        if: steps.kokkos-cache.outputs.cache-hit != 'true'
         run: |
           mkdir -p ${{ github.workspace}}/Kokkos_install/${{ matrix.exec_model }}
           cd kokkos
@@ -77,6 +77,7 @@ jobs:
                           -DKokkos_ENABLE_COMPLEX_ALIGN=OFF \
                           -DKokkos_ENABLE_SERIAL=ON \
                           -DKokkos_ENABLE_${{ matrix.exec_model }}=ON \
+                          -DKokkos_ENABLE_DEPRECATED_CODE_3:BOOL=ON \
                           -DKokkos_ENABLE_DEPRECATION_WARNINGS=OFF \
                           -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
                           -DCMAKE_CXX_STANDARD=20 \
