@@ -24,7 +24,7 @@ jobs:
         with:
           access_token: ${{ github.token }}
 
-      - name: Checkout PennyLane-Lightning
+      - name: Checkout PennyLane-Lightning-Kokkos
         uses: actions/checkout@v3
 
       - name: Python version
@@ -62,7 +62,7 @@ jobs:
         with:
           access_token: ${{ github.token }}
 
-      - name: Checkout PennyLane-Lightning
+      - name: Checkout PennyLane-Lightning-Kokkos
         uses: actions/checkout@v3
 
       - uses: actions/setup-python@v4
@@ -88,7 +88,9 @@ jobs:
           # Testing of built wheels
           CIBW_TEST_REQUIRES: pytest pytest-cov pytest-mock flaky
 
-          CIBW_BEFORE_TEST: pip install git+https://github.com/PennyLaneAI/pennylane.git@master
+          CIBW_BEFORE_TEST: |
+            python -m pip install git+https://github.com/PennyLaneAI/pennylane.git@master
+            python -m pip install --index-url https://test.pypi.org/simple/ pennylane-lightning --pre --force-reinstall --no-deps
 
           CIBW_TEST_COMMAND: |
             pl-device-test --device=lightning.qubit --skip-ops -x --tb=short --no-flaky-report
