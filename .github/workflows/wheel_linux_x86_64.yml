@@ -60,7 +60,7 @@ jobs:
       - name: Install dependencies (CentOS)
         if: ${{ (matrix.container_img == 'quay.io/pypa/manylinux2014_x86_64') && (steps.kokkos-cache.outputs.cache-hit != 'true') }}
         run: |
-          yum update -y && yum install -y cmake ninja-build
+          yum update -y && yum install -y cmake gcc-$GCC_VERSION g++-$GCC_VERSION ninja-build git
           echo "COMPILER=g++" >> $GITHUB_ENV
 
       - name: Clone Kokkos libs
@@ -99,7 +99,7 @@ jobs:
           cd -
 
   linux-wheels-x86-64:
-    needs: [set_wheel_build_matrix]
+    needs: [set_wheel_build_matrix, build_dependencies]
     strategy:
       fail-fast: false
       matrix:
