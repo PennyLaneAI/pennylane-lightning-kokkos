@@ -82,7 +82,9 @@ jobs:
           CIBW_TEST_REQUIRES: numpy~=1.21 scipy pytest pytest-cov pytest-mock flaky
 
           CIBW_BEFORE_TEST: |
-            pip install git+https://github.com/PennyLaneAI/pennylane.git@master
+            python -m pip install git+https://github.com/PennyLaneAI/pennylane.git@master
+            python -m pip install --index-url https://test.pypi.org/simple/ pennylane-lightning --pre --force-reinstall --no-deps
+
           CIBW_TEST_COMMAND: |
             pl-device-test --device=lightning.kokkos --skip-ops -x --tb=short --no-flaky-report
           
@@ -90,8 +92,14 @@ jobs:
 
           CIBW_BUILD_VERBOSITY: 3
 
-        run: | 
+        run: 
           python3.8 -m cibuildwheel --output-dir wheelhouse
+
+      - name: Validate wheels
+        run: |
+          python3.8 -m pip install twine
+          python3.8 -m twine check ./wheelhouse/*.whl
+
       - uses: actions-ecosystem/action-regex-match@v2
         id: rc_build
         with:

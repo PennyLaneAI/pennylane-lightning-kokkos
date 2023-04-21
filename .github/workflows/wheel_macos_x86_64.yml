@@ -1,0 +1,189 @@
+name: Wheel::MacOS::Intel
+
+# **What it does**: Builds python wheels for MacOS (10.15) architecture x86_64 and store it as artifacts.
+#                   Python versions: 3.8, 3.9, 3.10, 3.11.
+# **Why we have it**: To build wheels for pennylane-lightning-kokkos installation.
+# **Who does it impact**: Wheels to be uploaded to PyPI.
+
+env:
+  MACOSX_DEPLOYMENT_TARGET: 10.15
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  release:
+    types: [published]
+
+jobs:
+  set_wheel_build_matrix:
+    name: "Set wheel build matrix"
+    uses: ./.github/workflows/set_wheel_build_matrix.yml
+    with:
+      event_name: ${{ github.event_name }}
+
+  build_dependencies:
+    needs: [set_wheel_build_matrix]
+    strategy:
+      matrix:
+        os: [macos-12]
+        arch: [x86_64]
+        exec_model: ${{ fromJson(needs.set_wheel_build_matrix.outputs.macos_exec_model) }}
+        kokkos_version: ${{ fromJson(needs.set_wheel_build_matrix.outputs.kokkos_version) }}
+
+    name: Kokkos core (${{ matrix.exec_model }}::${{ matrix.arch }} )
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Cancel previous runs
+        uses: styfle/cancel-workflow-action@0.11.0
+        with:
+          access_token: ${{ github.token }}
+
+      - name: Cache installation directories
+        id: kokkos-cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ github.workspace}}/Kokkos_install/${{ matrix.exec_model }}
+          key: ${{ matrix.os }}-kokkos${{ matrix.kokkos_version }}-${{ matrix.exec_model }}
+
+      - name: Install clang
+        run: |
+          brew install llvm
+
+      - name: Clone Kokkos libs
+        # if: steps.kokkos-cache.outputs.cache-hit != 'true'
+        run: |
+          git clone https://github.com/kokkos/kokkos.git
+          cd kokkos
+          git checkout ${{ matrix.kokkos_version }}
+          cd -
+
+      - uses: actions/setup-python@v4
+        name: Install Python
+        with:
+          python-version: '3.8'
+
+      - name: Build Kokkos core library
+        # if: steps.kokkos-cache.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ${{ github.workspace}}/Kokkos_install/${{ matrix.exec_model }}
+          cd kokkos
+          python -m pip install cmake ninja
+
+          cmake -BBuild . -DCMAKE_INSTALL_PREFIX=${{ github.workspace}}/Kokkos_install/${{ matrix.exec_model }} \
+                          -DCMAKE_BUILD_TYPE=Release \
+                          -DKokkos_ENABLE_COMPLEX_ALIGN=OFF \
+                          -DKokkos_ENABLE_SERIAL=ON \
+                          -DKokkos_ENABLE_${{ matrix.exec_model }}=ON \
+                          -DKokkos_ENABLE_DEPRECATION_WARNINGS=OFF \
+                          -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+                          -DCMAKE_CXX_STANDARD=20 \
+                          -DCMAKE_CXX_COMPILER=$(brew --prefix llvm)/bin/clang++ \
+                          -G Ninja
+          cmake --build ./Build --verbose
+          cmake --install ./Build
+          cd -
+
+  mac-wheels-x86:
+    needs: [set_wheel_build_matrix, build_dependencies]
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-12]
+        arch: [x86_64]
+        cibw_build: ${{ fromJson(needs.set_wheel_build_matrix.outputs.python_version) }}
+        exec_model: ${{ fromJson(needs.set_wheel_build_matrix.outputs.macos_exec_model) }}
+        kokkos_version: ${{ fromJson(needs.set_wheel_build_matrix.outputs.kokkos_version) }}
+
+    name: ${{ matrix.os }} (Python ${{ fromJson('{ "cp38-*":"3.8","cp39-*":"3.9","cp310-*":"3.10","cp311-*":"3.11" }')[matrix.cibw_build] }} ${{ matrix.exec_model }}))
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.11.0
+        with:
+          access_token: ${{ github.token }}
+
+      - name: Checkout PennyLane-Lightning-Kokkos
+        uses: actions/checkout@v3
+
+      - name: Restoring cached dependencies
+        id: kokkos-cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ github.workspace}}/Kokkos_install/${{ matrix.exec_model }}
+          key: ${{ matrix.os }}-kokkos${{ matrix.kokkos_version }}-${{ matrix.exec_model }}
+
+      - name: Copy cached libraries
+        run: |
+          mkdir Kokkos
+          cp -rf ${{ github.workspace }}/Kokkos_install/${{ matrix.exec_model }}/* Kokkos/
+
+      - uses: actions/setup-python@v4
+        name: Install Python
+        with:
+          python-version: '3.8'
+
+      - name: Install cibuildwheel
+        run: python -m pip install cibuildwheel~=2.11.0
+
+      - name: Build wheels
+        env:
+          CIBW_BUILD: ${{ matrix.cibw_build }}
+
+          # MacOS specific build settings
+          CIBW_BEFORE_ALL_MACOS: |
+            brew uninstall --force oclint
+            brew install llvm
+
+          # Python build settings
+          CIBW_BEFORE_BUILD: |
+            python -m pip install pybind11 ninja cmake~=3.24.0 setuptools
+
+          # Testing of built wheels
+          CIBW_TEST_REQUIRES: pytest pytest-cov pytest-mock flaky
+
+          CIBW_BEFORE_TEST: |
+            python -m pip install git+https://github.com/PennyLaneAI/pennylane.git@master
+            python -m pip install --index-url https://test.pypi.org/simple/ pennylane-lightning --pre --force-reinstall --no-deps
+
+          CIBW_TEST_COMMAND: |
+            OMP_PROC_BIND=false pl-device-test --device=lightning.kokkos --skip-ops --tb=short --no-flaky-report
+
+          CIBW_BUILD_VERBOSITY: 3
+
+          CIBW_ARCHS_MACOS: ${{matrix.arch}}
+
+        run: |
+          python -m cibuildwheel --output-dir wheelhouse
+
+      - uses: actions-ecosystem/action-regex-match@v2
+        id: rc_build
+        with:
+          text: ${{ github.event.pull_request.head.ref }}
+          regex: '.*[0-9]+.[0-9]+.[0-9]+[-_]?rc[0-9]+'
+
+      - uses: actions/upload-artifact@v2
+        if: ${{ github.event_name == 'release' || github.ref == 'refs/heads/master' || steps.rc_build.outputs.match != ''}}
+        with:
+          name: ${{ runner.os }}-wheels-${{ matrix.arch }}.zip
+          path: ./wheelhouse/*.whl
+
+  upload-pypi:
+    needs: mac-wheels-x86
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'release' || github.ref == 'refs/heads/master' }}
+    steps:
+      - uses: actions/download-artifact@v2
+        with:
+          name: macOS-wheels-x86_64.zip
+          path: dist
+
+      - name: Upload wheels to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+          repository_url: https://test.pypi.org/legacy/
