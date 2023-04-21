@@ -829,6 +829,14 @@ PYBIND11_MODULE(lightning_kokkos_qubit_ops, // NOLINT: No control over
   m.def("kokkos_start", []() { Kokkos::initialize(); });
   m.def("kokkos_end", []() { Kokkos::finalize(); });
   m.def("kokkos_config_info", &getConfig, "Kokkos configurations query.");
+  m.def(
+      "print_configuration",
+      []() {
+        std::ostringstream buffer;
+        Kokkos::print_configuration(buffer, true);
+        return buffer.str();
+      },
+      "Kokkos configurations query.");
 
   py::class_<Kokkos::InitializationSettings>(m, "InitializationSettings")
       .def(py::init<>())

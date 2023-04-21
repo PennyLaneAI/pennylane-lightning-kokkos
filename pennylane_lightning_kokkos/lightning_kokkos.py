@@ -66,6 +66,7 @@ try:
         SparseHamiltonianKokkos_C64,
         SparseHamiltonianKokkos_C128,
         kokkos_config_info,
+        print_configuration,
     )
 
     from ._serialize import _serialize_observables, _serialize_ops
@@ -83,11 +84,12 @@ def _kokkos_dtype(dtype):
 
 
 def _kokkos_configuration():
-    config_info = kokkos_config_info()
-    for key in config_info.keys():
-        if "Runtime Configuration" in key:
-            for sub_key, value in config_info[key].items():
-                config_info[key][sub_key] = re.sub("\x00", ":", value)
+    config_info = print_configuration()
+    # config_info = kokkos_config_info()
+    # for key in config_info.keys():
+    #     if "Runtime Configuration" in key:
+    #         for sub_key, value in config_info[key].items():
+    #             config_info[key][sub_key] = re.sub("\x00", ":", value)
     return config_info
 
 
