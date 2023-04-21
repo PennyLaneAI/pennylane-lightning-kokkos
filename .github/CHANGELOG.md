@@ -9,6 +9,9 @@
 
 ### Improvements
 
+* Remove deprecated `set-output` commands from workflow files.
+[(#56)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/56)
+
 * `setup.py` works on MacOS without `brew` (which is required by Conda-Forge runners).
 [(#48)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/48)
 
