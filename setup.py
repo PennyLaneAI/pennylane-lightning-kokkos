@@ -108,9 +108,13 @@ if not os.getenv("READTHEDOCS"):
                         "-DCMAKE_SYSTEM_PROCESSOR=ARM64",
                     ]
                 else:  # X64 arch
-                    llvmpath = (
-                        subprocess.check_output(["brew", "--prefix", "llvm"]).decode().strip()
-                    )
+                    if shutil.which("brew"):
+                        llvmpath = (
+                            subprocess.check_output(["brew", "--prefix", "llvm"]).decode().strip()
+                        )
+                    else:
+                        llvmpath = shutil.which("clang++")
+                        llvmpath = Path(llvmpath).parent.parent
                     configure_args += [
                         f"-DCMAKE_CXX_COMPILER={llvmpath}/bin/clang++",
                         f"-DCMAKE_LINKER={llvmpath}/bin/lld",

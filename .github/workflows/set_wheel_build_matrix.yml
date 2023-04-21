@@ -17,6 +17,12 @@ on:
       cpu_exec_model:
         description: "Kokkos' cpu execution model."
         value: ${{ jobs.set-builder-matrix.outputs.cpu_exec_model }}
+      macos_exec_model:
+        description: "Kokkos' MacOS execution model."
+        value: ${{ jobs.set-builder-matrix.outputs.macos_exec_model }}
+      kokkos_version:
+        description: "Kokkos version"
+        value: ${{ jobs.set-builder-matrix.outputs.kokkos_version }}
 
 jobs:
   set-builder-matrix:
@@ -49,6 +55,16 @@ jobs:
         id: cpu_exec_model
         run: echo "::set-output name=cpu_exec_model::[\"SERIAL\",\"OPENMP\"]"
 
+      - name: Kokkos execution strategy (MacOS)
+        id: macos_exec_model
+        run: echo "::set-output name=macos_exec_model::[\"SERIAL\",\"THREADS\"]"
+
+      - name: Kokkos version
+        id: kokkos_version
+        run: echo "::set-output name=kokkos_version::[\"3.7.00\"]"
+
     outputs:
       python_version: ${{ steps.pyver.outputs.python_version }}
       cpu_exec_model: ${{ steps.cpu_exec_model.outputs.cpu_exec_model }}
+      macos_exec_model: ${{ steps.macos_exec_model.outputs.macos_exec_model }}
+      kokkos_version: ${{ steps.kokkos_version.outputs.kokkos_version }}
