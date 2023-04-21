@@ -135,7 +135,9 @@ jobs:
           yum update -y && yum install -y docker
   
       - name: Install cibuildwheel
-        run: python3.8 -m pip install cibuildwheel~=2.11.0
+        run: |
+          python3.8 -m pip install pip~=22.3
+          python3.8 -m pip install cibuildwheel~=2.11.0
 
       - name: Build wheels
         env:
@@ -148,7 +150,7 @@ jobs:
           # Python build settings
           CIBW_BEFORE_BUILD: |
             cat /etc/yum.conf | sed "s/\[main\]/\[main\]\ntimeout=5/g" > /etc/yum.conf
-            pip install ninja cmake~=3.24.0
+            python3.8 -m pip install ninja cmake~=3.24.0
             yum clean all -y
             yum install centos-release-scl-rh -y
             yum install devtoolset-11-gcc-c++ -y
@@ -161,8 +163,8 @@ jobs:
           CIBW_TEST_REQUIRES: numpy~=1.21 scipy pytest pytest-cov pytest-mock flaky
 
           CIBW_BEFORE_TEST: |
-            python -m pip install git+https://github.com/PennyLaneAI/pennylane.git@master
-            python -m pip install --index-url https://test.pypi.org/simple/ pennylane-lightning --pre --force-reinstall --no-deps
+            python3.8 -m pip install git+https://github.com/PennyLaneAI/pennylane.git@master
+            python3.8 -m pip install --index-url https://test.pypi.org/simple/ pennylane-lightning --pre --force-reinstall --no-deps
 
           CIBW_TEST_COMMAND: |
             pl-device-test --device=lightning.kokkos --skip-ops -x --tb=short --no-flaky-report
