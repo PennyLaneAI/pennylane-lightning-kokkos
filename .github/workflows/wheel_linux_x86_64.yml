@@ -116,7 +116,7 @@ jobs:
         id: kokkos-cache
         uses: actions/cache@v3
         with:
-          path: ${{ github.workspace }}/Kokkos_install/${{ matrix.exec_model }}
+          path: /root/Kokkos_install/${{ matrix.exec_model }}
           key: ${{ matrix.container_img }}-kokkos${{ matrix.kokkos_version }}-${{ matrix.exec_model }}
 
       - name: Checkout PennyLane-Lightning-Kokkos
@@ -125,7 +125,7 @@ jobs:
       - name: Copy cached libraries
         run: |
           mkdir Kokkos
-          cp -rf ${{ github.workspace }}/Kokkos_install/${{ matrix.exec_model }}/* Kokkos/
+          cp -rf /root/Kokkos_install/${{ matrix.exec_model }}/* Kokkos/
 
       - name: Install dependencies (CentOS)
         if: ${{ (matrix.container_img == 'quay.io/pypa/manylinux2014_x86_64') }}
