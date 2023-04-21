@@ -60,7 +60,7 @@ jobs:
       - name: Install dependencies (CentOS)
         if: ${{ (matrix.container_img == 'quay.io/pypa/manylinux2014_x86_64') && (steps.kokkos-cache.outputs.cache-hit != 'true') }}
         run: |
-          yum update -y && yum install -y cmake ninja-build git devtoolset-11-gcc-c++
+          yum update -y && yum install -y cmake ninja-build git devtoolset-11-gcc-c++ glib*
           echo "COMPILER=g++" >> $GITHUB_ENV
 
       - name: Clone Kokkos libs
