@@ -852,7 +852,18 @@ PYBIND11_MODULE(lightning_kokkos_qubit_ops, // NOLINT: No control over
         "Kokkos configurations query.");
 
     py::class_<Kokkos::InitializationSettings>(m, "InitializationSettings")
-        .def(py::init<>())
+        .def(py::init([]() {
+            return Kokkos::InitializationSettings()
+                .set_num_threads(0)
+                .set_device_id(0)
+                .set_map_device_id_by("")
+                .set_disable_warnings(0)
+                .set_print_configuration(0)
+                .set_tune_internals(0)
+                .set_tools_libs("")
+                .set_tools_help(0)
+                .set_tools_args("");
+        }))
         .def("get_num_threads",
              &Kokkos::InitializationSettings::get_num_threads,
              "Number of threads to use with the host parallel backend. Must be "
