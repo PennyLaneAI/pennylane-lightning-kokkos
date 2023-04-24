@@ -67,6 +67,7 @@ if not os.getenv("READTHEDOCS"):
 
             configure_args = [
                 "-DCMAKE_CXX_FLAGS=-fno-lto",
+                "-DKokkos_ENABLE_SERIAL=ON",  # always build serial backend
                 f"-DCMAKE_LIBRARY_OUTPUT_DIRECTORY={extdir}",
                 f"-DCMAKE_BUILD_TYPE={cfg}",  # not used on MSVC, but no harm
                 *(self.cmake_defines),
@@ -82,7 +83,6 @@ if not os.getenv("READTHEDOCS"):
                     f"-DCMAKE_MAKE_PROGRAM={ninja_path}",
                 ]
 
-            build_args = []
             if os.getenv("BACKEND") and not self.backend:
                 self.backend = os.getenv("BACKEND")
             if os.getenv("ARCH") and not self.arch:
@@ -105,13 +105,18 @@ if not os.getenv("READTHEDOCS"):
                 ]  # only build with Clang under Windows
             elif platform.system() != "Linux":
                 raise RuntimeError(f"Unsupported '{platform.system()}' platform")
+            
             for var, opt in zip(["CC", "CXX"], ["C", "CXX"]):
                 if os.getenv(var):
                     tmp = os.getenv(var)
                     configure_args += [f"-DCMAKE_{opt}_COMPILER={tmp}"]
+                    
             if not Path(self.build_temp).exists():
                 os.makedirs(self.build_temp)
-
+            
+            if "CMAKE_ARGS" not in os.environ.keys():
+                os.environ["CMAKE_ARGS"] = ""
+                
             subprocess.check_call(
                 ["cmake"]
                 + os.environ["CMAKE_ARGS"].split(" ")
@@ -121,7 +126,7 @@ if not os.getenv("READTHEDOCS"):
                 env=os.environ,
             )
             subprocess.check_call(
-                ["cmake", "--build", ".", "--verbose"] + build_args,
+                ["cmake", "--build", ".", "--verbose"],
                 cwd=self.build_temp,
                 env=os.environ,
             )
