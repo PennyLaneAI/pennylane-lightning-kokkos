@@ -101,7 +101,10 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 option(Kokkos_ENABLE_DEPRECATION_WARNINGS "Enable Kokkos deprecation warnings" OFF)
 
-find_package(Kokkos 3.7)
+find_package(Kokkos 3.7
+HINTS   ${CMAKE_SOURCE_DIR}/kokkos
+        ${CMAKE_SOURCE_DIR}/Kokkos
+)
 if(Kokkos_FOUND)
     message(STATUS "Found existing Kokkos libraries")
     add_library(kokkos ALIAS Kokkos::kokkos)
