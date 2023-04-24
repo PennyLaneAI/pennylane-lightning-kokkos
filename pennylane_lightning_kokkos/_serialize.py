@@ -47,6 +47,8 @@ try:
         HamiltonianKokkos_C128,
         SparseHamiltonianKokkos_C64,
         SparseHamiltonianKokkos_C128,
+        HermitianObsKokkos_C64,
+        HermitianObsKokkos_C128,
     )
 except ImportError as e:
     print(e)
@@ -150,6 +152,28 @@ def _serialize_sparsehamiltonian(ob, wires_map: dict, use_csingle: bool):
     wires.extend([wires_map[w] for w in wires_list])
 
     return sparsehamiltonian_obs(data, indices, offsets, wires)
+
+
+def _serialize_hermitian(ob, wires_map: dict, use_csingle: bool):
+    """Serialize an observable (Hermitian)
+
+    Args:
+        o (Observable): the input observable (Hermitian)
+        wire_map (dict): a dictionary mapping input wires to the device's backend wires
+        use_csingle (bool): whether to use np.complex64 instead of np.complex128
+
+    Returns:
+        hermitian_obs (HermitianObsKokkos_C64 or HermitianObsKokkos_C128): A Hermitian observable object compatible with the C++ backend
+    """
+    if use_csingle:
+        rtype = np.float32
+        hermitian_obs = HermitianObsKokkos_C64
+    else:
+        rtype = np.float64
+        hermitian_obs = HermitianObsKokkos_C128
+
+    data = qml.matrix(ob).astype(rtype).ravel(order="C")
+    return hermitian_obs(data, ob.wires.tolist())
 
 
 def _serialize_pauli_word(ob, wires_map: dict, use_csingle: bool):
