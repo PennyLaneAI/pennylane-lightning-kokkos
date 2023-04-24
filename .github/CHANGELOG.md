@@ -9,6 +9,9 @@
 
 ### Improvements
 
+* Replace deprecated InitArguments by InitializationSettings.
+[(#57)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/57)
+
 * `setup.py` works on MacOS without `brew` (which is required by Conda-Forge runners).
 [(#48)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/48)
 
