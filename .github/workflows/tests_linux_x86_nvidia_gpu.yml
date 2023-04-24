@@ -32,7 +32,9 @@ jobs:
           python-version: '3.8'
 
       - name: Remove Ubuntu unattended upgrades
-        run: sudo apt-get remove -y -q unattended-upgrades
+        run: |
+          sudo apt --fix-broken install
+          sudo apt-get remove -y -q unattended-upgrades
 
       - name: Install required packages
         run: |
