@@ -150,3 +150,27 @@ def test_inverse_unitary_correct(op, op_name):
     unitary_expected = qml.matrix(qml.adjoint(op[0](*op[1], **op[2])))
 
     assert np.allclose(unitary, unitary_expected)
+
+
+@pytest.mark.skipif(not LightningKokkos._CPP_BINARY_AVAILABLE, reason="LightningKokkos unsupported")
+@pytest.mark.parametrize(
+    "obs,has_rotation",
+    [
+        (qml.Hamiltonian([1], [qml.PauliY(0)]), False),
+        (qml.sum(qml.PauliZ(0), qml.PauliX(1)), False),
+        (qml.PauliX(0), True),
+        (qml.sum(qml.PauliZ(0), qml.Hermitian(qml.PauliX(1).matrix(), 1)), True),
+    ],
+)
+def test_get_diagonalizing_gates(obs, has_rotation):
+    """Tests that _get_diagonalizing_gates filters measurements as expected."""
+    dev = qml.device("lightning.kokkos", wires=2)
+    qs = qml.tape.QuantumScript(measurements=[qml.expval(obs)])
+    actual = dev._get_diagonalizing_gates(qs)
+    if has_rotation:
+        expected = obs.diagonalizing_gates()
+        assert len(actual) == len(expected)
+        for rot_actual, rot_expected in zip(actual, expected):
+            assert qml.equal(rot_actual, rot_expected)
+    else:
+        assert len(actual) == 0
