@@ -83,19 +83,6 @@ if not os.getenv("READTHEDOCS"):
                     f"-DCMAKE_MAKE_PROGRAM={ninja_path}",
                 ]
 
-            if os.getenv("BACKEND") and not self.backend:
-                self.backend = os.getenv("BACKEND")
-            if os.getenv("ARCH") and not self.arch:
-                self.arch = os.getenv("ARCH")
-
-            if self.backend:
-                if self.backend in self.backends:
-                    configure_args.append(f"-DKokkos_ENABLE_{self.backend}=ON")
-                else:
-                    raise RuntimeError(f"Unsupported backend: '{self.backend}'")
-                if self.arch:
-                    configure_args.append(f"-DKokkos_ARCH_{self.arch}=ON")
-
             # Add more platform dependent options
             if platform.system() == "Darwin":
                 pass
@@ -106,11 +93,6 @@ if not os.getenv("READTHEDOCS"):
             elif platform.system() != "Linux":
                 raise RuntimeError(f"Unsupported '{platform.system()}' platform")
             
-            for var, opt in zip(["CC", "CXX"], ["C", "CXX"]):
-                if os.getenv(var):
-                    tmp = os.getenv(var)
-                    configure_args += [f"-DCMAKE_{opt}_COMPILER={tmp}"]
-                    
             if not Path(self.build_temp).exists():
                 os.makedirs(self.build_temp)
             
