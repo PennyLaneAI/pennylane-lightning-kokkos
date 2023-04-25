@@ -33,13 +33,16 @@ jobs:
 
       - name: Remove Ubuntu unattended upgrades
         run: |
-          sudo apt-get remove -y -q unattended-upgrades | sudo apt --fix-broken -y install
-          sudo apt-get remove -y -q unattended-upgrades | sudo apt --fix-broken -y install
+          sudo apt-get remove -y -q unattended-upgrades
 
       - name: Install required packages
         run: |
+          sudo apt-get update && sudo apt-get -y -q install gcc-${{ env.GCC_VERSION }} g++-${{ env.GCC_VERSION }} gcovr lcov | apt --fix-broken install | \
+          sudo apt-get update && sudo apt-get -y -q install gcc-${{ env.GCC_VERSION }} g++-${{ env.GCC_VERSION }} gcovr lcov | apt --fix-broken install | \
+          sudo apt-get update && sudo apt-get -y -q install gcc-${{ env.GCC_VERSION }} g++-${{ env.GCC_VERSION }} gcovr lcov | apt --fix-broken install | \
           sudo apt-get update && sudo apt-get -y -q install gcc-${{ env.GCC_VERSION }} g++-${{ env.GCC_VERSION }} gcovr lcov
           python3.8 -m pip install ninja cmake~=3.24.3
+
       - name: Checkout PennyLane-Lightning-Kokkos
         uses: actions/checkout@v3
 
