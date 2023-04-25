@@ -37,17 +37,11 @@ if not os.getenv("READTHEDOCS"):
         user_options = build_ext.user_options + [
             ("define=", "D", "Define variables for CMake"),
             ("verbosity", "V", "Increase CMake build verbosity"),
-            ("backend=", "B", "Define compiled Kokkos backend"),
-            ("arch=", "A", "Define backend targetted architecture"),
         ]
-
-        backends = {"CUDA", "HIP", "OPENMP", "THREADS", "SERIAL"}
 
         def initialize_options(self):
             super().initialize_options()
             self.define = None
-            self.backend = None
-            self.arch = None
             self.verbosity = ""
 
         def finalize_options(self):
@@ -84,13 +78,11 @@ if not os.getenv("READTHEDOCS"):
                 ]
 
             # Add more platform dependent options
-            if platform.system() == "Darwin":
-                pass
-            elif platform.system() == "Windows":
+            if platform.system() == "Windows":
                 configure_args += [
                     "-DKokkos_ENABLE_OPENMP=OFF"
                 ]  # only build with Clang under Windows
-            elif platform.system() != "Linux":
+            elif platform.system() not in ["Darwin", "Linux"]:
                 raise RuntimeError(f"Unsupported '{platform.system()}' platform")
             
             if not Path(self.build_temp).exists():

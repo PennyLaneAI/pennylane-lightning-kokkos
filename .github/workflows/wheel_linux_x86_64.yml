@@ -86,11 +86,13 @@ jobs:
             python -m pip install --index-url https://test.pypi.org/simple/ pennylane-lightning --pre --force-reinstall --no-deps
 
           CIBW_TEST_COMMAND: |
-            OMP_PROC_BIND=false pl-device-test --device=lightning.kokkos --skip-ops -x --tb=short --no-flaky-report
+            pl-device-test --device=lightning.kokkos --skip-ops -x --tb=short --no-flaky-report
           
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
 
           CIBW_BUILD_VERBOSITY: 3
+
+          OMP_PROC_BIND: false
 
         run: 
           python3.8 -m cibuildwheel --output-dir wheelhouse
