@@ -76,7 +76,7 @@ jobs:
 
       - name: Install lightning.kokkos device
         env:
-          CMAKE_ARGS: "-DCMAKE_C_COMPILER=$(which gcc-${{ env.GCC_VERSION }}) -DCMAKE_CXX_COMPILER=$(which g++-${{ env.GCC_VERSION }}) -DKokkos_ENABLE_OPENMP=ON"
+          CMAKE_ARGS: -DCMAKE_C_COMPILER=$(which gcc-${{ env.GCC_VERSION }}) -DCMAKE_CXX_COMPILER=$(which g++-${{ env.GCC_VERSION }}) -DKokkos_ENABLE_OPENMP=ON
         run: |
           cd main
           python -m pip install -e . --verbose

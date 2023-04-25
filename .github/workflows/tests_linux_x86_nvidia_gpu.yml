@@ -94,7 +94,7 @@ jobs:
 
       - name: Build and install package
         env:
-          CMAKE_ARGS: "-DCMAKE_C_COMPILER=$(which gcc-${{ env.GCC_VERSION }}) -DCMAKE_CXX_COMPILER=$(which g++-${{ env.GCC_VERSION }}) -DKokkos_ENABLE_CUDA=ON"
+          CMAKE_ARGS: -DCMAKE_C_COMPILER=$(which gcc-${{ env.GCC_VERSION }}) -DCMAKE_CXX_COMPILER=$(which g++-${{ env.GCC_VERSION }}) -DKokkos_ENABLE_CUDA=ON
           PATH: /usr/local/cuda-11.8/bin:$PATH
           LD_LIBRARY_PATH: /usr/local/cuda-11.8/lib64:$LD_LIBRARY_PATH
         run: |
