@@ -49,8 +49,8 @@ jobs:
           /usr/local/cuda-11.8/bin/nvcc --version
       - name: Build and run unit tests
         env:
-          PATH: /usr/local/cuda-11.8/bin:$PATH
-          LD_LIBRARY_PATH: /usr/local/cuda-11.8/lib64:$LD_LIBRARY_PATH
+          PATH: /usr/local/cuda-11.8/bin:${{ PATH }}
+          LD_LIBRARY_PATH: /usr/local/cuda-11.8/lib64:${{ LD_LIBRARY_PATH }}
         run: |
             cmake . -BBuild \
               -DKokkos_ENABLE_CUDA=ON \
@@ -98,8 +98,8 @@ jobs:
           CMAKE_ARGS: -DKokkos_ENABLE_CUDA=ON
           CC: gcc-${{ env.GCC_VERSION }}
           CXX: g++-${{ env.GCC_VERSION }}
-          PATH: /usr/local/cuda-11.8/bin:$PATH
-          LD_LIBRARY_PATH: /usr/local/cuda-11.8/lib64:$LD_LIBRARY_PATH
+          PATH: /usr/local/cuda-11.8/bin:${{ PATH }}
+          LD_LIBRARY_PATH: /usr/local/cuda-11.8/lib64:${{ LD_LIBRARY_PATH }}
         run: |
           python3.8 -m pip install -e . --verbose
 
