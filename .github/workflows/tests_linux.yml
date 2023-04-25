@@ -75,7 +75,7 @@ jobs:
           python -m pip install --index-url https://test.pypi.org/simple/ pennylane-lightning --pre --force-reinstall --no-deps
 
       - name: Install lightning.kokkos device
-        env: |
+        env:
           CMAKE_ARGS: "-DCMAKE_C_COMPILER=$(which gcc-${{ env.GCC_VERSION }}) -DCMAKE_CXX_COMPILER=$(which g++-${{ env.GCC_VERSION }}) -DKokkos_ENABLE_OPENMP=ON"
         run: |
           cd main
@@ -149,7 +149,7 @@ jobs:
           python -m pip install --index-url https://test.pypi.org/simple/ pennylane-lightning --pre --force-reinstall --no-deps
 
       - name: Install lightning.kokkos device
-        env: |
+        env:
           CMAKE_ARGS: "-DCMAKE_C_COMPILER=$(which gcc-${{ env.GCC_VERSION }}) -DCMAKE_CXX_COMPILER=$(which g++-${{ env.GCC_VERSION }}) -DKokkos_ENABLE_SERIAL=ON"
         run: |
           cd main
@@ -221,7 +221,7 @@ jobs:
           python -m pip install --index-url https://test.pypi.org/simple/ pennylane-lightning --pre --force-reinstall --no-deps
 
       - name: Install lightning.kokkos device
-        env: |
+        env:
           CMAKE_ARGS: "-DCMAKE_C_COMPILER=$(which gcc-${{ env.GCC_VERSION }}) -DCMAKE_CXX_COMPILER=$(which g++-${{ env.GCC_VERSION }}) -DKokkos_ENABLE_THREADS=ON"
         run: |
           cd main
