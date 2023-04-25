@@ -86,7 +86,7 @@ jobs:
             python -m pip install --index-url https://test.pypi.org/simple/ pennylane-lightning --pre --force-reinstall --no-deps
 
           CIBW_TEST_COMMAND: |
-            pl-device-test --device=lightning.kokkos --skip-ops -x --tb=short --no-flaky-report
+            OMP_PROC_BIND=false pl-device-test --device=lightning.kokkos --skip-ops -x --tb=short --no-flaky-report
           
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
 
