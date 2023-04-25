@@ -77,8 +77,8 @@ jobs:
       - name: Install lightning.kokkos device
         env:
           CMAKE_ARGS: -DKokkos_ENABLE_OPENMP=ON
-          CC: $(which gcc-${{ env.GCC_VERSION }})
-          CXX: $(which g++-${{ env.GCC_VERSION }})
+          CC: ${{ which gcc-${{ env.GCC_VERSION }} }}
+          CXX: ${{ which g++-${{ env.GCC_VERSION }} }}
         run: |
           cd main
           python -m pip install -e . --verbose
@@ -153,8 +153,8 @@ jobs:
       - name: Install lightning.kokkos device
         env:
           CMAKE_ARGS: -DKokkos_ENABLE_SERIAL=ON
-          CC: $(which gcc-${{ env.GCC_VERSION }})
-          CXX: $(which g++-${{ env.GCC_VERSION }})
+          CC: ${{ which gcc-${{ env.GCC_VERSION }} }}
+          CXX: ${{ which g++-${{ env.GCC_VERSION }} }}
         run: |
           cd main
           python -m pip install -e . --verbose
@@ -227,8 +227,8 @@ jobs:
       - name: Install lightning.kokkos device
         env:
           CMAKE_ARGS: -DKokkos_ENABLE_THREADS=ON
-          CC: $(which gcc-${{ env.GCC_VERSION }})
-          CXX: $(which g++-${{ env.GCC_VERSION }})
+          CC: ${{ which gcc-${{ env.GCC_VERSION }} }}
+          CXX: ${{ which g++-${{ env.GCC_VERSION }} }}
         run: |
           cd main
           python -m pip install -e . --verbose
