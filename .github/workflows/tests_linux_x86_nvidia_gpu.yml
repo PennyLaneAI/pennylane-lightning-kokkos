@@ -86,7 +86,7 @@ jobs:
           python -m pip install pip~=22.3
           python -m pip install ninja cmake~=3.24.3 pytest pytest-mock flaky pytest-cov wheel
           # Sync with latest master branches
-          python -m pip install git+https://github.com/PennyLaneAI/pennylane.git@master
+          python -m pip install git+https://github.com/PennyLaneAI/pennylane.git@v0.30.0-rc0
           python -m pip install --index-url https://test.pypi.org/simple/ pennylane-lightning --pre --force-reinstall --no-deps
           
       - name: Checkout pennyLane-lightning-kokkos
