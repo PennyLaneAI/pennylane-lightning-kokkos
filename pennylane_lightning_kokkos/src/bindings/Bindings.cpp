@@ -50,6 +50,8 @@ namespace py = pybind11;
 template <class PrecisionT, class ParamT>
 void StateVectorKokkos_class_bindings(py::module &m) {
 
+    using CFP_t = Kokkos::complex<PrecisionT>;
+
     using np_arr_r =
         py::array_t<ParamT, py::array::c_style | py::array::forcecast>;
     using np_arr_c = py::array_t<std::complex<ParamT>,
@@ -70,16 +72,14 @@ void StateVectorKokkos_class_bindings(py::module &m) {
         }))
         .def(py::init([](const np_arr_c &arr) {
             py::buffer_info numpyArrayInfo = arr.request();
-            auto *data_ptr =
-                static_cast<Kokkos::complex<PrecisionT> *>(numpyArrayInfo.ptr);
+            auto *data_ptr = static_cast<CFP_t *>(numpyArrayInfo.ptr);
             return new StateVectorKokkos<PrecisionT>(
                 data_ptr, static_cast<std::size_t>(arr.size()));
         }))
         .def(py::init([](const np_arr_c &arr,
                          const Kokkos::InitArguments &kokkos_args) {
             py::buffer_info numpyArrayInfo = arr.request();
-            auto *data_ptr =
-                static_cast<Kokkos::complex<PrecisionT> *>(numpyArrayInfo.ptr);
+            auto *data_ptr = static_cast<CFP_t *>(numpyArrayInfo.ptr);
             return new StateVectorKokkos<PrecisionT>(
                 data_ptr, static_cast<std::size_t>(arr.size()), kokkos_args);
         }))
@@ -555,15 +555,14 @@ void StateVectorKokkos_class_bindings(py::module &m) {
             "DeviceToHost",
             [](StateVectorKokkos<PrecisionT> &device_sv, np_arr_c &host_sv) {
                 py::buffer_info numpyArrayInfo = host_sv.request();
-                auto *data_ptr = static_cast<Kokkos::complex<PrecisionT> *>(
-                    numpyArrayInfo.ptr);
+                auto *data_ptr = static_cast<CFP_t *>(numpyArrayInfo.ptr);
                 if (host_sv.size()) {
                     device_sv.DeviceToHost(data_ptr, host_sv.size());
                 }
             },
             "Synchronize data from the GPU device to host.")
         .def("HostToDevice",
-             py::overload_cast<Kokkos::complex<PrecisionT> *, size_t>(
+             py::overload_cast<CFP_t *, size_t>(
                  &StateVectorKokkos<PrecisionT>::HostToDevice),
              "Synchronize data from the host device to GPU.")
         .def(
@@ -571,8 +570,7 @@ void StateVectorKokkos_class_bindings(py::module &m) {
             [](StateVectorKokkos<PrecisionT> &device_sv,
                const np_arr_c &host_sv) {
                 const py::buffer_info numpyArrayInfo = host_sv.request();
-                auto *data_ptr = static_cast<Kokkos::complex<PrecisionT> *>(
-                    numpyArrayInfo.ptr);
+                auto *data_ptr = static_cast<CFP_t *>(numpyArrayInfo.ptr);
                 const auto length =
                     static_cast<size_t>(numpyArrayInfo.shape[0]);
                 if (length) {
