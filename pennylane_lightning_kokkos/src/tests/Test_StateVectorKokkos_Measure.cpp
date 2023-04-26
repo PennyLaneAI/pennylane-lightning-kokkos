@@ -51,7 +51,7 @@ TEMPLATE_TEST_CASE("Probabilities", "[Measures]", float, double) {
 
     SECTION("Looping over different wire configurations:") {
         auto m =
-            Lightning::Kokkos::Simulators::MeasuresKokkos<TestType>(measure_sv);
+            Lightning_Kokkos::Simulators::MeasuresKokkos<TestType>(measure_sv);
         for (const auto &term : input) {
             auto probabilities = m.probs(term.first);
             REQUIRE_THAT(term.second,
@@ -94,10 +94,10 @@ TEST_CASE("Test tensor transposition", "[Measure]") {
         {{3, 2, 0, 1}, {0, 4, 8, 12, 2, 6, 10, 14, 1, 5, 9, 13, 3, 7, 11, 15}},
         {{3, 2, 1, 0}, {0, 8, 4, 12, 2, 10, 6, 14, 1, 9, 5, 13, 3, 11, 7, 15}}};
 
-    using KokkosExecSpace = ::Kokkos::DefaultExecutionSpace;
+    using KokkosExecSpace = Kokkos::DefaultExecutionSpace;
     using UnmanagedSizeTHostView =
-        ::Kokkos::View<size_t *, ::Kokkos::HostSpace,
-                       ::Kokkos::MemoryTraits<::Kokkos::Unmanaged>>;
+        Kokkos::View<size_t *, Kokkos::HostSpace,
+                     Kokkos::MemoryTraits<Kokkos::Unmanaged>>;
 
     SECTION("Looping over different wire configurations:") {
         for (auto &term : input) {
@@ -107,20 +107,20 @@ TEST_CASE("Test tensor transposition", "[Measure]") {
 
             std::vector<size_t> results(indices.size());
 
-            ::Kokkos::View<size_t *> d_indices("d_indices", indices.size());
-            ::Kokkos::View<size_t *> d_results("d_results", indices.size());
-            ::Kokkos::View<size_t *> d_wires("d_wires", term.first.size());
-            ::Kokkos::View<size_t *> d_trans_index("d_trans_index",
-                                                   indices.size());
+            Kokkos::View<size_t *> d_indices("d_indices", indices.size());
+            Kokkos::View<size_t *> d_results("d_results", indices.size());
+            Kokkos::View<size_t *> d_wires("d_wires", term.first.size());
+            Kokkos::View<size_t *> d_trans_index("d_trans_index",
+                                                 indices.size());
 
-            ::Kokkos::deep_copy(d_indices, UnmanagedSizeTHostView(
-                                               indices.data(), indices.size()));
-            ::Kokkos::deep_copy(
+            Kokkos::deep_copy(d_indices, UnmanagedSizeTHostView(
+                                             indices.data(), indices.size()));
+            Kokkos::deep_copy(
                 d_wires,
                 UnmanagedSizeTHostView(term.first.data(), term.first.size()));
 
-            using MDPolicyType_2D = ::Kokkos::MDRangePolicy<
-                ::Kokkos::Rank<2, ::Kokkos::Iterate::Left>>;
+            using MDPolicyType_2D =
+                Kokkos::MDRangePolicy<Kokkos::Rank<2, Kokkos::Iterate::Left>>;
 
             MDPolicyType_2D mdpolicy_2d1(
                 {{0, 0}}, {{static_cast<int>(indices.size()),
@@ -128,17 +128,17 @@ TEST_CASE("Test tensor transposition", "[Measure]") {
 
             const int num_wires = term.first.size();
 
-            ::Kokkos::parallel_for(
+            Kokkos::parallel_for(
                 "TransIndex", mdpolicy_2d1,
                 getTransposedIndexFunctor(d_wires, d_trans_index, num_wires));
 
-            ::Kokkos::parallel_for(
+            Kokkos::parallel_for(
                 "Transpose",
-                ::Kokkos::RangePolicy<KokkosExecSpace>(0, indices.size()),
+                Kokkos::RangePolicy<KokkosExecSpace>(0, indices.size()),
                 getTransposedFunctor<size_t>(d_results, d_indices,
                                              d_trans_index));
 
-            ::Kokkos::deep_copy(
+            Kokkos::deep_copy(
                 UnmanagedSizeTHostView(results.data(), results.size()),
                 d_results);
             REQUIRE(term.second == results);

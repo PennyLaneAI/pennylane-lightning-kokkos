@@ -13,7 +13,7 @@
 // limitations under the License.
 /**
  * @file GetConfigInfo.hpp
- * Defines operations to store information from ::Kokkos::print_configuration in
+ * Defines operations to store information from Kokkos::print_configuration in
  * a unordered_map variable.
  */
 #pragma once
@@ -66,7 +66,7 @@ auto getConfig() {
     using category_map = std::unordered_map<std::string, value_map>;
 
     std::ostringstream buffer;
-    ::Kokkos::print_configuration(buffer, true);
+    Kokkos::print_configuration(buffer, true);
     const std::string bufferstr(buffer.str());
     const auto str_list = string_split(bufferstr, "\n");
 

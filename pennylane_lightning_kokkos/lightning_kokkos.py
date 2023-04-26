@@ -159,7 +159,7 @@ if CPP_BINARY_AVAILABLE:
             wires (int): the number of wires to initialize the device with
             sync (bool): immediately sync with host-sv after applying operations
             c_dtype: Datatypes for statevector representation. Must be one of ``np.complex64`` or ``np.complex128``.
-            kokkos_args (InitArguments): binding for ::Kokkos::InitArguments (threading parameters).
+            kokkos_args (InitArguments): binding for Kokkos::InitArguments (threading parameters).
         """
 
         name = "PennyLane plugin for Kokkos-backed Lightning device"
