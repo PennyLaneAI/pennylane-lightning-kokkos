@@ -6,7 +6,7 @@
 #include "LinearAlgebraKokkos.hpp"
 #include "StateVectorKokkos.hpp"
 
-namespace Pennylane::Lightning::Kokkos::Simulators {
+namespace Pennylane::Lightning_Kokkos::Simulators {
 
 /**
  * @brief A base class for all observable classes.
@@ -103,7 +103,7 @@ template <typename T> class NamedObsKokkos final : public ObservableKokkos<T> {
           params_{std::move(params)} {}
 
     [[nodiscard]] auto getObsName() const -> std::string override {
-        using Pennylane::Lightning::Kokkos::Util::operator<<;
+        using Pennylane::Lightning_Kokkos::Util::operator<<;
         std::ostringstream obs_stream;
         obs_stream << obs_name_ << wires_;
         return obs_stream.str();
@@ -129,7 +129,7 @@ class HermitianObsKokkos final : public ObservableKokkos<T> {
   private:
     std::vector<std::complex<T>> matrix_;
     std::vector<size_t> wires_;
-    inline static const Lightning::Kokkos::Util::MatrixHasher mh;
+    inline static const Lightning_Kokkos::Util::MatrixHasher mh;
 
     [[nodiscard]] bool
     isEqual(const ObservableKokkos<T> &other) const override {
@@ -171,10 +171,10 @@ class HermitianObsKokkos final : public ObservableKokkos<T> {
      */
     void applyInPlace(StateVectorKokkos<T> &sv) const override {
         const auto *matrix_ptr =
-            reinterpret_cast<const ::Kokkos::complex<T> *>(matrix_.data());
-        std::vector<::Kokkos::complex<T>> conv_matrix =
-            std::vector<::Kokkos::complex<T>>{matrix_ptr,
-                                              matrix_ptr + matrix_.size()};
+            reinterpret_cast<const Kokkos::complex<T> *>(matrix_.data());
+        std::vector<Kokkos::complex<T>> conv_matrix =
+            std::vector<Kokkos::complex<T>>{matrix_ptr,
+                                            matrix_ptr + matrix_.size()};
         sv.applyOperation_std(getObsName(), wires_, false, {}, conv_matrix);
     }
 };
@@ -276,7 +276,7 @@ class TensorProdObsKokkos final : public ObservableKokkos<T> {
     }
 
     [[nodiscard]] auto getObsName() const -> std::string override {
-        using Pennylane::Lightning::Kokkos::Util::operator<<;
+        using Pennylane::Lightning_Kokkos::Util::operator<<;
         std::ostringstream obs_stream;
         const auto obs_size = obs_.size();
         for (size_t idx = 0; idx < obs_size; idx++) {
@@ -365,8 +365,8 @@ class HamiltonianKokkos final : public ObservableKokkos<T> {
         for (size_t term_idx = 0; term_idx < coeffs_.size(); term_idx++) {
             StateVectorKokkos<T> tmp(sv);
             obs_[term_idx]->applyInPlace(tmp);
-            Lightning::Kokkos::Util::axpy_Kokkos<T>(
-                ::Kokkos::complex<T>{coeffs_[term_idx], 0.0}, tmp.getData(),
+            Lightning_Kokkos::Util::axpy_Kokkos<T>(
+                Kokkos::complex<T>{coeffs_[term_idx], 0.0}, tmp.getData(),
                 buffer.getData(), tmp.getLength());
         }
         sv.updateData(buffer);
@@ -386,7 +386,7 @@ class HamiltonianKokkos final : public ObservableKokkos<T> {
 
     [[nodiscard]] auto getObsName() const -> std::string override {
 
-        using Pennylane::Lightning::Kokkos::Util::operator<<;
+        using Pennylane::Lightning_Kokkos::Util::operator<<;
         std::ostringstream ss;
         ss << "Hamiltonian: { 'coeffs' : " << coeffs_ << ", 'observables' : [";
         const auto term_size = coeffs_.size();
@@ -487,14 +487,14 @@ class SparseHamiltonianKokkos final : public ObservableKokkos<T> {
 
         StateVectorKokkos<T> d_sv_prime(sv.getNumQubits());
 
-        Lightning::Kokkos::Util::SparseMV_Kokkos<T>(
+        Lightning_Kokkos::Util::SparseMV_Kokkos<T>(
             sv.getData(), d_sv_prime.getData(), data_, indices_, indptr_);
 
         sv.updateData(d_sv_prime);
     }
 
     [[nodiscard]] auto getObsName() const -> std::string override {
-        using Pennylane::Lightning::Kokkos::Util::operator<<;
+        using Pennylane::Lightning_Kokkos::Util::operator<<;
         std::ostringstream ss;
         ss << "SparseHamiltonian: {\n'data' : ";
         for (const auto &d : data_)
@@ -516,4 +516,4 @@ class SparseHamiltonianKokkos final : public ObservableKokkos<T> {
     };
 };
 
-} // namespace Pennylane::Lightning::Kokkos::Simulators
+} // namespace Pennylane::Lightning_Kokkos::Simulators

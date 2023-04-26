@@ -7,12 +7,12 @@
 
 /// @cond DEV
 namespace {
-namespace Simulators = Pennylane::Lightning::Kokkos::Simulators;
+namespace Simulators = Pennylane::Lightning_Kokkos::Simulators;
 using namespace Simulators;
 } // namespace
 /// @endcond
 
-namespace Pennylane::Lightning::Kokkos::Algorithms {
+namespace Pennylane::Lightning_Kokkos::Algorithms {
 
 template <class T> class OpsData {
   private:
@@ -180,7 +180,7 @@ template <class T> class OpsData {
  */
 template <class T = double> class AdjointJacobianKokkos {
   private:
-    using CFP_t = ::Kokkos::complex<T>;
+    using CFP_t = Kokkos::complex<T>;
     using scalar_type_t = T;
 
     /**
@@ -201,13 +201,13 @@ template <class T = double> class AdjointJacobianKokkos {
                                size_t param_index) {
         jac[obs_index][param_index] =
             -2 * scaling_coeff *
-            Pennylane::Lightning::Kokkos::Util::getImagOfComplexInnerProduct<T>(
+            Pennylane::Lightning_Kokkos::Util::getImagOfComplexInnerProduct<T>(
                 sv1.getData(), sv2.getData());
     }
 
     /**
      * @brief Utility method to apply all operations from given
-     * `%Pennylane::Lightning::Kokkos::Algorithms::OpsData<T>` object to
+     * `%Pennylane::Lightning_Kokkos::Algorithms::OpsData<T>` object to
      * `%StateVectorKokkos<T>`
      *
      * @param state Statevector to be updated.
@@ -216,7 +216,7 @@ template <class T = double> class AdjointJacobianKokkos {
      */
     inline void applyOperations(
         StateVectorKokkos<T> &state,
-        const Pennylane::Lightning::Kokkos::Algorithms::OpsData<T> &operations,
+        const Pennylane::Lightning_Kokkos::Algorithms::OpsData<T> &operations,
         bool adj = false) {
         for (size_t op_idx = 0; op_idx < operations.getOpsName().size();
              op_idx++) {
@@ -229,7 +229,7 @@ template <class T = double> class AdjointJacobianKokkos {
 
     /**
      * @brief Utility method to apply the adjoint indexed operation from
-     * `%Pennylane::Lightning::Kokkos::Algorithms::OpsData<T>` object to
+     * `%Pennylane::Lightning_Kokkos::Algorithms::OpsData<T>` object to
      * `%StateVectorKokkos<T>`.
      *
      * @param state Statevector to be updated.
@@ -238,7 +238,7 @@ template <class T = double> class AdjointJacobianKokkos {
      */
     inline void applyOperationAdj(
         StateVectorKokkos<T> &state,
-        const Pennylane::Lightning::Kokkos::Algorithms::OpsData<T> &operations,
+        const Pennylane::Lightning_Kokkos::Algorithms::OpsData<T> &operations,
         size_t op_idx) {
         state.applyOperation(operations.getOpsName()[op_idx],
                              operations.getOpsWires()[op_idx],
@@ -248,7 +248,7 @@ template <class T = double> class AdjointJacobianKokkos {
 
     /**
      * @brief Utility method to apply a given operations from given
-     * `%Pennylane::Lightning::Kokkos::Algorithms::ObsDatum<T>` object to
+     * `%Pennylane::Lightning_Kokkos::Algorithms::ObsDatum<T>` object to
      * `%StateVectorKokkos<T>`
      *
      * @param state Statevector to be updated.
@@ -256,7 +256,7 @@ template <class T = double> class AdjointJacobianKokkos {
      */
     inline void applyObservable(StateVectorKokkos<T> &state,
                                 const ObservableKokkos<T> &observable) {
-        using namespace Pennylane::Lightning::Kokkos::Util;
+        using namespace Pennylane::Lightning_Kokkos::Util;
         observable.applyInPlace(state);
     }
 
@@ -303,7 +303,7 @@ template <class T = double> class AdjointJacobianKokkos {
      */
     inline void applyOperationsAdj(
         std::vector<StateVectorKokkos<T>> &states,
-        const Pennylane::Lightning::Kokkos::Algorithms::OpsData<T> &operations,
+        const Pennylane::Lightning_Kokkos::Algorithms::OpsData<T> &operations,
         size_t op_idx) {
         // clang-format off
         // Globally scoped exception value to be captured within OpenMP block.
@@ -366,7 +366,7 @@ template <class T = double> class AdjointJacobianKokkos {
      * @param ops_inverses Indicate whether to take adjoint of each operation in
      * ops_name.
      * @param ops_matrices Matrix definition of an operation if unsupported.
-     * @return const Pennylane::Lightning::Kokkos::Algorithms::OpsData<T>
+     * @return const Pennylane::Lightning_Kokkos::Algorithms::OpsData<T>
      */
     auto createOpsData(
         const std::vector<std::string> &ops_name,
@@ -374,7 +374,7 @@ template <class T = double> class AdjointJacobianKokkos {
         const std::vector<std::vector<size_t>> &ops_wires,
         const std::vector<bool> &ops_inverses,
         const std::vector<std::vector<std::complex<T>>> &ops_matrices = {{}})
-        -> Pennylane::Lightning::Kokkos::Algorithms::OpsData<T> {
+        -> Pennylane::Lightning_Kokkos::Algorithms::OpsData<T> {
         return {ops_name, ops_params, ops_wires, ops_inverses, ops_matrices};
     }
 
@@ -404,7 +404,7 @@ template <class T = double> class AdjointJacobianKokkos {
     void adjointJacobian(
         const StateVectorKokkos<T> &ref_data, std::vector<std::vector<T>> &jac,
         const std::vector<std::shared_ptr<ObservableKokkos<T>>> &obs,
-        const Pennylane::Lightning::Kokkos::Algorithms::OpsData<T> &ops,
+        const Pennylane::Lightning_Kokkos::Algorithms::OpsData<T> &ops,
         const std::vector<size_t> &trainableParams,
         bool apply_operations = false) {
         PL_ABORT_IF(trainableParams.empty(),
@@ -478,4 +478,4 @@ template <class T = double> class AdjointJacobianKokkos {
     }
 };
 
-} // namespace Pennylane::Lightning::Kokkos::Algorithms
+} // namespace Pennylane::Lightning_Kokkos::Algorithms
