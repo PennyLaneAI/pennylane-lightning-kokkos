@@ -28,6 +28,9 @@
 
 ### Bug fixes
 
+* Provide support for PennyLane-Lightning-Kokkos to coexist with PennyLane-Lightning.
+[(#49)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/49)
+
 ### Contributors
 
 This release contains contributions from (in alphabetical order):

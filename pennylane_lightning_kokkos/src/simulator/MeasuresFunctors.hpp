@@ -3,7 +3,7 @@
 #include <Kokkos_Core.hpp>
 #include <Kokkos_StdAlgorithms.hpp>
 
-#include "Util.hpp"
+#include "UtilKokkos.hpp"
 
 namespace Pennylane::Functors {
 /**
