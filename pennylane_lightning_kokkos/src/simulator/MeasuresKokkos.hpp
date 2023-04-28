@@ -4,12 +4,12 @@
 #include <Kokkos_Random.hpp>
 
 #include "ExpValFunctors.hpp"
-#include "LinearAlgebra.hpp"
+#include "LinearAlgebraKokkos.hpp"
 #include "MeasuresFunctors.hpp"
 #include "ObservablesKokkos.hpp"
 #include "StateVectorKokkos.hpp"
 
-namespace Pennylane::Simulators {
+namespace Pennylane::Lightning_Kokkos::Simulators {
 
 template <class Precision> class MeasuresKokkos {
 
@@ -172,7 +172,7 @@ template <class Precision> class MeasuresKokkos {
             original_sv.getData();
         Precision expval = 0;
         Kokkos::parallel_reduce(
-            Util::exp2(num_qubits),
+            Lightning_Kokkos::Util::exp2(num_qubits),
             getExpectationValueIdentityFunctor(arr_data, num_qubits, wires),
             expval);
         return expval;
@@ -195,7 +195,7 @@ template <class Precision> class MeasuresKokkos {
             original_sv.getData();
         Precision expval = 0;
         Kokkos::parallel_reduce(
-            Util::exp2(num_qubits - 1),
+            Lightning_Kokkos::Util::exp2(num_qubits - 1),
             getExpectationValuePauliXFunctor(arr_data, num_qubits, wires),
             expval);
         return expval;
@@ -218,7 +218,7 @@ template <class Precision> class MeasuresKokkos {
             original_sv.getData();
         Precision expval = 0;
         Kokkos::parallel_reduce(
-            Util::exp2(num_qubits - 1),
+            Lightning_Kokkos::Util::exp2(num_qubits - 1),
             getExpectationValuePauliYFunctor(arr_data, num_qubits, wires),
             expval);
         return expval;
@@ -241,7 +241,7 @@ template <class Precision> class MeasuresKokkos {
             original_sv.getData();
         Precision expval = 0;
         Kokkos::parallel_reduce(
-            Util::exp2(num_qubits - 1),
+            Lightning_Kokkos::Util::exp2(num_qubits - 1),
             getExpectationValuePauliZFunctor(arr_data, num_qubits, wires),
             expval);
         return expval;
@@ -264,7 +264,7 @@ template <class Precision> class MeasuresKokkos {
             original_sv.getData();
         Precision expval = 0;
         Kokkos::parallel_reduce(
-            Util::exp2(num_qubits - 1),
+            Lightning_Kokkos::Util::exp2(num_qubits - 1),
             getExpectationValueHadamardFunctor(arr_data, num_qubits, wires),
             expval);
         return expval;
@@ -288,7 +288,7 @@ template <class Precision> class MeasuresKokkos {
             original_sv.getData();
         Precision expval = 0;
         Kokkos::parallel_reduce(
-            Util::exp2(num_qubits - 1),
+            Lightning_Kokkos::Util::exp2(num_qubits - 1),
             getExpectationValueSingleQubitOpFunctor<Precision>(
                 arr_data, num_qubits, matrix, wires),
             expval);
@@ -312,7 +312,7 @@ template <class Precision> class MeasuresKokkos {
         Kokkos::View<Kokkos::complex<Precision> *> arr_data =
             original_sv.getData();
         Precision expval = 0;
-        Kokkos::parallel_reduce(Util::exp2(num_qubits - 2),
+        Kokkos::parallel_reduce(Lightning_Kokkos::Util::exp2(num_qubits - 2),
                                 getExpectationValueTwoQubitOpFunctor<Precision>(
                                     arr_data, num_qubits, matrix, wires),
                                 expval);
@@ -349,7 +349,7 @@ template <class Precision> class MeasuresKokkos {
             Precision expval = 0;
             Kokkos::parallel_reduce(
                 Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Util::exp2(num_qubits - wires.size())),
+                    0, Lightning_Kokkos::Util::exp2(num_qubits - wires.size())),
                 getExpectationValueMultiQubitOpFunctor(arr_data, num_qubits,
                                                        matrix, wires_view),
                 expval);
@@ -367,7 +367,7 @@ template <class Precision> class MeasuresKokkos {
         StateVectorKokkos<Precision> ob_sv(original_sv.getNumQubits());
         ob_sv.DeviceToDevice(original_sv.getData());
         ob.applyInPlace(ob_sv);
-        return Pennylane::Util::getRealOfComplexInnerProduct(
+        return Pennylane::Lightning_Kokkos::Util::getRealOfComplexInnerProduct(
             original_sv.getData(), ob_sv.getData());
     }
 
@@ -383,12 +383,12 @@ template <class Precision> class MeasuresKokkos {
         ob.applyInPlace(ob_sv);
 
         const Precision mean_square =
-            Pennylane::Util::getRealOfComplexInnerProduct(ob_sv.getData(),
-                                                          ob_sv.getData());
-        const Precision squared_mean = static_cast<Precision>(
-            std::pow(Pennylane::Util::getRealOfComplexInnerProduct(
-                         original_sv.getData(), ob_sv.getData()),
-                     2));
+            Pennylane::Lightning_Kokkos::Util::getRealOfComplexInnerProduct(
+                ob_sv.getData(), ob_sv.getData());
+        const Precision squared_mean = static_cast<Precision>(std::pow(
+            Pennylane::Lightning_Kokkos::Util::getRealOfComplexInnerProduct(
+                original_sv.getData(), ob_sv.getData()),
+            2));
         return (mean_square - squared_mean);
     }
 
@@ -442,17 +442,20 @@ template <class Precision> class MeasuresKokkos {
         std::vector<size_t> sorted_wires(wires);
 
         if (!is_sorted_wires) {
-            sorted_ind_wires = Util::sorting_indices(wires);
+            sorted_ind_wires = Lightning_Kokkos::Util::sorting_indices(wires);
             for (size_t pos = 0; pos < wires.size(); pos++)
                 sorted_wires[pos] = wires[sorted_ind_wires[pos]];
         }
 
         std::vector<size_t> all_indices =
-            Util::generateBitsPatterns(sorted_wires, num_qubits);
+            Lightning_Kokkos::Util::generateBitsPatterns(sorted_wires,
+                                                         num_qubits);
 
-        std::vector<size_t> all_offsets = Util::generateBitsPatterns(
-            Util::getIndicesAfterExclusion(sorted_wires, num_qubits),
-            num_qubits);
+        std::vector<size_t> all_offsets =
+            Lightning_Kokkos::Util::generateBitsPatterns(
+                Lightning_Kokkos::Util::getIndicesAfterExclusion(sorted_wires,
+                                                                 num_qubits),
+                num_qubits);
 
         Kokkos::View<Precision *> d_probabilities("d_probabilities",
                                                   all_indices.size());
@@ -578,4 +581,4 @@ template <class Precision> class MeasuresKokkos {
     }
 };
 
-} // namespace Pennylane::Simulators
+} // namespace Pennylane::Lightning_Kokkos::Simulators

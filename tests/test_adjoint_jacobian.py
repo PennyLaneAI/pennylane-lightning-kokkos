@@ -22,7 +22,18 @@ from pennylane import numpy as np
 from pennylane import QNode, qnode
 from scipy.stats import unitary_group
 import pennylane_lightning_kokkos as plk
-from pennylane_lightning_kokkos.lightning_kokkos_qubit_ops import InitArguments
+from pennylane_lightning_kokkos._serialize import _serialize_ob
+from pennylane_lightning_kokkos.lightning_kokkos_qubit_ops import (
+    InitArguments,
+    NamedObsKokkos_C64,
+    NamedObsKokkos_C128,
+    TensorProdObsKokkos_C64,
+    TensorProdObsKokkos_C128,
+    HamiltonianKokkos_C64,
+    HamiltonianKokkos_C128,
+    SparseHamiltonianKokkos_C64,
+    SparseHamiltonianKokkos_C128,
+)
 
 from pennylane import (
     QuantumFunctionError,
@@ -370,6 +381,25 @@ class TestAdjointJacobian:
         dM2 = dev_kokkos.adjoint_jacobian(tape, starting_state=state_vector)
 
         assert np.allclose(dM1, dM2, atol=tol, rtol=0)
+
+    @pytest.mark.parametrize(
+        "old_obs",
+        [
+            qml.PauliX(0) @ qml.PauliZ(1),
+            qml.Hamiltonian([1.1], [qml.PauliZ(0)]),
+            qml.Hamiltonian([1.1, 2.2], [qml.PauliZ(0), qml.PauliZ(1)]),
+            qml.Hamiltonian([1.1, 2.2], [qml.PauliX(0), qml.PauliZ(0) @ qml.PauliX(1)]),
+        ],
+    )
+    def test_op_arithmetic_is_supported(self, old_obs, dev_kokkos):
+        """Tests that an arithmetic obs with a PauliRep are supported for adjoint_jacobian."""
+        ops = [qml.RX(1.1, 0), qml.RY(2.2, 0), qml.RX(0.66, 1), qml.RY(1.23, 1)]
+        new_obs = qml.pauli.pauli_sentence(old_obs).operation()
+        old_tape = qml.tape.QuantumScript(ops, [qml.expval(old_obs)])
+        new_tape = qml.tape.QuantumScript(ops, [qml.expval(new_obs)])
+        old_res = dev_kokkos.adjoint_jacobian(old_tape)
+        new_res = dev_kokkos.adjoint_jacobian(new_tape)
+        assert qml.math.allequal(old_res, new_res)
 
 
 class TestAdjointJacobianQNode:
@@ -927,3 +957,46 @@ def test_integration_custom_wires_batching(returns):
     j_lightning = qml.jacobian(convert_to_array_lightning)(params)
 
     assert np.allclose(j_kokkos, j_lightning, atol=1e-7)
+
+
+@pytest.mark.parametrize(
+    "obs,obs_type_c64,obs_type_c128",
+    [
+        (qml.PauliZ(0), NamedObsKokkos_C64, NamedObsKokkos_C128),
+        (qml.PauliZ(0) @ qml.PauliZ(1), TensorProdObsKokkos_C64, TensorProdObsKokkos_C128),
+        (qml.Hadamard(0), NamedObsKokkos_C64, NamedObsKokkos_C128),
+        (qml.Hamiltonian([1], [qml.PauliZ(0)]), HamiltonianKokkos_C64, HamiltonianKokkos_C128),
+        (
+            qml.PauliZ(0) @ qml.Hadamard(1) @ (0.1 * (qml.PauliZ(2) + qml.PauliX(3))),
+            HamiltonianKokkos_C64,
+            HamiltonianKokkos_C128,
+        ),
+        (
+            qml.SparseHamiltonian(qml.Hamiltonian([1], [qml.PauliZ(0)]).sparse_matrix(), wires=[0]),
+            SparseHamiltonianKokkos_C64,
+            SparseHamiltonianKokkos_C128,
+        ),
+    ],
+)
+@pytest.mark.parametrize("use_csingle", [True, False])
+def test_obs_returns_expected_type(obs, obs_type_c64, obs_type_c128, use_csingle):
+    """Tests that observables get serialized to the expected type."""
+    obs_type = obs_type_c64 if use_csingle else obs_type_c128
+    assert isinstance(_serialize_ob(obs, dict(enumerate(obs.wires)), use_csingle), obs_type)
+
+
+@pytest.mark.parametrize(
+    "bad_obs",
+    [
+        qml.Hermitian(np.eye(2), wires=0),
+        qml.sum(qml.PauliZ(0), qml.Hadamard(1)),
+        qml.Projector([0], wires=0),
+        qml.PauliZ(0) @ qml.Projector([0], wires=1),
+        qml.sum(qml.Hadamard(0), qml.PauliX(1)),
+    ],
+)
+@pytest.mark.parametrize("use_csingle", [True, False])
+def test_obs_not_supported_for_adjoint_diff(bad_obs, use_csingle):
+    """Tests observables that can't be serialized for adjoint-differentiation."""
+    with pytest.raises(TypeError, match="Please use Pauli-words only."):
+        _serialize_ob(bad_obs, dict(enumerate(bad_obs.wires)), use_csingle)

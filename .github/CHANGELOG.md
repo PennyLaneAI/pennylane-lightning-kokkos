@@ -9,6 +9,9 @@
 
 ### Improvements
 
+* Remove deprecated `set-output` commands from workflow files.
+[(#56)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/56)
+
 * `setup.py` works on MacOS without `brew` (which is required by Conda-Forge runners).
 [(#48)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/48)
 
@@ -27,6 +30,10 @@
 
 * Updates to use the new call signature for `QuantumScript.get_operation`.
   [(#52)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/52)
+
+* Provide support for PennyLane-Lightning-Kokkos to coexist with PennyLane-Lightning.
+[(#49)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/49)
+
 
 ### Contributors
 
