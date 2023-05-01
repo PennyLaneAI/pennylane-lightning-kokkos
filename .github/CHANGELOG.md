@@ -1,4 +1,4 @@
-# Release 0.30.0-dev
+# Release 0.30.0
 
 ### New features since last release
 
@@ -6,6 +6,9 @@
 [(#47)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/47)
 
 ### Breaking changes
+
+* Provide support for PennyLane-Lightning-Kokkos to coexist with PennyLane-Lightning.
+[(#49)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/49)
 
 ### Improvements
 
@@ -24,15 +27,10 @@
 * Template n-qubit gate methods.
 [(#40)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/40)
 
-### Documentation
-
 ### Bug fixes
 
 * Updates to use the new call signature for `QuantumScript.get_operation`.
   [(#52)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/52)
-
-* Provide support for PennyLane-Lightning-Kokkos to coexist with PennyLane-Lightning.
-[(#49)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/49)
 
 
 ### Contributors
