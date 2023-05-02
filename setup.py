@@ -84,13 +84,13 @@ if not os.getenv("READTHEDOCS"):
                 ]  # only build with Clang under Windows
             elif platform.system() not in ["Darwin", "Linux"]:
                 raise RuntimeError(f"Unsupported '{platform.system()}' platform")
-            
+
             if not Path(self.build_temp).exists():
                 os.makedirs(self.build_temp)
-            
+
             if "CMAKE_ARGS" not in os.environ.keys():
                 os.environ["CMAKE_ARGS"] = ""
-                
+
             subprocess.check_call(
                 ["cmake"]
                 + os.environ["CMAKE_ARGS"].split(" ")
@@ -121,7 +121,9 @@ info = {
     "url": "https://github.com/PennyLaneAI/pennylane-lightning-kokkos",
     "license": "Apache License 2.0",
     "packages": find_packages(where="."),
-    "package_data": {"pennylane_lightning_kokkos": ["src/*"]},
+    "package_data": {
+        "pennylane_lightning_kokkos": [os.path.join("src", "*"), os.path.join("src", "**", "*")]
+    },
     "entry_points": {
         "pennylane.plugins": [
             "lightning.kokkos = pennylane_lightning_kokkos:LightningKokkos",
