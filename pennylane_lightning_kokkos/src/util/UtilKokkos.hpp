@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 /**
- * @file Util.hpp
+ * @file UtilKokkos.hpp
  * Contains uncategorised utility functions.
  */
 #pragma once
@@ -43,7 +43,7 @@
 #include <numbers>
 #endif
 
-namespace Pennylane::Util {
+namespace Pennylane::Lightning_Kokkos::Util {
 template <typename T> struct remove_complex { using type = T; };
 template <typename T> struct remove_complex<std::complex<T>> {
     using type = T;
@@ -608,4 +608,4 @@ inline auto operator<<(std::ostream &os,
     return os;
 }
 
-} // namespace Pennylane::Util
+} // namespace Pennylane::Lightning_Kokkos::Util

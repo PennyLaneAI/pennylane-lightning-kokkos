@@ -31,8 +31,8 @@
 /// @cond DEV
 namespace {
 using namespace Pennylane;
-using namespace Pennylane::Algorithms;
-using namespace Pennylane::Simulators;
+using namespace Pennylane::Lightning_Kokkos::Algorithms;
+using namespace Pennylane::Lightning_Kokkos::Simulators;
 using std::complex;
 using std::set;
 using std::string;
@@ -747,7 +747,7 @@ void StateVectorKokkos_class_bindings(py::module &m) {
              const std::vector<bool> &,
              const std::vector<std::vector<std::complex<PrecisionT>>> &>())
         .def("__repr__", [](const OpsData<PrecisionT> &ops) {
-            using namespace Pennylane::Util;
+            using namespace Pennylane::Lightning_Kokkos::Util;
             std::ostringstream ops_stream;
             for (size_t op = 0; op < ops.getSize(); op++) {
                 ops_stream << "{'name': " << ops.getOpsName()[op];
@@ -960,7 +960,7 @@ PYBIND11_MODULE(lightning_kokkos_qubit_ops, // NOLINT: No control over
         .def("set_tools_args", &Kokkos::InitializationSettings::set_tools_args,
              "Options to pass to the loaded tool as command-line arguments.")
         .def("__repr__", [](const Kokkos::InitializationSettings &args) {
-            using namespace Pennylane::Util;
+            using namespace Pennylane::Lightning_Kokkos::Util;
             std::ostringstream args_stream;
             args_stream << args;
             return args_stream.str();

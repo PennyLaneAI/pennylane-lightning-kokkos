@@ -2,10 +2,10 @@
 
 #include <Kokkos_Core.hpp>
 
-#include "Util.hpp"
+#include "UtilKokkos.hpp"
 
 namespace {
-using namespace Pennylane::Util;
+using namespace Pennylane::Lightning_Kokkos::Util;
 }
 
 namespace Pennylane::Functors {
@@ -280,7 +280,7 @@ struct getExpectationValueMultiQubitOpFunctor {
     KOKKOS_INLINE_FUNCTION
     void operator()(const std::size_t kp, Precision &expval) const {
         const std::size_t k = kp * dim;
-        using Pennylane::Util::bitswap;
+        using Pennylane::Lightning_Kokkos::Util::bitswap;
         for (std::size_t inner_idx = 0; inner_idx < dim; inner_idx++) {
             std::size_t idx = k | inner_idx;
             const std::size_t n_wires = wires.size();

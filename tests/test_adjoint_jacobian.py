@@ -968,8 +968,8 @@ def test_integration_custom_wires_batching(returns):
         (qml.Hamiltonian([1], [qml.PauliZ(0)]), HamiltonianKokkos_C64, HamiltonianKokkos_C128),
         (
             qml.PauliZ(0) @ qml.Hadamard(1) @ (0.1 * (qml.PauliZ(2) + qml.PauliX(3))),
-            TensorProdObsKokkos_C64,
-            TensorProdObsKokkos_C128,
+            HamiltonianKokkos_C64,
+            HamiltonianKokkos_C128,
         ),
         (
             qml.SparseHamiltonian(qml.Hamiltonian([1], [qml.PauliZ(0)]).sparse_matrix(), wires=[0]),
