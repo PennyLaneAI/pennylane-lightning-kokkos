@@ -14,7 +14,7 @@
 #include "TestHelpers.hpp"
 
 using namespace Pennylane;
-using namespace Pennylane::Simulators;
+using namespace Pennylane::Lightning_Kokkos::Simulators;
 
 TEMPLATE_TEST_CASE("StateVectorKokkosManaged::getExpectationValueIdentity",
                    "[StateVectorKokkosManaged_Expval]", float, double) {

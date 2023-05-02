@@ -189,3 +189,20 @@ class TestProbs:
             match="Lightning does not currently support out-of-order indices for probabilities",
         ):
             assert np.allclose(circuit(), cases[1], atol=tol, rtol=0)
+
+    def test_probs_qpe(self, tol):
+        """Test the application of qml.QuantumPhaseEstimation"""
+        dev = qml.device("lightning.kokkos", wires=2)
+
+        @qml.qnode(dev)
+        def circuit():
+            qml.Hadamard(wires=0)
+            qml.QuantumPhaseEstimation(qml.matrix(qml.Hadamard)(wires=0), [0], [1])
+            return qml.probs(wires=[0, 1])
+
+        circuit()
+
+        res_probs = dev.probability([0, 1])
+        expected_prob = np.array([0.72855339, 0.02144661, 0.125, 0.125])
+
+        assert np.allclose(res_probs, expected_prob, atol=tol, rtol=0)
