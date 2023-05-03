@@ -6,6 +6,9 @@
 
 ### Improvements
 
+* Remove logic from `setup.py` and transfer paths and definitions into workflow files.
+[(#58)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/58)
+
 ### Documentation
 
 ### Bug fixes
@@ -13,6 +16,8 @@
 ### Contributors
 
 This release contains contributions from (in alphabetical order):
+
+Vincent Michaud-Rioux
 
 ---
 
@@ -29,9 +34,6 @@ This release contains contributions from (in alphabetical order):
 [(#49)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/49)
 
 ### Improvements
-
-* Remove logic from `setup.py` and transfer paths and definitions into workflow files.
-[(#58)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/58)
 
 * Remove deprecated `set-output` commands from workflow files.
 [(#56)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/56)
