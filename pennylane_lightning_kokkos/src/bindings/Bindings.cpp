@@ -65,7 +65,7 @@ void StateVectorKokkos_class_bindings(py::module &m) {
             return new StateVectorKokkos<PrecisionT>(num_qubits);
         }))
         .def(py::init([](std::size_t num_qubits,
-                         const Kokkos::InitArguments &kokkos_args) {
+                         const Kokkos::InitializationSettings &kokkos_args) {
             return new StateVectorKokkos<PrecisionT>(num_qubits, kokkos_args);
         }))
         .def(py::init([](const np_arr_c &arr) {
@@ -76,7 +76,7 @@ void StateVectorKokkos_class_bindings(py::module &m) {
                 data_ptr, static_cast<std::size_t>(arr.size()));
         }))
         .def(py::init([](const np_arr_c &arr,
-                         const Kokkos::InitArguments &kokkos_args) {
+                         const Kokkos::InitializationSettings &kokkos_args) {
             py::buffer_info numpyArrayInfo = arr.request();
             auto *data_ptr =
                 static_cast<Kokkos::complex<PrecisionT> *>(numpyArrayInfo.ptr);
@@ -842,18 +842,124 @@ PYBIND11_MODULE(lightning_kokkos_qubit_ops, // NOLINT: No control over
     m.def("kokkos_start", []() { Kokkos::initialize(); });
     m.def("kokkos_end", []() { Kokkos::finalize(); });
     m.def("kokkos_config_info", &getConfig, "Kokkos configurations query.");
+    m.def(
+        "print_configuration",
+        []() {
+            std::ostringstream buffer;
+            Kokkos::print_configuration(buffer, true);
+            return buffer.str();
+        },
+        "Kokkos configurations query.");
 
-    py::class_<Kokkos::InitArguments>(m, "InitArguments")
-        .def(py::init<>())
-        .def(py::init<const int &>())
-        .def_readwrite("num_threads", &Kokkos::InitArguments::num_threads)
-        .def_readwrite("num_numa", &Kokkos::InitArguments::num_numa)
-        .def_readwrite("device_id", &Kokkos::InitArguments::device_id)
-        .def_readwrite("ndevices", &Kokkos::InitArguments::ndevices)
-        .def_readwrite("skip_device", &Kokkos::InitArguments::skip_device)
-        .def_readwrite("disable_warnings",
-                       &Kokkos::InitArguments::disable_warnings)
-        .def("__repr__", [](const Kokkos::InitArguments &args) {
+    py::class_<Kokkos::InitializationSettings>(m, "InitializationSettings")
+        .def(py::init([]() {
+            return Kokkos::InitializationSettings()
+                .set_num_threads(0)
+                .set_device_id(0)
+                .set_map_device_id_by("")
+                .set_disable_warnings(0)
+                .set_print_configuration(0)
+                .set_tune_internals(0)
+                .set_tools_libs("")
+                .set_tools_help(0)
+                .set_tools_args("");
+        }))
+        .def("get_num_threads",
+             &Kokkos::InitializationSettings::get_num_threads,
+             "Number of threads to use with the host parallel backend. Must be "
+             "greater than zero.")
+        .def("get_device_id", &Kokkos::InitializationSettings::get_device_id,
+             "Device to use with the device parallel backend. Valid IDs are "
+             "zero to number of GPU(s) available for execution minus one.")
+        .def(
+            "get_map_device_id_by",
+            &Kokkos::InitializationSettings::get_map_device_id_by,
+            "Strategy to select a device automatically from the GPUs available "
+            "for execution. Must be either mpi_rank"
+            "for round-robin assignment based on the local MPI rank or random.")
+        .def("get_disable_warnings",
+             &Kokkos::InitializationSettings::get_disable_warnings,
+             "Whether to disable warning messages.")
+        .def("get_print_configuration",
+             &Kokkos::InitializationSettings::get_print_configuration,
+             "Whether to print the configuration after initialization.")
+        .def("get_tune_internals",
+             &Kokkos::InitializationSettings::get_tune_internals,
+             "Whether to allow autotuning internals instead of using "
+             "heuristics.")
+        .def("get_tools_libs", &Kokkos::InitializationSettings::get_tools_libs,
+             "Which tool dynamic library to load. Must either be the full path "
+             "to library or the name of library if the path is present in the "
+             "runtime library search path (e.g. LD_LIBRARY_PATH)")
+        .def("get_tools_help", &Kokkos::InitializationSettings::get_tools_help,
+             "Query the loaded tool for its command-line options support.")
+        .def("get_tools_args", &Kokkos::InitializationSettings::get_tools_args,
+             "Options to pass to the loaded tool as command-line arguments.")
+        .def("has_num_threads",
+             &Kokkos::InitializationSettings::has_num_threads,
+             "Number of threads to use with the host parallel backend. Must be "
+             "greater than zero.")
+        .def("has_device_id", &Kokkos::InitializationSettings::has_device_id,
+             "Device to use with the device parallel backend. Valid IDs are "
+             "zero "
+             "to number of GPU(s) available for execution minus one.")
+        .def(
+            "has_map_device_id_by",
+            &Kokkos::InitializationSettings::has_map_device_id_by,
+            "Strategy to select a device automatically from the GPUs available "
+            "for execution. Must be either mpi_rank"
+            "for round-robin assignment based on the local MPI rank or random.")
+        .def("has_disable_warnings",
+             &Kokkos::InitializationSettings::has_disable_warnings,
+             "Whether to disable warning messages.")
+        .def("has_print_configuration",
+             &Kokkos::InitializationSettings::has_print_configuration,
+             "Whether to print the configuration after initialization.")
+        .def("has_tune_internals",
+             &Kokkos::InitializationSettings::has_tune_internals,
+             "Whether to allow autotuning internals instead of using "
+             "heuristics.")
+        .def("has_tools_libs", &Kokkos::InitializationSettings::has_tools_libs,
+             "Which tool dynamic library to load. Must either be the full path "
+             "to "
+             "library or the name of library if the path is present in the "
+             "runtime library search path (e.g. LD_LIBRARY_PATH)")
+        .def("has_tools_help", &Kokkos::InitializationSettings::has_tools_help,
+             "Query the loaded tool for its command-line options support.")
+        .def("has_tools_args", &Kokkos::InitializationSettings::has_tools_args,
+             "Options to pass to the loaded tool as command-line arguments.")
+        .def("set_num_threads",
+             &Kokkos::InitializationSettings::set_num_threads,
+             "Number of threads to use with the host parallel backend. Must be "
+             "greater than zero.")
+        .def("set_device_id", &Kokkos::InitializationSettings::set_device_id,
+             "Device to use with the device parallel backend. Valid IDs are "
+             "zero to number of GPU(s) available for execution minus one.")
+        .def(
+            "set_map_device_id_by",
+            &Kokkos::InitializationSettings::set_map_device_id_by,
+            "Strategy to select a device automatically from the GPUs available "
+            "for execution. Must be either mpi_rank"
+            "for round-robin assignment based on the local MPI rank or random.")
+        .def("set_disable_warnings",
+             &Kokkos::InitializationSettings::set_disable_warnings,
+             "Whether to disable warning messages.")
+        .def("set_print_configuration",
+             &Kokkos::InitializationSettings::set_print_configuration,
+             "Whether to print the configuration after initialization.")
+        .def("set_tune_internals",
+             &Kokkos::InitializationSettings::set_tune_internals,
+             "Whether to allow autotuning internals instead of using "
+             "heuristics.")
+        .def("set_tools_libs", &Kokkos::InitializationSettings::set_tools_libs,
+             "Which tool dynamic library to load. Must either be the full path "
+             "to library or the name of library if the path is present in the "
+             "runtime library search path (e.g. LD_LIBRARY_PATH)")
+        .def("set_tools_help", &Kokkos::InitializationSettings::set_tools_help,
+             "Query the loaded tool for its command-line options support.")
+        .def("set_tools_args", &Kokkos::InitializationSettings::set_tools_args,
+             "Options to pass to the loaded tool as command-line arguments.")
+        .def("__repr__", [](const Kokkos::InitializationSettings &args) {
             using namespace Pennylane::Lightning_Kokkos::Util;
             std::ostringstream args_stream;
             args_stream << args;

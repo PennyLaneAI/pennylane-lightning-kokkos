@@ -16,49 +16,49 @@ Unit tests for Kokkos bindings.
 """
 import pytest
 
-from pennylane_lightning_kokkos.lightning_kokkos_qubit_ops import InitArguments
+from pennylane_lightning_kokkos.lightning_kokkos_qubit_ops import InitializationSettings
 
 
 class TestKokkos:
     """Tests that Kokkos bindings work."""
 
-    @pytest.mark.parametrize("init_threads", [None, 1, 2, 5])
     @pytest.mark.parametrize(
         "fields",
         [
-            ("num_threads", -1, 2),
-            ("num_numa", -1, 3),
-            ("device_id", -1, 4),
-            ("ndevices", -1, 5),
-            ("skip_device", 9999, 6),
-            ("disable_warnings", False, True),
+            ("get_num_threads", 0),
+            ("get_device_id", 0),
+            ("get_map_device_id_by", ""),
+            ("get_disable_warnings", 0),
+            ("get_print_configuration", 0),
+            ("get_tune_internals", 0),
+            ("get_tools_libs", ""),
+            ("get_tools_help", 0),
+            ("get_tools_args", ""),
         ],
     )
-    def test_InitArguments_readwrite_attrs(self, init_threads, fields):
-        """Tests that InitArguments fields are properly accessed."""
-        field, default, value = fields
-        if init_threads is None:
-            args = InitArguments()
-        else:
-            args = InitArguments(init_threads)
-            default = init_threads if field == "num_threads" else default
-        assert getattr(args, field) == default
-        setattr(args, field, value)
-        assert getattr(args, field) == value
+    def test_InitializationSettings_getters(self, fields):
+        """Tests that InitializationSettings fields are properly accessed."""
+        args = InitializationSettings()
+        field, default = fields
+        assert getattr(args, field)() == default
 
-    @pytest.mark.parametrize("init_threads", list(range(1, 5)))
-    def test_InitArguments_repr(self, init_threads):
-        """Tests that InitArguments are properly initialized."""
-        r0 = f"""<InitArguments with
-num_threads = {init_threads}
-num_numa = -1
-device_id = -1
-ndevices = -1
-skip_device = 9999
-disable_warnings = 0>"""
-        args = InitArguments()
-        r1 = args.__repr__()
-        assert r1.strip() != r0.strip()
-        args = InitArguments(init_threads)
-        r1 = args.__repr__()
-        assert r1.strip() == r0.strip()
+    @pytest.mark.parametrize(
+        "fields",
+        [
+            ("num_threads", 4),
+            ("device_id", 1),
+            ("map_device_id_by", "mpi_rank"),
+            ("disable_warnings", True),
+            ("print_configuration", True),
+            ("tune_internals", True),
+            ("tools_libs", "LD_LIBRARY_PATH"),
+            ("tools_help", True),
+            ("tools_args", "TOOL_ARGS"),
+        ],
+    )
+    def test_InitializationSettings_setters(self, fields):
+        """Tests that InitializationSettings fields are properly accessed."""
+        args = InitializationSettings()
+        field, value = fields
+        _ = getattr(args, f"set_{field}")(value)
+        assert getattr(args, f"get_{field}")() == value

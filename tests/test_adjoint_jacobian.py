@@ -24,7 +24,7 @@ from scipy.stats import unitary_group
 import pennylane_lightning_kokkos as plk
 from pennylane_lightning_kokkos._serialize import _serialize_ob
 from pennylane_lightning_kokkos.lightning_kokkos_qubit_ops import (
-    InitArguments,
+    InitializationSettings,
     NamedObsKokkos_C64,
     NamedObsKokkos_C128,
     TensorProdObsKokkos_C64,
@@ -87,7 +87,7 @@ class TestAdjointJacobian:
     from pennylane_lightning_kokkos import LightningKokkos as lk
     from pennylane_lightning import LightningQubit as lq
 
-    @pytest.fixture(params=[None, InitArguments(2)])
+    @pytest.fixture(params=[None, InitializationSettings().set_num_threads(2)])
     def dev_kokkos(self, request):
         if request.param is None:
             return qml.device("lightning.kokkos", wires=3)

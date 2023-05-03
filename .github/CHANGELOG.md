@@ -30,6 +30,9 @@ This release contains contributions from (in alphabetical order):
 
 ### Improvements
 
+* Replace deprecated InitArguments by InitializationSettings.
+[(#57)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/57)
+
 * Remove deprecated `set-output` commands from workflow files.
 [(#56)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/56)
 

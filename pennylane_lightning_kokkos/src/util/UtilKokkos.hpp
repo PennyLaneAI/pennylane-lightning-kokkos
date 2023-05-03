@@ -586,21 +586,25 @@ inline auto generateBitsPatterns(const std::vector<size_t> &qubitIndices,
 }
 
 /**
- * @brief Streaming operator for Kokkos::InitArguments structs.
+ * @brief Streaming operator for Kokkos::InitializationSettings objects.
  *
  * @param os Output stream.
- * @param args Kokkos::InitArguments struct.
+ * @param args Kokkos::InitializationSettings object.
  * @return std::ostream&
  */
-inline auto operator<<(std::ostream &os, const Kokkos::InitArguments &args)
+inline auto operator<<(std::ostream &os,
+                       const Kokkos::InitializationSettings &args)
     -> std::ostream & {
-    os << "<InitArguments with\n";
-    os << "num_threads = " << args.num_threads << '\n';
-    os << "num_numa = " << args.num_numa << '\n';
-    os << "device_id = " << args.device_id << '\n';
-    os << "ndevices = " << args.ndevices << '\n';
-    os << "skip_device = " << args.skip_device << '\n';
-    os << "disable_warnings = " << args.disable_warnings << ">";
+    os << "InitializationSettings:\n";
+    os << "num_threads = " << args.get_num_threads() << '\n';
+    os << "device_id = " << args.get_device_id() << '\n';
+    os << "map_device_id_by = " << args.get_map_device_id_by() << '\n';
+    os << "disable_warnings = " << args.get_disable_warnings() << '\n';
+    os << "print_configuration = " << args.get_print_configuration() << '\n';
+    os << "tune_internals = " << args.get_tune_internals() << '\n';
+    os << "tools_libs = " << args.get_tools_libs() << '\n';
+    os << "tools_help = " << args.get_tools_help() << '\n';
+    os << "tools_args = " << args.get_tools_args();
     return os;
 }
 

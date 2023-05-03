@@ -128,7 +128,7 @@ template <class Precision> class StateVectorKokkos {
                      Kokkos::MemoryTraits<Kokkos::Unmanaged>>;
 
     StateVectorKokkos() = delete;
-    StateVectorKokkos(size_t num_qubits, const Kokkos::InitArguments &kokkos_args = {})
+    StateVectorKokkos(size_t num_qubits, const Kokkos::InitializationSettings &kokkos_args = {})
         : gates_{
                 //Identity
                  {"PauliX", 
@@ -528,7 +528,7 @@ template <class Precision> class StateVectorKokkos {
      * @param num_qubits Number of qubits
      */
     StateVectorKokkos(Kokkos::complex<Precision> *hostdata_, size_t length,
-                      const Kokkos::InitArguments &kokkos_args = {})
+                      const Kokkos::InitializationSettings &kokkos_args = {})
         : StateVectorKokkos(Lightning_Kokkos::Util::log2(length), kokkos_args) {
         HostToDevice(hostdata_, length);
     }
@@ -539,7 +539,7 @@ template <class Precision> class StateVectorKokkos {
      * @param other Another state vector
      */
     StateVectorKokkos(const StateVectorKokkos &other,
-                      const Kokkos::InitArguments &kokkos_args = {})
+                      const Kokkos::InitializationSettings &kokkos_args = {})
         : StateVectorKokkos(other.getNumQubits(), kokkos_args) {
         this->DeviceToDevice(other.getData());
     }
