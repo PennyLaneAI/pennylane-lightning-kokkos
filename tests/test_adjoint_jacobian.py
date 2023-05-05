@@ -867,21 +867,21 @@ def test_adjoint_Hamiltonian():
             qml.Hamiltonian(
                 [0.1],
                 [qml.PauliX(wires=custom_wires[0]) @ qml.PauliZ(wires=custom_wires[1])],
-            ).sparse_matrix(),
+            ).sparse_matrix(custom_wires),
             wires=custom_wires,
         ),
         qml.SparseHamiltonian(
             qml.Hamiltonian(
                 [2.0],
                 [qml.PauliX(wires=custom_wires[2]) @ qml.PauliZ(wires=custom_wires[0])],
-            ).sparse_matrix(),
+            ).sparse_matrix(custom_wires),
             wires=custom_wires,
         ),
         qml.SparseHamiltonian(
             qml.Hamiltonian(
                 [1.1],
                 [qml.PauliX(wires=custom_wires[0]) @ qml.PauliZ(wires=custom_wires[2])],
-            ).sparse_matrix(),
+            ).sparse_matrix(custom_wires),
             wires=custom_wires,
         ),
     ],
