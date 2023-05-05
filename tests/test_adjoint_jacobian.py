@@ -635,12 +635,9 @@ def test_qchem_expvalcost_correct():
     )
     active_electrons = 2
     hf_state = qchem.hf_state(active_electrons, qubits)
-
-    diff_method = "adjoint"  # pennylane.QuantumFunctionError: Adjoint differentiation method does not support Hamiltonian observables.
-    diff_method = None
     dev_lig = qml.device("lightning.kokkos", wires=qubits)
 
-    @qml.qnode(dev_lig, diff_method=diff_method)
+    @qml.qnode(dev_lig, diff_method="adjoint")
     def circuit_1(params, wires):
         qml.BasisState(hf_state, wires=wires)
         qml.RX(params[0], wires=0)
@@ -651,10 +648,9 @@ def test_qchem_expvalcost_correct():
 
     params = np.array([0.123], requires_grad=True)
     grads_lig = qml.grad(circuit_1)(params, wires=range(qubits))
-
     dev_def = qml.device("default.qubit", wires=qubits)
 
-    @qml.qnode(dev_def, diff_method=diff_method)
+    @qml.qnode(dev_def, diff_method="backprop")
     def circuit_2(params, wires):
         qml.BasisState(hf_state, wires=wires)
         qml.RX(params[0], wires=0)
