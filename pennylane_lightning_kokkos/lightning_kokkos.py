@@ -579,7 +579,9 @@ if CPP_BINARY_AVAILABLE:
             )
 
         @staticmethod
-        def _check_adjdiff_supported_measurements(measurements: List[MeasurementProcess]):
+        def _check_adjdiff_supported_measurements(
+            measurements: List[MeasurementProcess],
+        ):
             """Check whether given list of measurement is supported by adjoint_diff.
             Args:
                 measurements (List[MeasurementProcess]): a list of measurement processes to check.
@@ -750,7 +752,8 @@ if CPP_BINARY_AVAILABLE:
             )
             meas_filtered = list(
                 filter(
-                    lambda m: m.obs is None or not skip_diagonalizing(m.obs), circuit.measurements
+                    lambda m: m.obs is None or not skip_diagonalizing(m.obs),
+                    circuit.measurements,
                 )
             )
             return super()._get_diagonalizing_gates(

@@ -4,6 +4,9 @@
 
 ### Breaking changes
 
+* Update tests to be compliant with PennyLane v0.31.0 development changes and deprecations.
+  [(#66)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/66)
+
 ### Improvements
 
 ### Documentation
@@ -13,6 +16,8 @@
 ### Contributors
 
 This release contains contributions from (in alphabetical order):
+
+Vincent Michaud-Rioux
 
 ---
 
