@@ -52,7 +52,7 @@ from ._version import __version__
 
 try:
     from .lightning_kokkos_qubit_ops import (
-        InitArguments,
+        InitializationSettings,
         LightningKokkos_C128,
         LightningKokkos_C64,
         AdjointJacobianKokkos_C128,
@@ -66,6 +66,7 @@ try:
         SparseHamiltonianKokkos_C64,
         SparseHamiltonianKokkos_C128,
         kokkos_config_info,
+        print_configuration,
     )
 
     from ._serialize import _serialize_observables, _serialize_ops
@@ -83,6 +84,7 @@ def _kokkos_dtype(dtype):
 
 
 def _kokkos_configuration():
+    # config_info = print_configuration()
     config_info = kokkos_config_info()
     for key in config_info.keys():
         if "Runtime Configuration" in key:
@@ -159,7 +161,7 @@ if CPP_BINARY_AVAILABLE:
             wires (int): the number of wires to initialize the device with
             sync (bool): immediately sync with host-sv after applying operations
             c_dtype: Datatypes for statevector representation. Must be one of ``np.complex64`` or ``np.complex128``.
-            kokkos_args (InitArguments): binding for Kokkos::InitArguments (threading parameters).
+            kokkos_args (InitializationSettings): binding for Kokkos::InitializationSettings (threading parameters).
         """
 
         name = "PennyLane plugin for Kokkos-backed Lightning device"
@@ -205,10 +207,10 @@ if CPP_BINARY_AVAILABLE:
             super().__init__(wires, shots=shots, r_dtype=r_dtype, c_dtype=c_dtype)
             if kokkos_args is None:
                 self._kokkos_state = _kokkos_dtype(c_dtype)(self.num_wires)
-            elif isinstance(kokkos_args, InitArguments):
+            elif isinstance(kokkos_args, InitializationSettings):
                 self._kokkos_state = _kokkos_dtype(c_dtype)(self.num_wires, kokkos_args)
             else:
-                raise TypeError("Argument kokkos_args must be of type InitArguments.")
+                raise TypeError("Argument kokkos_args must be of type InitializationSettings.")
             self._sync = sync
 
             if not LightningKokkos.kokkos_config:

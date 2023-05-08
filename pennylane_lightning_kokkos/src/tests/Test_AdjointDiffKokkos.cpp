@@ -36,7 +36,8 @@ TEST_CASE("AdjointJacobianKokkos::AdjointJacobianKokkos Op=RX, Obs=Z",
     AdjointJacobianKokkos<double> adj;
     std::vector<double> param{-M_PI / 7, M_PI / 5, 2 * M_PI / 3};
 
-    const Kokkos::InitArguments num_threads_2 = {2};
+    const auto num_threads_2 =
+        Kokkos::InitializationSettings().set_num_threads(2);
     const size_t num_qubits = 1;
     const size_t num_params = 3;
     const size_t num_obs = 1;
