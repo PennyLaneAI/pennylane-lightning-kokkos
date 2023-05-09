@@ -135,7 +135,7 @@ jobs:
           yum update -y && yum install -y docker
   
       - name: Install cibuildwheel
-        run: python3.8 -m pip install cibuildwheel~=2.11.0
+        run: python -m pip install cibuildwheel~=2.11.0
 
       - name: Build wheels
         env:
@@ -174,12 +174,12 @@ jobs:
           OMP_PROC_BIND: false
 
         run: 
-          python3.8 -m cibuildwheel --output-dir wheelhouse
+          python -m cibuildwheel --output-dir wheelhouse
 
       - name: Validate wheels
         run: |
-          python3.8 -m pip install twine
-          python3.8 -m twine check ./wheelhouse/*.whl
+          python -m pip install twine
+          python -m twine check ./wheelhouse/*.whl
 
       - uses: actions-ecosystem/action-regex-match@v2
         id: rc_build
