@@ -190,10 +190,7 @@ def _serialize_pauli_word(ob, wires_map: dict, use_csingle: bool):
         return named_obs(pauli_name_map[pauli], [wires_map[wire]])
 
     return tensor_obs(
-        [
-            named_obs(pauli_name_map[pauli], [wires_map[wire]])
-            for wire, pauli in ob.items()
-        ]
+        [named_obs(pauli_name_map[pauli], [wires_map[wire]]) for wire, pauli in ob.items()]
     )
 
 
@@ -239,9 +236,7 @@ def _serialize_ob(ob, wires_map, use_csingle):
         raise TypeError(f"Unknown observable found: {ob}. Please use Pauli-words only.")
 
 
-def _serialize_observables(
-    tape: QuantumTape, wires_map: dict, use_csingle: bool = False
-) -> List:
+def _serialize_observables(tape: QuantumTape, wires_map: dict, use_csingle: bool = False) -> List:
     """Serialize the observables of an input tape.
     Args:
         tape (QuantumTape): the input quantum tape
@@ -256,9 +251,7 @@ def _serialize_observables(
 
 def _serialize_ops(
     tape: QuantumTape, wires_map: dict, use_csingle: bool = False
-) -> Tuple[
-    List[List[str]], List[np.ndarray], List[List[int]], List[bool], List[np.ndarray]
-]:
+) -> Tuple[List[List[str]], List[np.ndarray], List[List[int]], List[bool], List[np.ndarray]]:
     """Serializes the operations of an input tape.
 
     The state preparation operations are not included.
