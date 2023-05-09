@@ -37,17 +37,11 @@ if not os.getenv("READTHEDOCS"):
         user_options = build_ext.user_options + [
             ("define=", "D", "Define variables for CMake"),
             ("verbosity", "V", "Increase CMake build verbosity"),
-            ("backend=", "B", "Define compiled Kokkos backend"),
-            ("arch=", "A", "Define backend targetted architecture"),
         ]
-
-        backends = {"CUDA", "HIP", "OPENMP", "THREADS", "SERIAL"}
 
         def initialize_options(self):
             super().initialize_options()
             self.define = None
-            self.backend = None
-            self.arch = None
             self.verbosity = ""
 
         def finalize_options(self):
@@ -65,11 +59,10 @@ if not os.getenv("READTHEDOCS"):
             cfg = "Debug" if debug else "Release"
             ninja_path = str(shutil.which("ninja"))
 
-            # Set Python_EXECUTABLE instead if you use PYBIND11_FINDPYTHON
             configure_args = [
                 "-DCMAKE_CXX_FLAGS=-fno-lto",
+                "-DKokkos_ENABLE_SERIAL=ON",  # always build serial backend
                 f"-DCMAKE_LIBRARY_OUTPUT_DIRECTORY={extdir}",
-                f"-DPYTHON_EXECUTABLE={sys.executable}",
                 f"-DCMAKE_BUILD_TYPE={cfg}",  # not used on MSVC, but no harm
                 *(self.cmake_defines),
             ]
@@ -84,60 +77,33 @@ if not os.getenv("READTHEDOCS"):
                     f"-DCMAKE_MAKE_PROGRAM={ninja_path}",
                 ]
 
-            build_args = []
-            if os.getenv("BACKEND") and not self.backend:
-                self.backend = os.getenv("BACKEND")
-            if os.getenv("ARCH") and not self.arch:
-                self.arch = os.getenv("ARCH")
-
-            if self.backend:
-                if self.backend in self.backends:
-                    configure_args.append(f"-DKokkos_ENABLE_{self.backend}=ON")
-                else:
-                    raise RuntimeError(f"Unsupported backend: '{self.backend}'")
-                if self.arch:
-                    configure_args.append(f"-DKokkos_ARCH_{self.arch}=ON")
-
             # Add more platform dependent options
-            if platform.system() == "Darwin":
-                # To support ARM64
-                if os.getenv("ARCHS") == "arm64":
-                    configure_args += [
-                        "-DCMAKE_CXX_COMPILER_TARGET=arm64-apple-macos11",
-                        "-DCMAKE_SYSTEM_NAME=Darwin",
-                        "-DCMAKE_SYSTEM_PROCESSOR=ARM64",
-                    ]
-                else:  # X64 arch
-                    if shutil.which("brew"):
-                        llvmpath = (
-                            subprocess.check_output(["brew", "--prefix", "llvm"]).decode().strip()
-                        )
-                    else:
-                        llvmpath = shutil.which("clang++")
-                        llvmpath = Path(llvmpath).parent.parent
-                    configure_args += [
-                        f"-DCMAKE_CXX_COMPILER={llvmpath}/bin/clang++",
-                        f"-DCMAKE_LINKER={llvmpath}/bin/lld",
-                    ]  # Use clang instead of appleclang
-                # Disable OpenMP in M1 Macs
-                configure_args += ["-DKokkos_ENABLE_OPENMP=OFF"]
-            elif platform.system() == "Windows":
+            if platform.system() == "Windows":
                 configure_args += [
                     "-DKokkos_ENABLE_OPENMP=OFF"
                 ]  # only build with Clang under Windows
-            elif platform.system() != "Linux":
+            elif platform.system() not in ["Darwin", "Linux"]:
                 raise RuntimeError(f"Unsupported '{platform.system()}' platform")
-            for var, opt in zip(["CC", "CXX"], ["C", "CXX"]):
-                if os.getenv(var):
-                    tmp = os.getenv(var)
-                    configure_args += [f"-DCMAKE_{opt}_COMPILER={tmp}"]
+
             if not Path(self.build_temp).exists():
                 os.makedirs(self.build_temp)
 
+            if "CMAKE_ARGS" not in os.environ.keys():
+                os.environ["CMAKE_ARGS"] = ""
+
             subprocess.check_call(
-                ["cmake", str(ext.sourcedir)] + configure_args, cwd=self.build_temp
+                ["cmake"]
+                + os.environ["CMAKE_ARGS"].split(" ")
+                + [str(ext.sourcedir)]
+                + configure_args,
+                cwd=self.build_temp,
+                env=os.environ,
             )
-            subprocess.check_call(["cmake", "--build", "."] + build_args, cwd=self.build_temp)
+            subprocess.check_call(
+                ["cmake", "--build", ".", "--verbose"],
+                cwd=self.build_temp,
+                env=os.environ,
+            )
 
 
 with open("pennylane_lightning_kokkos/_version.py") as f:
@@ -155,7 +121,9 @@ info = {
     "url": "https://github.com/PennyLaneAI/pennylane-lightning-kokkos",
     "license": "Apache License 2.0",
     "packages": find_packages(where="."),
-    "package_data": {"pennylane_lightning_kokkos": ["src/*"]},
+    "package_data": {
+        "pennylane_lightning_kokkos": [os.path.join("src", "*"), os.path.join("src", "**", "*")]
+    },
     "entry_points": {
         "pennylane.plugins": [
             "lightning.kokkos = pennylane_lightning_kokkos:LightningKokkos",

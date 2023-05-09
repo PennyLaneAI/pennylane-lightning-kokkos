@@ -9,6 +9,9 @@
 
 ### Improvements
 
+* Remove logic from `setup.py` and transfer paths and definitions into workflow files.
+[(#58)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/58)
+
 ### Documentation
 
 ### Bug fixes

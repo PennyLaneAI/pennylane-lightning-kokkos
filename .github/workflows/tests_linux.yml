@@ -37,12 +37,14 @@ jobs:
         run: sudo apt-get update && sudo apt-get -y -q install cmake gcc-${{ env.GCC_VERSION }} g++-${{ env.GCC_VERSION }} gcovr lcov
 
       - name: Build and run unit tests
+        env:
+          OMP_PROC_BIND: false
+          OMP_PLACES: threads
         run: |
             cmake . -BBuild -DKokkos_ENABLE_OPENMP=ON -DPLKOKKOS_BUILD_TESTS=ON -DPLKOKKOS_ENABLE_SANITIZER=ON -DCMAKE_CXX_COMPILER="$(which g++-${{ env.GCC_VERSION }})"
             cmake --build ./Build
-            export OMP_PROC_BIND=false
-            export OMP_PLACES=threads
             ./Build/pennylane_lightning_kokkos/src/tests/runner_kokkos
+
   pythontests_openmp:
     name: Python tests for OpenMP Kokkos Backend
     runs-on: ${{ matrix.os }}
@@ -74,15 +76,23 @@ jobs:
           python -m pip install --index-url https://test.pypi.org/simple/ pennylane-lightning --pre --force-reinstall --no-deps
 
       - name: Install lightning.kokkos device
+        env:
+          CMAKE_ARGS: -DKokkos_ENABLE_OPENMP=ON
+          CC: gcc-${{ env.GCC_VERSION }}
+          CXX: g++-${{ env.GCC_VERSION }}
         run: |
           cd main
-          CC=$(which gcc-${{ env.GCC_VERSION }}) CXX=$(which g++-${{ env.GCC_VERSION }}) BACKEND="OPENMP" python -m pip install -e . --verbose
+          python -m pip install -e . --verbose
+          
       - name: Run PennyLane-Lightning-Kokkos unit tests
+        env:
+          OMP_PROC_BIND: false
         run: |
           cd main/
           pytest tests/
           pl-device-test --device lightning.kokkos --skip-ops --shots=20000
           pl-device-test --device lightning.kokkos --skip-ops --shots=None
+
   cpptests_serial:
     name: C++ tests (Linux) for Serial Kokkos backend
     runs-on: ${{ matrix.os }}
@@ -112,6 +122,7 @@ jobs:
             cmake . -BBuild -DPLKOKKOS_BUILD_TESTS=ON -DPLKOKKOS_ENABLE_SANITIZER=ON -DCMAKE_CXX_COMPILER="$(which g++-${{ env.GCC_VERSION }})"
             cmake --build ./Build
             ./Build/pennylane_lightning_kokkos/src/tests/runner_kokkos
+
   pythontests_serial:
     name: Python tests for Serial Kokkos Backend
     runs-on: ${{ matrix.os }}
@@ -143,10 +154,17 @@ jobs:
           python -m pip install --index-url https://test.pypi.org/simple/ pennylane-lightning --pre --force-reinstall --no-deps
 
       - name: Install lightning.kokkos device
+        env:
+          CMAKE_ARGS: -DKokkos_ENABLE_SERIAL=ON
+          CC: gcc-${{ env.GCC_VERSION }}
+          CXX: g++-${{ env.GCC_VERSION }}
         run: |
           cd main
-          CC=$(which gcc-${{ env.GCC_VERSION }}) CXX=$(which g++-${{ env.GCC_VERSION }}) BACKEND="SERIAL" python -m pip install -e . --verbose
+          python -m pip install -e . --verbose
+
       - name: Run PennyLane-Lightning-Kokkos unit tests
+        env:
+          OMP_PROC_BIND: false
         run: |
           cd main/
           pytest tests/
@@ -212,10 +230,17 @@ jobs:
           python -m pip install --index-url https://test.pypi.org/simple/ pennylane-lightning --pre --force-reinstall --no-deps
 
       - name: Install lightning.kokkos device
+        env:
+          CMAKE_ARGS: -DKokkos_ENABLE_THREADS=ON
+          CC: gcc-${{ env.GCC_VERSION }}
+          CXX: g++-${{ env.GCC_VERSION }}
         run: |
           cd main
-          CC=$(which gcc-${{ env.GCC_VERSION }}) CXX=$(which g++-${{ env.GCC_VERSION }}) BACKEND="THREADS" python -m pip install -e . --verbose
+          python -m pip install -e . --verbose
+
       - name: Run PennyLane-Lightning-Kokkos unit tests
+        env:
+          OMP_PROC_BIND: false
         run: |
           cd main/
           pytest tests/

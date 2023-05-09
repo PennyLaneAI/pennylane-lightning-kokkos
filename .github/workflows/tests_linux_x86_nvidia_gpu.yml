@@ -76,16 +76,16 @@ jobs:
 
       - name: Build and run unit tests
         run: |
-            export PATH=/usr/local/cuda-11.8/bin:$PATH
-            export LD_LIBRARY_PATH=/usr/local/cuda-11.8/lib64:$LD_LIBRARY_PATH
-            cmake . -BBuild \
-              -DKokkos_ENABLE_CUDA=ON \
-              -DKokkos_ENABLE_SERIAL=ON \
-              -DPLKOKKOS_BUILD_TESTS=ON \
-              -DPython_EXECUTABLE:FILE="${{ steps.python_path.outputs.python }}" \
-              -G Ninja
-            cmake --build ./Build
-            ./Build/pennylane_lightning_kokkos/src/tests/runner_kokkos
+          export PATH=/usr/local/cuda-11.8/bin:$PATH
+          export LD_LIBRARY_PATH=/usr/local/cuda-11.8/lib64:$LD_LIBRARY_PATH
+          cmake . -BBuild \
+            -DKokkos_ENABLE_CUDA=ON \
+            -DKokkos_ENABLE_SERIAL=ON \
+            -DPLKOKKOS_BUILD_TESTS=ON \
+            -DPython_EXECUTABLE:FILE="${{ steps.python_path.outputs.python }}" \
+            -G Ninja
+          cmake --build ./Build
+          ./Build/pennylane_lightning_kokkos/src/tests/runner_kokkos
 
       - name: Upload test results
         uses: actions/upload-artifact@v3
@@ -161,12 +161,18 @@ jobs:
           python -m pip install --index-url https://test.pypi.org/simple/ pennylane-lightning --pre --force-reinstall --no-deps
 
       - name: Build and install package
+        env:
+          CMAKE_ARGS: -DKokkos_ENABLE_CUDA=ON
+          CC: gcc-${{ env.GCC_VERSION }}
+          CXX: g++-${{ env.GCC_VERSION }}
         run: |
           export PATH=/usr/local/cuda-11.8/bin:$PATH
           export LD_LIBRARY_PATH=/usr/local/cuda-11.8/lib64:$LD_LIBRARY_PATH
-          CC=$(which gcc-${{ env.GCC_VERSION }}) CXX=$(which g++-${{ env.GCC_VERSION }}) BACKEND="CUDA" python -m pip install -e . --verbose
+          python -m pip install -e . --verbose
 
       - name: Run PennyLane-Lightning-Kokkos unit tests
+        env:
+          OMP_PROC_BIND: false
         run: |
           python -m pytest ./tests/ ${{ env.COVERAGE_FLAGS }}
           pl-device-test --device lightning.kokkos --skip-ops --shots=20000 ${{ env.COVERAGE_FLAGS }} --cov-append
