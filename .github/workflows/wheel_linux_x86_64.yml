@@ -100,6 +100,7 @@ jobs:
         cibw_build: ${{ fromJson(needs.set_wheel_build_matrix.outputs.python_version) }}
         exec_model: ${{ fromJson(needs.set_wheel_build_matrix.outputs.cpu_exec_model) }}
         container_img: ["quay.io/pypa/manylinux2014_x86_64"]
+        kokkos_version: ${{ fromJson(needs.set_wheel_build_matrix.outputs.kokkos_version) }}
 
     name: ${{ matrix.os }} (Python ${{ fromJson('{"cp38-*":"3.8", "cp39-*":"3.9","cp310-*":"3.10","cp311-*":"3.11" }')[matrix.cibw_build] }} ${{ matrix.exec_model }})
     runs-on: ${{ matrix.os }}
