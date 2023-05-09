@@ -155,7 +155,7 @@ jobs:
             source /opt/rh/devtoolset-11/enable -y
 
           CIBW_ENVIRONMENT: |
-            PATH=/opt/rh/devtoolset-11/root/usr/bin:$PATH CMAKE_ARGS="-DPYTHON_EXECUTABLE=$(which python) -DKokkos_ENABLE_${{ matrix.exec_model }}=ON"
+            PATH=/opt/rh/devtoolset-11/root/usr/bin:$PATH CMAKE_ARGS="-DPYTHON_EXECUTABLE=$(which python)"
           
           # Testing of built wheels
           CIBW_TEST_REQUIRES: numpy~=1.21 scipy pytest pytest-cov pytest-mock flaky
