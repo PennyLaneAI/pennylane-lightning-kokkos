@@ -38,7 +38,6 @@ endif()
 target_link_libraries(runner_kokkos PUBLIC pennylane_lightning_kokkos Catch2::Catch2 kokkos)
 target_sources(runner_kokkos PRIVATE  Test_LinearAlgebra.cpp
                                       Test_AdjointDiffKokkos.cpp
-                                      Test_Backend_info.cpp
                                       Test_StateVectorKokkos_Measure.cpp
                                       Test_StateVectorKokkos_NonParam.cpp
                                       Test_StateVectorKokkos_Param.cpp

@@ -20,7 +20,6 @@ from typing import List
 from warnings import warn
 from itertools import product
 
-import re
 import numpy as np
 from pennylane import (
     active_return,
@@ -30,8 +29,6 @@ from pennylane import (
     QubitStateVector,
     DeviceError,
     Projector,
-    Hamiltonian,
-    SparseHamiltonian,
     Hermitian,
     Rot,
     QuantumFunctionError,
@@ -57,15 +54,6 @@ try:
         LightningKokkos_C64,
         AdjointJacobianKokkos_C128,
         AdjointJacobianKokkos_C64,
-        NamedObsKokkos_C64,
-        NamedObsKokkos_C128,
-        TensorProdObsKokkos_C64,
-        TensorProdObsKokkos_C128,
-        HamiltonianKokkos_C64,
-        HamiltonianKokkos_C128,
-        SparseHamiltonianKokkos_C64,
-        SparseHamiltonianKokkos_C128,
-        kokkos_config_info,
         print_configuration,
     )
 
@@ -84,13 +72,7 @@ def _kokkos_dtype(dtype):
 
 
 def _kokkos_configuration():
-    # config_info = print_configuration()
-    config_info = kokkos_config_info()
-    for key in config_info.keys():
-        if "Runtime Configuration" in key:
-            for sub_key, value in config_info[key].items():
-                config_info[key][sub_key] = re.sub("\x00", ":", value)
-    return config_info
+    return print_configuration()
 
 
 allowed_operations = {
@@ -435,8 +417,7 @@ if CPP_BINARY_AVAILABLE:
             for operation in operations:
                 if isinstance(operation, (QubitStateVector, BasisState)):
                     raise DeviceError(
-                        "Operation {} cannot be used after other Operations have already been "
-                        "applied on a {} device.".format(operation.name, self.short_name)
+                        f"Operation {operation.name} cannot be used after other Operations have already been applied on a {self.short_name} device."
                     )
 
             self.apply_kokkos(operations)
@@ -460,14 +441,14 @@ if CPP_BINARY_AVAILABLE:
             sqr_matrix = np.matmul(adjoint_matrix, qml.matrix(observable))
 
             mean = self._kokkos_state.ExpectationValue(
-                [i + "_var" for i in observable.name],
+                [f"{i}_var" for i in observable.name],
                 self.wires.indices(observable.wires),
                 observable.parameters,
                 qml.matrix(observable).ravel(order="C"),
             )
 
             squared_mean = self._kokkos_state.ExpectationValue(
-                [i + "_sqr" for i in observable.name],
+                [f"{i}_sqr" for i in observable.name],
                 self.wires.indices(observable.wires),
                 observable.parameters,
                 sqr_matrix.ravel(order="C"),
@@ -588,7 +569,7 @@ if CPP_BINARY_AVAILABLE:
             Returns:
                 Expectation or State: a common return type of measurements.
             """
-            if len(measurements) == 0:
+            if not measurements:
                 return None
 
             if len(measurements) == 1 and measurements[0].return_type is State:
@@ -596,7 +577,7 @@ if CPP_BINARY_AVAILABLE:
                 raise QuantumFunctionError("Not supported")
 
             # The return_type of measurement processes must be expectation
-            if not all([m.return_type is Expectation for m in measurements]):
+            if any(m.return_type is not Expectation for m in measurements):
                 raise QuantumFunctionError(
                     "Adjoint differentiation method does not support expectation return type "
                     "mixed with other return types"
@@ -613,11 +594,11 @@ if CPP_BINARY_AVAILABLE:
                             "LightningKokkos adjoint differentiation method does not currently support the Hermitian observable"
                         )
                 else:
-                    if any([isinstance(o, Projector) for o in m.obs.non_identity_obs]):
+                    if any(isinstance(o, Projector) for o in m.obs.non_identity_obs):
                         raise QuantumFunctionError(
                             "Adjoint differentiation method does not support the Projector observable"
                         )
-                    if any([isinstance(o, Hermitian) for o in m.obs.non_identity_obs]):
+                    if any(isinstance(o, Hermitian) for o in m.obs.non_identity_obs):
                         raise QuantumFunctionError(
                             "LightningKokkos adjoint differentiation method does not currently support the Hermitian observable"
                         )
@@ -657,10 +638,9 @@ if CPP_BINARY_AVAILABLE:
             # Initialization of state
             if starting_state is not None:
                 ket = np.ravel(starting_state, order="C")
-            else:
-                if not use_device_state:
-                    self.reset()
-                    self.execute(tape)
+            elif not use_device_state:
+                self.reset()
+                self.execute(tape)
 
             if self.use_csingle:
                 adj = AdjointJacobianKokkos_C64()

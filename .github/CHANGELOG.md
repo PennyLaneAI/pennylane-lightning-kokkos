@@ -4,10 +4,16 @@
 
 ### Breaking changes
 
+* Deprecate `kokkos_config_info`, replaced by Kokkos' `print_configuration`.
+[(#55)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/55)
+
 * Update tests to be compliant with PennyLane v0.31.0 development changes and deprecations.
   [(#66)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/66)
 
 ### Improvements
+
+* Upgrade Kokkos version to v0.4.01.
+[(#55)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/55)
 
 * Remove logic from `setup.py` and transfer paths and definitions into workflow files.
 [(#58)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/58)

@@ -24,7 +24,6 @@
 #include <cstddef>
 #include <iostream>
 #include <limits>
-#include <memory>
 #include <numeric>
 #include <set>
 #include <stdexcept>
