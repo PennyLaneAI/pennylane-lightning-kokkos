@@ -18,7 +18,8 @@
 * Remove logic from `setup.py` and transfer paths and definitions into workflow files.
 [(#58)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/58)
 
-* Use `Operator.name` instead of `Operation.base_name`
+* Use `Operator.name` instead of `Operation.base_name`.
+  [(#67)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/67)
 
 ### Documentation
 
