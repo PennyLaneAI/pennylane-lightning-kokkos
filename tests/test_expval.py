@@ -14,6 +14,7 @@
 """
 Unit tests for the expval method of the :mod:`pennylane_lightning_kokkos.LightningKokkos` device.
 """
+import math
 import pytest
 
 import numpy as np
@@ -177,3 +178,25 @@ class TestTensorExpval:
         expected = -(np.cos(varphi) * np.sin(phi) + np.sin(varphi) * np.cos(theta)) / np.sqrt(2)
 
         assert np.allclose(res, expected, tol)
+
+
+class TestHamiltonian:
+    @pytest.mark.parametrize(
+        "obs, coeffs, res",
+        [
+            ([qml.PauliX(0) @ qml.PauliZ(1)], [1.0], 0.0),
+            ([qml.PauliZ(0) @ qml.PauliZ(1)], [1.0], math.cos(0.4) * math.cos(-0.2)),
+        ],
+    )
+    def test_expval_hamiltonian(self, obs, coeffs, res, qubit_device_3_wires, tol):
+        """Test expval with Hamiltonian"""
+        ham = qml.Hamiltonian(coeffs, obs)
+        dev = qubit_device_3_wires
+
+        @qml.qnode(dev)
+        def circuit():
+            qml.RX(0.4, wires=[0])
+            qml.RY(-0.2, wires=[1])
+            return qml.expval(ham)
+
+        assert np.allclose(circuit(), res, atol=tol, rtol=0)

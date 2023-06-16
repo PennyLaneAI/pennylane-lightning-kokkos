@@ -57,7 +57,7 @@ try:
         print_configuration,
     )
 
-    from ._serialize import _serialize_observables, _serialize_ops
+    from ._serialize import _serialize_observables, _serialize_ops, _serialize_hamiltonian
 
     CPP_BINARY_AVAILABLE = True
 except (ImportError, ValueError, PLException) as e:
@@ -520,19 +520,10 @@ if CPP_BINARY_AVAILABLE:
                 )
 
             if observable.name in ["Hamiltonian"]:
-                if len(observable.wires) < 13:
-                    device_wires = self.map_wires(observable.wires)
-                    return self._kokkos_state.ExpectationValue(
-                        device_wires, qml.matrix(observable).ravel(order="C")
-                    )
-                else:
-                    Hmat = qml.utils.sparse_hamiltonian(observable, wires=self.wires)
-                    CSR_SparseHamiltonian = observable.sparse_matrix().tocsr()
-                    return self._kokkos_state.ExpectationValue(
-                        CSR_SparseHamiltonian.data,
-                        CSR_SparseHamiltonian.indices,
-                        CSR_SparseHamiltonian.indptr,
-                    )
+                ham = _serialize_hamiltonian(
+                    observable, self.wire_map, use_csingle=self.use_csingle
+                )
+                return self._kokkos_state.ExpectationValue(ham)
 
             if self.shots is not None:
                 # estimate the expectation value

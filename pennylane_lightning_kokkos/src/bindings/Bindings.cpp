@@ -494,7 +494,6 @@ void StateVectorKokkos_class_bindings(py::module &m) {
                     wires, conv_matrix);
             },
             "Calculate the expectation value of the given observable.")
-
         .def(
             "ExpectationValue",
             [](StateVectorKokkos<PrecisionT> &sv, const np_arr_c &gate_data,
@@ -512,6 +511,13 @@ void StateVectorKokkos_class_bindings(py::module &m) {
                 // Return the real component only & ignore params
                 return MeasuresKokkos<PrecisionT>(sv).getExpectationValue(
                     conv_data, indices, index_ptr);
+            },
+            "Calculate the expectation value of the given observable.")
+        .def(
+            "ExpectationValue",
+            [](StateVectorKokkos<PrecisionT> &sv,
+               const ObservableKokkos<PrecisionT> &obs) {
+                return MeasuresKokkos<PrecisionT>(sv).expval(obs);
             },
             "Calculate the expectation value of the given observable.")
         .def("probs",
