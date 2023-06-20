@@ -75,7 +75,7 @@ jobs:
 
       - name: Switch to stable build of Lightning-Kokkos
         if: inputs.lightning-kokkos-version == 'stable'
-        run: git checkout $(git tag | sort -V | tail -1)
+        run: cd main && git checkout $(git tag | sort -V | tail -1)
 
       - uses: actions/setup-python@v4
         name: Install Python
@@ -164,6 +164,10 @@ jobs:
           # Checkout entire git-history if workflow_call passes 'stable' as we need to find the most recent git-tag
           fetch-depth: ${{ inputs.lightning-kokkos-version == 'stable' && 0 || 2 }}
 
+      - name: Switch to stable build of Lightning-Kokkos
+        if: inputs.lightning-kokkos-version == 'stable'
+        run: cd main && git checkout $(git tag | sort -V | tail -1)
+
       - uses: actions/setup-python@v4
         name: Install Python
         with:
@@ -251,7 +255,7 @@ jobs:
 
       - name: Switch to stable build of Lightning-Kokkos
         if: inputs.lightning-kokkos-version == 'stable'
-        run: git checkout $(git tag | sort -V | tail -1)
+        run: cd main && git checkout $(git tag | sort -V | tail -1)
 
       - uses: actions/setup-python@v4
         name: Install Python
