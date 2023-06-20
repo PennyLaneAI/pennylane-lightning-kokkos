@@ -1,11 +1,11 @@
-# Release 0.31.0-dev
+# Release 0.31.0
 
 ### New features since last release
 
 ### Breaking changes
 
 * Deprecate `kokkos_config_info`, replaced by Kokkos' `print_configuration`.
-[(#55)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/55)
+  [(#55)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/55)
 
 * Update tests to be compliant with PennyLane v0.31.0 development changes and deprecations.
   [(#66)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/66)
@@ -13,10 +13,10 @@
 ### Improvements
 
 * Upgrade Kokkos version to v0.4.01.
-[(#55)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/55)
+  [(#55)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/55)
 
 * Remove logic from `setup.py` and transfer paths and definitions into workflow files.
-[(#58)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/58)
+  [(#58)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/58)
 
 * Use `Operator.name` instead of `Operation.base_name`.
   [(#67)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/67)
@@ -38,32 +38,32 @@ Christina Lee, Vincent Michaud-Rioux
 ### New features since last release
 
 * Add native support for `expval` and `var` of generic observables. Refactor measurements support.
-[(#47)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/47)
+  [(#47)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/47)
 
 ### Breaking changes
 
 * Provide support for PennyLane-Lightning-Kokkos to coexist with PennyLane-Lightning.
-[(#49)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/49)
+  [(#49)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/49)
 
 ### Improvements
 
 * Replace deprecated InitArguments by InitializationSettings.
-[(#57)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/57)
+  [(#57)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/57)
 
 * Remove deprecated `set-output` commands from workflow files.
-[(#56)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/56)
+  [(#56)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/56)
 
 * `setup.py` works on MacOS without `brew` (which is required by Conda-Forge runners).
-[(#48)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/48)
+  [(#48)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/48)
 
 * MacOS::Intel wheels are built for the SERIAL and THREADS Kokkos backends.
-[(#48)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/48)
+  [(#48)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/48)
 
 * Wheels are now checked with `twine check` post-creation for PyPI compatibility.
-[(#50)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/50)
+  [(#50)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/50)
 
 * Template n-qubit gate methods.
-[(#40)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/40)
+  [(#40)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/40)
 
 ### Bug fixes
 
@@ -84,12 +84,12 @@ Ali Asadi, Lee James O'Riordan, Vincent Michaud-Rioux, Romain Moyard
 ### Improvements
 
 * Use CMake `find_package` to bind pre-installed Kokkos libraries.
-[(#43)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/43)
+  [(#43)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/43)
 
 ### Bug fixes
 
 * Ensure Kokkos finalize is only called at the end of process execution.
-[(#45)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/45)
+  [(#45)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/45)
 
 ### Contributors
 
@@ -106,53 +106,53 @@ Vincent Michaud-Rioux, Lee James O'Riordan
  * Add support for building X86-64 Linux wheels with OpenMP and SERIAL backends with Github Actions.
  [(#14)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/14)
 
- * Add the `kokkos_config` class variable, which stores the kokkos build and runtime information such as `Backend`, `Architecture`, `Kokkos Version`, `Compiler`, to LightningKokkos for users' query purpose. Users can also access other information such as `Options`, `Memory`, `Atomics` and `Vectorization` from `kokkos_config`.
- The workflow for build and runtime information query is:
+* Add the `kokkos_config` class variable, which stores the kokkos build and runtime information such as `Backend`, `Architecture`, `Kokkos Version`, `Compiler`, to LightningKokkos for users' query purpose. Users can also access other information such as `Options`, `Memory`, `Atomics` and `Vectorization` from `kokkos_config`.
+  The workflow for build and runtime information query is:
 
- ```python
- >>> import pennylane as qml
- >>> dev = qml.device('lightning.kokkos', wires=3)
- >>> dev.kokkos_config["Backend"]
- {'Parallel': 'OpenMP'}
- ```
-[(#17)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/17)
+  ```python
+  >>> import pennylane as qml
+  >>> dev = qml.device('lightning.kokkos', wires=3)
+  >>> dev.kokkos_config["Backend"]
+  {'Parallel': 'OpenMP'}
+  ```
+  [(#17)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/17)
 
 
 ### Breaking changes
 
 * Change LightningKokkos to inherit from QubitDevice instead of LightningQubit. Numpy data initialization is decoupled.
-[(#31)] (https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/31)
+  [(#31)] (https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/31)
 
 ### Improvements
 
 * Use CMake `find_package` to bind pre-installed Kokkos libraries.
-[(#43)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/43)
+  [(#43)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/43)
 
 * Update `inv()` methods in Python unit tests with `qml.adjoint()`.
-[(#33)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/33)
+  [(#33)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/33)
 
 * Remove explicit Numpy requirement.
-[(#35)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/35)
+  [(#35)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/35)
 
 * Add Kokkos::InitArguments support.
-[(#17)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/17)
+  [(#17)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/17)
 
 * Add Nvidia GPU support for CI checks.
-[(#37)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/37)
+  [(#37)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/37)
 
 * Add VJP support.
-[(#32)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/32)
+  [(#32)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/32)
 
 ### Bug fixes
 
 * Ensure early-failure rather than return of incorrect results from out of order probs wires.
-[(#41)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/41)
+  [(#41)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/41)
 
 * Fix the CI environment variables for building wheels with the OpenMP backend.
-[(#36)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/36)
+  [(#36)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/36)
 
 * Fix the failures of pl_device_test tests with shots set.
-[(#38)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/38)
+  [(#38)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/38)
 
 ### Contributors
 
@@ -169,25 +169,25 @@ Amintor Dusko, Vincent Michaud-Rioux, Lee James O'Riordan, Shuli Shu
 * Drop python3.7 and deprecate the Python and C++ tests with threading backend in workflows.
 Note this deprecation is based on the fact that Kokkos cannot promise that its Threads back-end will
 not conflict with the application's direct use of operating system threads.
-[(#23)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/23)
+  [(#23)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/23)
 
 * Remove the unused `supports_reversible_diff` device capability from `LightningKokkos`
-[(#20)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/20)
+  [(#20)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/20)
 
 ### Improvements
 
 * Improve the stopping condition method.
-[(#25)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/25)
+  [(#25)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/25)
 
 ### Documentation
 
 * Update version string in package for release.
-[(#27)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/27)
+  [(#27)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/27)
 
 ### Bug fixes
 
 * Avoid integer overflow in middle value calculation of binary search in `Sampler`.
-[#18] (https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/18)
+  [#18](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/18)
 
 ### Contributors
 
@@ -201,22 +201,22 @@ Amintor Dusko, Lee J. O'Riordan, Shuli Shu, Matthew Silverman
 
 ### New features since last release
 
- * Add probability support.
- [(#11)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/11)
+* Add probability support.
+  [(#11)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/11)
 
- * Add sample generation support.
- [(#9)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/9)
+* Add sample generation support.
+  [(#9)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/9)
 
 ### Breaking changes
 
 
 ### Improvements
 
- * Add tests for MacOS.
+* Add tests for MacOS.
   [(#3)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/3)
 
- * Update `LightningKokkos` device following changes in `LightningQubit` inheritance from `DefaultQubit` to `QubitDevice`.
- [(#16)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/16)
+* Update `LightningKokkos` device following changes in `LightningQubit` inheritance from `DefaultQubit` to `QubitDevice`.
+  [(#16)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/16)
 
 ### Documentation
 
