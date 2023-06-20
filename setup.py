@@ -110,7 +110,7 @@ with open("pennylane_lightning_kokkos/_version.py") as f:
     version = f.readlines()[-1].split()[-1].strip("\"'")
 
 requirements = [
-    "pennylane>=0.28",
+    "pennylane>=0.30",
 ]
 
 info = {
