@@ -11,13 +11,13 @@ jobs:
     name: Lightning-Kokkos Compatibility test (tests_linux) - stable/latest
     uses: ./.github/workflows/tests_linux.yml
     with:
-      lightning-gpu-version: stable
+      lightning-kokkos-version: stable
       pennylane-version: latest
 
   tests_linux_x86_nvidia_gpu:
     name: Lightning-Kokkos Compatibility test (tests_linux_x86_nvidia_gpu) - stable/latest
     uses: ./.github/workflows/tests_linux_x86_nvidia_gpu.yml
     with:
-      lightning-gpu-version: stable
+      lightning-kokkos-version: stable
       pennylane-version: latest
 
