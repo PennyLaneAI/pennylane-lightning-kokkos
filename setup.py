@@ -66,6 +66,11 @@ if not os.getenv("READTHEDOCS"):
                 f"-DCMAKE_BUILD_TYPE={cfg}",  # not used on MSVC, but no harm
                 *(self.cmake_defines),
             ]
+            configure_args += (
+                [f"-DPYTHON_EXECUTABLE={sys.executable}"]
+                if platform.system() == "Linux"
+                else [f"-DPython_EXECUTABLE={sys.executable}"]
+            )
 
             if platform.system() == "Windows":
                 configure_args += [
