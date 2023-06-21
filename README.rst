@@ -3,10 +3,11 @@ PennyLane-Lightning-Kokkos Plugin
 
 .. header-start-inclusion-marker-do-not-remove
 
-The `PennyLane-Lightning-Kokkos <https://github.com/PennyLaneAI/pennylane-lightning-kokkos>`_ plugin extends the `Pennylane-Lightning <https://github.com/PennyLaneAI/pennylane-lightning>`_ state-vector simulator written in C++, and offloads to the `Kokkos library <https://github.com/kokkos/kokkos>`__ for accelerated circuit simulation.
+The `PennyLane-Lightning-Kokkos <https://github.com/PennyLaneAI/pennylane-lightning-kokkos>`_ plugin provides a fast state-vector simulator written in C++.
+It enables parallel execution with various parallel backends, including C++ threads, OpenMP, CUDA, ROCM/HIP and SYCL via the `Kokkos library <https://github.com/kokkos/kokkos>`_.
+For more details, have a look at our `blog post <https://pennylane.ai/blog/2023/04/pennylane-goes-kokkos-a-novel-hardware-agnostic-parallel-backend-for-quantum-simulations>`_.
 
-`PennyLane <https://docs.pennylane.ai>`_ is a cross-platform Python library for quantum machine
-learning, automatic differentiation, and optimization of hybrid quantum-classical computations.
+PennyLane is a cross-platform Python library for quantum machine learning, automatic differentiation, and optimization of hybrid quantum-classical computations.
 
 .. header-end-inclusion-marker-do-not-remove
 
