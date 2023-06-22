@@ -12,7 +12,7 @@
 
 ### Improvements
 
-* Upgrade Kokkos version to v0.4.01.
+* Upgrade Kokkos version to v4.0.01.
   [(#55)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/55)
 
 * Remove logic from `setup.py` and transfer paths and definitions into workflow files.
