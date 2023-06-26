@@ -66,6 +66,11 @@ if not os.getenv("READTHEDOCS"):
                 f"-DCMAKE_BUILD_TYPE={cfg}",  # not used on MSVC, but no harm
                 *(self.cmake_defines),
             ]
+            configure_args += (
+                [f"-DPYTHON_EXECUTABLE={sys.executable}"]
+                if platform.system() == "Linux"
+                else [f"-DPython_EXECUTABLE={sys.executable}"]
+            )
 
             if platform.system() == "Windows":
                 configure_args += [
@@ -110,7 +115,7 @@ with open("pennylane_lightning_kokkos/_version.py") as f:
     version = f.readlines()[-1].split()[-1].strip("\"'")
 
 requirements = [
-    "pennylane>=0.28",
+    "pennylane>=0.30",
 ]
 
 info = {
