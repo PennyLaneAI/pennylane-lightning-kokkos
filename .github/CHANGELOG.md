@@ -1,7 +1,5 @@
 # Release 0.31.0
 
-### New features since last release
-
 ### Breaking changes
 
 * Deprecate `kokkos_config_info`, replaced by Kokkos' `print_configuration`.
@@ -20,10 +18,6 @@
 
 * Use `Operator.name` instead of `Operation.base_name`.
   [(#67)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/67)
-
-### Documentation
-
-### Bug fixes
 
 ### Contributors
 
