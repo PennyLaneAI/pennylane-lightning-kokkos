@@ -198,6 +198,8 @@ if CPP_BINARY_AVAILABLE:
             if not LightningKokkos.kokkos_config:
                 LightningKokkos.kokkos_config = _kokkos_configuration()
 
+            self._batch_obs = batch_obs
+
         def reset(self):
             super().reset()
             # init the state vector to |00..0>
@@ -648,7 +650,10 @@ if CPP_BINARY_AVAILABLE:
             else:
                 adj = AdjointJacobianKokkos_C128()
 
-            obs_serialized = _serialize_observables(
+            #   MPI HERE
+            # from IPython import embed; embed()
+
+            obs_serialized, obs_offsets = _serialize_observables(
                 tape, self.wire_map, use_csingle=self.use_csingle
             )
             ops_serialized, use_sp = _serialize_ops(
@@ -678,12 +683,57 @@ if CPP_BINARY_AVAILABLE:
                 # whether there must be only one state preparation...
                 tp_shift = [i - 1 for i in tp_shift]
 
-            jac = adj.adjoint_jacobian(self._kokkos_state, obs_serialized, ops_serialized, tp_shift)
+            if self._batch_obs:
+                from mpi4py import MPI
+                from mpi4py.futures import MPIPoolExecutor
+
+                comm = MPI.COMM_WORLD
+                rank = comm.Get_rank()
+                jac = []
+
+                if rank == 0:
+                    num_obs = len(obs_serialized)
+                    batch_size = (
+                        num_obs if isinstance(self._batch_obs, bool) else self._batch_obs * 1
+                    )
+                    obs_chunks = []
+                    for chunk in range(0, num_obs, batch_size):
+                        obs_chunks.extend(obs_serialized[chunk : chunk + batch_size])
+                else:
+                    obs_chunks = None
+                obs_chunks = comm.bcast(obs_chunks, root=0)
+
+                with MPIPoolExecutor() as executor:
+                    jac_chunks = []
+                    for ch in obs_chunks:
+                        jac_chunks.append(
+                            executor.submit(
+                                adj.adjoint_jacobian,
+                                self._kokkos_state,
+                                [ch],
+                                ops_serialized,
+                                tp_shift,
+                            )
+                        )
+                    jac_chunks = [f.result() for f in jac_chunks]
+                jac.extend(jac_chunks)
+            else:
+                jac = adj.adjoint_jacobian(
+                    self._kokkos_state, obs_serialized, ops_serialized, tp_shift
+                )
+
             jac = np.array(jac)  # only for parameters differentiable with the adjoint method
             jac = jac.reshape(-1, len(tp_shift))
-            jac_r = np.zeros((jac.shape[0], all_params))
-            jac_r[:, record_tp_rows] = jac
-            return self._adjoint_jacobian_processing(jac_r) if active_return() else jac_r
+            jac_r = np.zeros((len(tape.observables), all_params))
+
+            # Reduce over decomposed expval(H), if required.
+            for idx in range(len(obs_offsets[0:-1])):
+                if (obs_offsets[idx + 1] - obs_offsets[idx]) > 1:
+                    jac_r[idx, :] = np.sum(jac[obs_offsets[idx] : obs_offsets[idx + 1], :], axis=0)
+                else:
+                    jac_r[idx, :] = jac[obs_offsets[idx] : obs_offsets[idx + 1], :]
+
+            return self._adjoint_jacobian_processing(jac_r) if qml.active_return() else jac_r
 
         def vjp(self, measurements, dy, starting_state=None, use_device_state=False):
             """Generate the processing function required to compute the vector-Jacobian products of a tape."""

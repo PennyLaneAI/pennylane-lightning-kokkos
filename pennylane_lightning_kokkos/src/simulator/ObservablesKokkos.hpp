@@ -75,7 +75,7 @@ class ObservableKokkos
  * @tparam T Floating point type
  */
 template <typename T> class NamedObsKokkos final : public ObservableKokkos<T> {
-  private:
+  public:
     std::string obs_name_;
     std::vector<size_t> wires_;
     std::vector<T> params_;
@@ -298,7 +298,6 @@ class HamiltonianKokkos final : public ObservableKokkos<T> {
   public:
     using PrecisionT = T;
 
-  private:
     std::vector<T> coeffs_;
     std::vector<std::shared_ptr<ObservableKokkos<T>>> obs_;
 
