@@ -528,7 +528,6 @@ if CPP_BINARY_AVAILABLE:
                         device_wires, qml.matrix(observable).ravel(order="C")
                     )
                 else:
-                    Hmat = qml.utils.sparse_hamiltonian(observable, wires=self.wires)
                     CSR_SparseHamiltonian = observable.sparse_matrix().tocsr()
                     return self._kokkos_state.ExpectationValue(
                         CSR_SparseHamiltonian.data,
@@ -694,11 +693,13 @@ if CPP_BINARY_AVAILABLE:
                 if rank == 0:
                     num_obs = len(obs_serialized)
                     batch_size = (
-                        num_obs if isinstance(self._batch_obs, bool) else self._batch_obs * 1
+                        num_obs // comm.size
+                        if isinstance(self._batch_obs, bool)
+                        else self._batch_obs
                     )
                     obs_chunks = []
                     for chunk in range(0, num_obs, batch_size):
-                        obs_chunks.extend(obs_serialized[chunk : chunk + batch_size])
+                        obs_chunks.append(obs_serialized[chunk : chunk + batch_size])
                 else:
                     obs_chunks = None
                 obs_chunks = comm.bcast(obs_chunks, root=0)
@@ -710,13 +711,14 @@ if CPP_BINARY_AVAILABLE:
                             executor.submit(
                                 adj.adjoint_jacobian,
                                 self._kokkos_state,
-                                [ch],
+                                ch,
                                 ops_serialized,
                                 tp_shift,
                             )
                         )
                     jac_chunks = [f.result() for f in jac_chunks]
                 jac.extend(jac_chunks)
+                jac = np.vstack(jac)  # only for parameters differentiable with the adjoint method
             else:
                 jac = adj.adjoint_jacobian(
                     self._kokkos_state, obs_serialized, ops_serialized, tp_shift
