@@ -106,11 +106,11 @@ bool operator!=(const std::vector<T, AllocA> &lhs,
  * @return true Data are approximately equal.
  * @return false Data are not approximately equal.
  */
-template <class Data_t>
+template <class PrecisionT, class ComplexT>
 inline bool isApproxEqual(
-    const std::vector<Data_t> &data1, const std::vector<Data_t> &data2,
-    const typename Data_t::value_type eps =
-        std::numeric_limits<typename Data_t::value_type>::epsilon() * 100) {
+    const std::vector<ComplexT> &data1, const std::vector<ComplexT> &data2,
+    const PrecisionT eps =
+        std::numeric_limits<PrecisionT>::epsilon() * 100) {
     if (data1.size() != data2.size()) {
         return false;
     }

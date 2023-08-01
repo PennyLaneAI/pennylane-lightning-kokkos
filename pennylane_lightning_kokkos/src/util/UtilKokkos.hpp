@@ -56,6 +56,34 @@ template <typename T> struct is_complex<std::complex<T>> : std::true_type {};
 
 template <typename T> constexpr bool is_complex_v = is_complex<T>::value;
 
+/**
+ * @brief Utility function to compare complex statevector data.
+ *
+ * @tparam Data_t Floating point data-type.
+ * @param data1 StateVector data 1.
+ * @param data2 StateVector data 2.
+ * @return true Data are approximately equal.
+ * @return false Data are not approximately equal.
+ */
+template <class Data_t, class AllocA, class AllocB>
+inline bool
+isApproxEqual(const std::vector<Data_t, AllocA> &data1,
+              const std::vector<Data_t, AllocB> &data2,
+              const typename Data_t::value_type eps =
+                  std::numeric_limits<typename Data_t::value_type>::epsilon() *
+                  100) {
+    return data1 == PLApprox<Data_t, AllocB>(data2).epsilon(eps);
+}
+
+/**
+ * @brief Utility function to compare complex statevector data.
+ *
+ * @tparam Data_t Floating point data-type.
+ * @param data1 StateVector data 1.
+ * @param data2 StateVector data 2.
+ * @return true Data are approximately equal.
+ * @return false Data are not approximately equal.
+ */
 template <class Data_t>
 inline bool
 isApproxEqual(const Data_t &data1, const Data_t &data2,
@@ -64,6 +92,40 @@ isApproxEqual(const Data_t &data1, const Data_t &data2,
                   100) {
     return !(data1.real() != Approx(data2.real()).epsilon(eps) ||
              data1.imag() != Approx(data2.imag()).epsilon(eps));
+}
+
+/**
+ * @brief Utility function to compare complex statevector data.
+ *
+ * @tparam Data_t Floating point data-type.
+ * @param data1 StateVector data array pointer 1.
+ * @param length1 StateVector data array pointer 1.
+ * @param data2 StateVector data array pointer 2.
+ * @param length2 StateVector data array pointer 1.
+ * @return true Data are approximately equal.
+ * @return false Data are not approximately equal.
+ */
+template <class Data_t>
+inline bool
+isApproxEqual(const Data_t *data1, const size_t length1, const Data_t *data2,
+              const size_t length2,
+              typename Data_t::value_type eps =
+                  std::numeric_limits<typename Data_t::value_type>::epsilon() *
+                  100) {
+    if (data1 == data2) {
+        return true;
+    }
+
+    if (length1 != length2) {
+        return false;
+    }
+
+    for (size_t idx = 0; idx < length1; idx++) {
+        if (!isApproxEqual(data1[idx], data2[idx], eps)) {
+            return false;
+        }
+    }
+    return true;
 }
 
 

@@ -96,10 +96,10 @@ for (size_t j=0; j < state_vector_1.getLength(); j++){
           printf("(%+1.6f, %+1.6f) // (%+1.6f, %+1.6f) // (%+1.6f, %+1.6f)\n", c0.real(), c0.imag(), c1.real(), c1.imag(), err.real(), err.imag());
         }
         
-        // PrecisionT eps = std::numeric_limits<PrecisionT>::epsilon() * 10E3;
-            //     REQUIRE(isApproxEqual(
-            // state_vector_1.getData().data(), state_vector_1.getLength(),
-            // state_vector_2.getData().data(), state_vector_2.getLength(), eps));
+        PrecisionT eps = std::numeric_limits<PrecisionT>::epsilon() * 10E3;
+                REQUIRE(isApproxEqual(
+            reinterpret_cast<std::complex<PrecisionT> *>(state_vector_1.getData().data()), state_vector_1.getLength(),
+            reinterpret_cast<std::complex<PrecisionT> *>(state_vector_2.getData().data()), state_vector_2.getLength(), eps));
         
     }
     }
