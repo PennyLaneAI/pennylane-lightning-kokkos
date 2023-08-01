@@ -20,7 +20,6 @@ using namespace Pennylane;
 /// @cond DEV
 namespace {
 using namespace Pennylane::Lightning_Kokkos::Util;
-// using Pennylane::Lightning_Kokkos::Util::randomUnitary;
 
 std::mt19937_64 re{1337};
 } // namespace
@@ -48,8 +47,8 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyMatrix with a pointer",
         //     st_data_1.size());
         StateVectorT state_vector_1(num_qubits);
         StateVectorT state_vector_2(num_qubits);
-        auto m = Pennylane::Gates::getToffoli<Kokkos::complex, PrecisionT>();
-        // auto m = randomUnitary<PrecisionT>(re, num_wires);
+        // auto m = Pennylane::Gates::getToffoli<Kokkos::complex, PrecisionT>();
+        auto m = randomUnitary<PrecisionT>(re, num_wires);
         std::vector<size_t> wires(num_wires);
         std::iota(wires.begin(), wires.end(), 1);
         std::vector<ComplexT> mkvec(reinterpret_cast<ComplexT *>(m.data()),
@@ -88,18 +87,19 @@ for (size_t j=0; j < state_vector_1.getLength(); j++){
         Kokkos::fence();
         //sleep(1);
 
-        
+        printf("=======================================\n");
         for (size_t i=0; i<state_vector_1.getLength(); i++){
           auto c0 = state_vector_1.getData()(i);
           auto c1 = state_vector_2.getData()(i);
           auto err = c1 - c0;
           printf("(%+1.6f, %+1.6f) // (%+1.6f, %+1.6f) // (%+1.6f, %+1.6f)\n", c0.real(), c0.imag(), c1.real(), c1.imag(), err.real(), err.imag());
         }
+        printf("=======================================\n");
         
         PrecisionT eps = std::numeric_limits<PrecisionT>::epsilon() * 10E3;
                 REQUIRE(isApproxEqual(
-            reinterpret_cast<std::complex<PrecisionT> *>(state_vector_1.getData().data()), state_vector_1.getLength(),
-            reinterpret_cast<std::complex<PrecisionT> *>(state_vector_2.getData().data()), state_vector_2.getLength(), eps));
+            state_vector_1.getData().data(), state_vector_1.getLength(),
+            state_vector_2.getData().data(), state_vector_2.getLength(), eps));
         
     }
     }

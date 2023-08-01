@@ -129,19 +129,30 @@ isApproxEqual(const Data_t *data1, const size_t length1, const Data_t *data2,
 }
 
 
-// template <class T, class U = T>
-// inline static constexpr auto ConstSum(std::complex<U> a, std::complex<T> b)
-//     -> std::complex<T> {
-//     return a + b;
-// }
-
-
+// /**
+//  * @brief Compile-time scalar real times complex number.
+//  *
+//  * @tparam U Precision of real value `a`.
+//  * @tparam T Precision of complex value `b` and result.
+//  * @param a Real scalar value.
+//  * @param b Complex scalar value.
+//  * @return constexpr std::complex<T>
+//  */
 // template <class T, class U = T>
 // inline static constexpr auto ConstMult(U a, std::complex<T> b)
 //     -> std::complex<T> {
 //     return {a * b.real(), a * b.imag()};
 // }
 
+// /**
+//  * @brief Compile-time scalar complex times complex.
+//  *
+//  * @tparam U Precision of complex value `a`.
+//  * @tparam T Precision of complex value `b` and result.
+//  * @param a Complex scalar value.
+//  * @param b Complex scalar value.
+//  * @return constexpr std::complex<T>
+//  */
 // template <class T, class U = T>
 // inline static constexpr auto ConstMult(std::complex<U> a, std::complex<T> b)
 //     -> std::complex<T> {
@@ -153,6 +164,21 @@ isApproxEqual(const Data_t *data1, const size_t length1, const Data_t *data2,
 //     -> std::complex<T> {
 //     return {a.real() * b.real() + a.imag() * b.imag(),
 //             -a.imag() * b.real() + a.real() * b.imag()};
+// }
+
+// /**
+//  * @brief Compile-time scalar complex summation.
+//  *
+//  * @tparam T Precision of complex value `a` and result.
+//  * @tparam U Precision of complex value `b`.
+//  * @param a Complex scalar value.
+//  * @param b Complex scalar value.
+//  * @return constexpr std::complex<T>
+//  */
+// template <class T, class U = T>
+// inline static constexpr auto ConstSum(std::complex<U> a, std::complex<T> b)
+//     -> std::complex<T> {
+//     return a + b;
 // }
 
 
@@ -700,6 +726,59 @@ inline auto generateBitsPatterns(const std::vector<size_t> &qubitIndices,
         }
     }
     return indices;
+}
+
+
+
+template <typename PrecisionT, class RandomEngine>
+auto randomUnitary(RandomEngine &re, size_t num_qubits)
+    -> std::vector<std::complex<PrecisionT>> {
+    using ComplexT = std::complex<PrecisionT>;
+    const size_t dim = (1U << num_qubits);
+    std::vector<ComplexT> res(dim * dim, ComplexT{});
+
+    std::normal_distribution<PrecisionT> dist;
+
+    auto generator = [&dist, &re]() -> ComplexT {
+        return ComplexT{dist(re), dist(re)};
+    };
+
+    std::generate(res.begin(), res.end(), generator);
+
+    // Simple algorithm to make rows orthogonal with Gram-Schmidt
+    // This algorithm is unstable but works for a small matrix.
+    // Use QR decomposition when we have LAPACK support.
+
+    for (size_t row2 = 0; row2 < dim; row2++) {
+        ComplexT *row2_p = res.data() + row2 * dim;
+        for (size_t row1 = 0; row1 < row2; row1++) {
+            const ComplexT *row1_p = res.data() + row1 * dim;
+            ComplexT dot12 = std::inner_product(
+                row1_p, row1_p + dim, row2_p, std::complex<PrecisionT>(),
+                ConstSum<PrecisionT>, ConstMultConj<PrecisionT>);
+
+            ComplexT dot11 = squaredNorm(row1_p, dim);
+
+            // orthogonalize row2
+            std::transform(
+                row2_p, row2_p + dim, row1_p, row2_p,
+                [scale = dot12 / dot11](auto &elem2, const auto &elem1) {
+                    return elem2 - scale * elem1;
+                });
+        }
+    }
+
+    // Normalize each row
+    for (size_t row = 0; row < dim; row++) {
+        ComplexT *row_p = res.data() + row * dim;
+        PrecisionT norm2 = std::sqrt(squaredNorm(row_p, dim));
+
+        // normalize row2
+        std::transform(row_p, row_p + dim, row_p, [norm2](const auto c) {
+            return (static_cast<PrecisionT>(1.0) / norm2) * c;
+        });
+    }
+    return res;
 }
 
 /**
