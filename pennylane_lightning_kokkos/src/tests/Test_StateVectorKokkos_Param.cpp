@@ -7,13 +7,105 @@
 #include <vector>
 
 #include <catch2/catch.hpp>
+#include <Kokkos_Core.hpp>
 
 #include "GatesHost.hpp"
 #include "MeasuresKokkos.hpp"
 #include "StateVectorKokkos.hpp"
 #include "TestHelpers.hpp"
+#include "UtilKokkos.hpp"
 
 using namespace Pennylane;
+
+/// @cond DEV
+namespace {
+using namespace Pennylane::Lightning_Kokkos::Util;
+// using Pennylane::Lightning_Kokkos::Util::randomUnitary;
+
+std::mt19937_64 re{1337};
+} // namespace
+/// @endcond
+
+TEMPLATE_TEST_CASE("StateVectorKokkos::applyMatrix with a pointer",
+                           "[applyMatrix]", float, double) {
+    using StateVectorT = StateVectorKokkos<TestType>;
+    using PrecisionT = TestType;
+    using ComplexT = Kokkos::complex<TestType>;
+
+        SECTION("Test with different number of wires 4") {
+        using KokkosVector = typename StateVectorT::KokkosVector;
+        const size_t num_qubits = 4;
+        const size_t num_wires = num_qubits - 1;
+
+        // VectorT st_data_1 =
+        //     createRandomStateVectorData<PrecisionT>(re, num_qubits);
+        // VectorT st_data_2 = st_data_1;
+        // StateVectorT state_vector_1(
+        //     reinterpret_cast<ComplexT *>(st_data_1.data()),
+        //     st_data_1.size());
+        // StateVectorT state_vector_2(
+        //     reinterpret_cast<ComplexT *>(st_data_1.data()),
+        //     st_data_1.size());
+        StateVectorT state_vector_1(num_qubits);
+        StateVectorT state_vector_2(num_qubits);
+        auto m = Pennylane::Gates::getToffoli<Kokkos::complex, PrecisionT>();
+        // auto m = randomUnitary<PrecisionT>(re, num_wires);
+        std::vector<size_t> wires(num_wires);
+        std::iota(wires.begin(), wires.end(), 1);
+        std::vector<ComplexT> mkvec(reinterpret_cast<ComplexT *>(m.data()),
+            reinterpret_cast<ComplexT *>(m.data()) + m.size());
+        KokkosVector mkview(reinterpret_cast<ComplexT *>(m.data()),
+                            m.size());
+        //KokkosVector mkview("device_matrix", m.size());
+        //Kokkos::deep_copy(mkview, typename StateVectorT::UnmanagedComplexHostView(
+        //                                     m.data(), m.size()));
+        // for (size_t j=0; j<std::pow(2,num_wires); j++){
+        // for (size_t i=0; i<std::pow(2,num_wires); i++){
+        //   auto r0 = m[i+j*8];
+        //   auto r1 = mkview(i+j*8);
+        //   auto r2 = mkvec[i+j*8];
+        //   auto err = r2 - r1;
+        //   printf("(%+1.6f, %+1.6f), (%+1.6f, %+1.6f), (%+1.6f, %+1.6f), (%+1.6f, %+1.6f)\n", r0.real(), r0.imag(), r1.real(), r1.imag(), r2.real(), r2.imag(), err.real(), err.imag());
+        // }
+        // printf("\n");
+        // }
+
+        // for (size_t i=0; i<state_vector_1.getLength(); i++){
+        //   auto c0 = state_vector_1.getView()(i);
+        //   auto c1 = state_vector_2.getView()(i);
+        //   auto err = c1 - c0;
+        //   printf("(%+1.6f, %+1.6f) // (%+1.6f, %+1.6f) // (%+1.6f, %+1.6f)\n", c0.real(), c0.imag(), c1.real(), c1.imag(), err.real(), err.imag());
+        // }
+
+for (size_t j=0; j < state_vector_1.getLength(); j++){  
+  state_vector_1.setBasisState(j);
+  state_vector_2.setBasisState(j);
+  Kokkos::fence();
+  
+        //state_vector_1.applyOperation("Toffoli", wires, false);
+        state_vector_1.applyMatrix(mkvec.data(), wires);
+        state_vector_2.applyMultiQubitOp(mkview, wires);
+        Kokkos::fence();
+        //sleep(1);
+
+        
+        for (size_t i=0; i<state_vector_1.getLength(); i++){
+          auto c0 = state_vector_1.getData()(i);
+          auto c1 = state_vector_2.getData()(i);
+          auto err = c1 - c0;
+          printf("(%+1.6f, %+1.6f) // (%+1.6f, %+1.6f) // (%+1.6f, %+1.6f)\n", c0.real(), c0.imag(), c1.real(), c1.imag(), err.real(), err.imag());
+        }
+        
+        // PrecisionT eps = std::numeric_limits<PrecisionT>::epsilon() * 10E3;
+            //     REQUIRE(isApproxEqual(
+            // state_vector_1.getData().data(), state_vector_1.getLength(),
+            // state_vector_2.getData().data(), state_vector_2.getLength(), eps));
+        
+    }
+    }
+
+}
+
 
 TEMPLATE_TEST_CASE("StateVectorKokkosManaged::applyIsingXY",
                    "[StateVectorKokkosManaged_Param]", float, double) {

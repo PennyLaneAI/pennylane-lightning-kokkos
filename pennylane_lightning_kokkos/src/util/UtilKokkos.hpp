@@ -25,6 +25,7 @@
 #include <iostream>
 #include <limits>
 #include <numeric>
+#include <random>
 #include <set>
 #include <stdexcept>
 #include <tuple>
@@ -54,6 +55,61 @@ template <typename T> struct is_complex : std::false_type {};
 template <typename T> struct is_complex<std::complex<T>> : std::true_type {};
 
 template <typename T> constexpr bool is_complex_v = is_complex<T>::value;
+
+template <class Data_t>
+inline bool
+isApproxEqual(const Data_t &data1, const Data_t &data2,
+              typename Data_t::value_type eps =
+                  std::numeric_limits<typename Data_t::value_type>::epsilon() *
+                  100) {
+    return !(data1.real() != Approx(data2.real()).epsilon(eps) ||
+             data1.imag() != Approx(data2.imag()).epsilon(eps));
+}
+
+
+// template <class T, class U = T>
+// inline static constexpr auto ConstSum(std::complex<U> a, std::complex<T> b)
+//     -> std::complex<T> {
+//     return a + b;
+// }
+
+
+// template <class T, class U = T>
+// inline static constexpr auto ConstMult(U a, std::complex<T> b)
+//     -> std::complex<T> {
+//     return {a * b.real(), a * b.imag()};
+// }
+
+// template <class T, class U = T>
+// inline static constexpr auto ConstMult(std::complex<U> a, std::complex<T> b)
+//     -> std::complex<T> {
+//     return {a.real() * b.real() - a.imag() * b.imag(),
+//             a.real() * b.imag() + a.imag() * b.real()};
+// }
+// template <class T, class U = T>
+// inline static constexpr auto ConstMultConj(std::complex<U> a, std::complex<T> b)
+//     -> std::complex<T> {
+//     return {a.real() * b.real() + a.imag() * b.imag(),
+//             -a.imag() * b.real() + a.real() * b.imag()};
+// }
+
+
+template <class T>
+auto squaredNorm(const T *data, size_t data_size) -> remove_complex_t<T> {
+    if constexpr (is_complex_v<T>) {
+        // complex type
+        using PrecisionT = remove_complex_t<T>;
+        return std::transform_reduce(
+            data, data + data_size, PrecisionT{}, std::plus<PrecisionT>(),
+            static_cast<PrecisionT (*)(const std::complex<PrecisionT> &)>(
+                &std::norm<PrecisionT>));
+    } else {
+        using PrecisionT = T;
+        return std::transform_reduce(
+            data, data + data_size, PrecisionT{}, std::plus<PrecisionT>(),
+            static_cast<PrecisionT (*)(PrecisionT)>(std::norm));
+    }
+}
 
 /**
  * Utility hash function for complex vectors representing matrices.

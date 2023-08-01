@@ -109,6 +109,8 @@ template <typename Precision> struct initZerosFunctor {
 template <class Precision> class StateVectorKokkos {
 
   public:
+    using PrecisionT = Precision;
+    using ComplexT = Kokkos::complex<Precision>;
     using KokkosExecSpace = Kokkos::DefaultExecutionSpace;
     using KokkosVector = Kokkos::View<Kokkos::complex<Precision> *>;
     using KokkosSizeTVector = Kokkos::View<size_t *>;
@@ -588,6 +590,15 @@ template <class Precision> class StateVectorKokkos {
             return applyMultiQubitOp(matrix, wires, adjoint);
         }
     }
+
+    inline void applyMatrix(ComplexT *matrix, const std::vector<size_t> &wires,
+                            bool inverse = false) {
+        PL_ABORT_IF(wires.empty(), "Number of wires must be larger than 0");
+        size_t n = 1U << wires.size();
+        KokkosVector matrix_(matrix, n * n);
+        applyMultiQubitOp(matrix_, wires, inverse);
+    }
+
 
     /**
      * @brief Apply a single gate to the state vector.
