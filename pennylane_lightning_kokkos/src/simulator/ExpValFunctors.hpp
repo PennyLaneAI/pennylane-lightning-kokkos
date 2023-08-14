@@ -249,6 +249,68 @@ template <class Precision> struct getExpectationValueTwoQubitOpFunctor {
     }
 };
 
+template <class Precision, bool inverse = false>
+struct getExpectationValueMultiQubitOpFunctor {
+
+    using KokkosComplexVector = Kokkos::View<Kokkos::complex<Precision> *>;
+    using KokkosSizeTVector = Kokkos::View<std::size_t *>;
+
+    KokkosComplexVector arr;
+    KokkosComplexVector matrix;
+    KokkosSizeTVector indices;
+    KokkosSizeTVector wires;
+    KokkosComplexVector coeffs_in;
+    std::size_t dim;
+    std::size_t num_qubits;
+    static const BitSwapFunctor bsf;
+
+    getExpectationValueMultiQubitOpFunctor(KokkosComplexVector arr_,
+                                           std::size_t num_qubits_,
+                                           const KokkosComplexVector matrix_,
+                                           const KokkosSizeTVector wires_) {
+        dim = 1U << wires_.size();
+        indices = KokkosSizeTVector("indices", dim);
+        coeffs_in = KokkosComplexVector("coeffs_in", dim);
+        num_qubits = num_qubits_;
+        wires = wires_;
+        matrix = matrix_;
+        arr = arr_;
+    }
+
+    KOKKOS_INLINE_FUNCTION
+    void operator()(const std::size_t kp, Precision &expval) const {
+        const std::size_t k = kp * dim;
+        using Pennylane::Lightning_Kokkos::Util::bitswap;
+        for (std::size_t inner_idx = 0; inner_idx < dim; inner_idx++) {
+            std::size_t idx = k | inner_idx;
+            const std::size_t n_wires = wires.size();
+
+            for (std::size_t pos = 0; pos < n_wires; pos++) {
+                size_t x = ((idx >> (n_wires - pos - 1)) ^
+                            (idx >> (num_qubits - wires[pos] - 1))) &
+                           1U;
+                idx = idx ^ ((x << (n_wires - pos - 1)) |
+                             (x << (num_qubits - wires[pos] - 1)));
+            }
+
+            indices[inner_idx] = idx;
+            coeffs_in[inner_idx] = arr[idx];
+        }
+
+        for (size_t i = 0; i < dim; i++) {
+            const auto idx = indices[i];
+            const std::size_t base_idx = i * dim;
+
+            Kokkos::complex<Precision> arr_idx_new = 0.0;
+            for (size_t j = 0; j < dim; j++) {
+                arr_idx_new += (matrix[base_idx + j] * coeffs_in[j]);
+            }
+
+            expval += real(arr_idx_new * conj(arr[idx]));
+        }
+    }
+};
+
 template <class Precision> struct getExpectationValueSparseFunctor {
 
     using KokkosComplexVector = Kokkos::View<Kokkos::complex<Precision> *>;

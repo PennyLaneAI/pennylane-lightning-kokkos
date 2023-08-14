@@ -51,7 +51,7 @@ jobs:
     strategy:
       matrix:
         os: [macos-11]
-        exec_model: ["OPENMP"]
+        exec_model: ["SERIAL"]
 
     name: Python tests for ${{ matrix.exec_model }} Kokkos Backend
     runs-on: ${{ matrix.os }}
@@ -82,19 +82,19 @@ jobs:
 
       - name: Install ML libraries for interfaces
         run: |
-          python -m pip install --upgrade torch==${{ env.TORCH_VERSION }} -f https://download.pytorch.org/whl/cpu/torch_stable.html
-          python -m pip install --upgrade "jax[cpu]"  # This also installs jaxlib
-          python -m pip install --upgrade tensorflow~=${{ env.TF_VERSION }}
+          pip install --upgrade torch==${{ env.TORCH_VERSION }} -f https://download.pytorch.org/whl/cpu/torch_stable.html
+          pip install --upgrade "jax[cpu]"  # This also installs jaxlib
+          pip install --upgrade tensorflow~=${{ env.TF_VERSION }}
       - name: Install lightning.kokkos device
         run: |
           cd main
           python setup.py build_ext -i --define="Kokkos_ENABLE_${{ matrix.exec_model }}=ON;CMAKE_CXX_COMPILER=$(brew --prefix llvm)/bin/clang++"
-          python -m pip install -e .
+          pip install -e .
       - name: Run PennyLane-Lightning unit tests
         env:
           OMP_PROC_BIND: false
         run: |
           cd main/
-          python -m pytest tests/
+          pytest tests/
           pl-device-test --device lightning.kokkos --skip-ops --shots=20000
           pl-device-test --device lightning.kokkos --skip-ops --shots=None
