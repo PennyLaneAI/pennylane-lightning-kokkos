@@ -10,10 +10,15 @@
 
 ### Bug fixes
 
+* Fix `applyMultiQubitOp`'s functor which had a bug causing incorrect gate application with parallel Kokkos backends.
+  [(#75)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/75)
+
+
 ### Contributors
 
 This release contains contributions from (in alphabetical order):
 
+Vincent Michaud-Rioux
 
 ---
 
