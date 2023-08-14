@@ -931,7 +931,7 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyToffoli",
 
 TEMPLATE_TEST_CASE("StateVectorKokkos::applyMultiQubitOp",
                    "[StateVectorKokkos_Nonparam]", float, double) {
-    size_t num_qubits = 3;
+    size_t num_qubits = 4;
     StateVectorKokkos<TestType> sv_normal{num_qubits};
     StateVectorKokkos<TestType> sv_mq{num_qubits};
     using UnmanagedComplexHostView =
@@ -983,21 +983,27 @@ TEMPLATE_TEST_CASE("StateVectorKokkos::applyMultiQubitOp",
     SECTION("Three Qubit") {
         auto matrix = getToffoli<Kokkos::complex, TestType>();
         std::vector<size_t> wires = {0, 1, 2};
-        sv_normal.applyOperation("Toffoli", wires, false);
-        auto sv_normal_host = Kokkos::create_mirror_view_and_copy(
-            Kokkos::HostSpace{}, sv_normal.getData());
 
-        Kokkos::View<Kokkos::complex<TestType> *> device_matrix("device_matrix",
-                                                                matrix.size());
-        Kokkos::deep_copy(device_matrix, UnmanagedComplexHostView(
-                                             matrix.data(), matrix.size()));
-        sv_mq.applyMultiQubitOp(device_matrix, wires, false);
-        auto sv_mq_host = Kokkos::create_mirror_view_and_copy(
-            Kokkos::HostSpace{}, sv_mq.getData());
+        for (std::size_t b = 0; b <= sv_normal.getLength(); b++) {
+            sv_mq.setBasisState(b);
+            sv_normal.setBasisState(b);
 
-        for (std::size_t j = 0; j < Util::exp2(num_qubits); j++) {
-            CHECK(imag(sv_normal_host[j]) == Approx(imag(sv_mq_host[j])));
-            CHECK(real(sv_normal_host[j]) == Approx(real(sv_mq_host[j])));
+            sv_normal.applyOperation("Toffoli", wires, false);
+            auto sv_normal_host = Kokkos::create_mirror_view_and_copy(
+                Kokkos::HostSpace{}, sv_normal.getData());
+
+            Kokkos::View<Kokkos::complex<TestType> *> device_matrix(
+                "device_matrix", matrix.size());
+            Kokkos::deep_copy(device_matrix, UnmanagedComplexHostView(
+                                                 matrix.data(), matrix.size()));
+            sv_mq.applyMultiQubitOp(device_matrix, wires, false);
+            auto sv_mq_host = Kokkos::create_mirror_view_and_copy(
+                Kokkos::HostSpace{}, sv_mq.getData());
+
+            for (std::size_t j = 0; j < Util::exp2(num_qubits); j++) {
+                CHECK(imag(sv_normal_host[j]) == Approx(imag(sv_mq_host[j])));
+                CHECK(real(sv_normal_host[j]) == Approx(real(sv_mq_host[j])));
+            }
         }
     }
 }

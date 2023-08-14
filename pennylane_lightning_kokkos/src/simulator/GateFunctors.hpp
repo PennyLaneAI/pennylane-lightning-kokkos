@@ -199,9 +199,7 @@ template <class Precision, bool inverse = false> struct multiQubitOpFunctor {
 
     KokkosComplexVector arr;
     KokkosComplexVector matrix;
-    KokkosIntVector indices;
     KokkosIntVector wires;
-    KokkosComplexVector coeffs_in;
     std::size_t dim;
     std::size_t num_qubits;
 
@@ -209,8 +207,6 @@ template <class Precision, bool inverse = false> struct multiQubitOpFunctor {
                         const KokkosComplexVector &matrix_,
                         KokkosIntVector &wires_) {
         dim = 1U << wires_.size();
-        indices = KokkosIntVector("indices", dim);
-        coeffs_in = KokkosComplexVector("coeffs_in", dim);
         num_qubits = num_qubits_;
         wires = wires_;
         arr = arr_;
@@ -221,6 +217,8 @@ template <class Precision, bool inverse = false> struct multiQubitOpFunctor {
     void operator()(std::size_t kp) const {
         const std::size_t k = kp * dim;
         using Pennylane::Lightning_Kokkos::Util::bitswap;
+        KokkosIntVector indices{"indices", dim};
+        KokkosComplexVector coeffs_in{"coeffs_in", dim};
         if constexpr (inverse) {
 
             for (size_t inner_idx = 0; inner_idx < dim; inner_idx++) {
