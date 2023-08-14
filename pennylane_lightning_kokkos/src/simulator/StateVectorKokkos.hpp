@@ -126,6 +126,17 @@ template <class Precision> class StateVectorKokkos {
         Kokkos::View<const size_t *, Kokkos::HostSpace,
                      Kokkos::MemoryTraits<Kokkos::Unmanaged>>;
 
+    using ScratchViewComplex =
+        Kokkos::View<Kokkos::complex<Precision> *,
+                     Kokkos::DefaultExecutionSpace::scratch_memory_space,
+                     Kokkos::MemoryTraits<Kokkos::Unmanaged>>;
+    using ScratchViewSizeT =
+        Kokkos::View<size_t *,
+                     Kokkos::DefaultExecutionSpace::scratch_memory_space,
+                     Kokkos::MemoryTraits<Kokkos::Unmanaged>>;
+    using team_policy = Kokkos::TeamPolicy<>;
+    using member_type = Kokkos::TeamPolicy<>::member_type;
+
     StateVectorKokkos() = delete;
     StateVectorKokkos(size_t num_qubits, const Kokkos::InitializationSettings &kokkos_args = {})
         : gates_{
@@ -761,18 +772,24 @@ template <class Precision> class StateVectorKokkos {
             Kokkos::View<std::size_t *> wires_view("wires_view", wires.size());
             Kokkos::deep_copy(wires_view, wires_host);
 
+            std::size_t two2N =
+                Lightning_Kokkos::Util::exp2(num_qubits_ - wires.size());
+            std::size_t dim = Lightning_Kokkos::Util::exp2(wires.size());
+            std::size_t scratch_size = ScratchViewComplex::shmem_size(dim) +
+                                       ScratchViewSizeT::shmem_size(dim);
+
             if (!inverse) {
                 Kokkos::parallel_for(
-                    Kokkos::RangePolicy<KokkosExecSpace>(
-                        0, Lightning_Kokkos::Util::exp2(num_qubits_ -
-                                                        wires.size())),
+                    "multiQubitOpFunctor",
+                    team_policy(two2N, Kokkos::AUTO, dim)
+                        .set_scratch_size(0, Kokkos::PerTeam(scratch_size)),
                     multiQubitOpFunctor<Precision, false>(*data_, num_qubits,
                                                           matrix, wires_view));
             } else {
                 Kokkos::parallel_for(
-                    Kokkos::RangePolicy<KokkosExecSpace>(
-                        0, Lightning_Kokkos::Util::exp2(num_qubits_ -
-                                                        wires.size())),
+                    "multiQubitOpFunctor",
+                    team_policy(two2N, Kokkos::AUTO, dim)
+                        .set_scratch_size(0, Kokkos::PerTeam(scratch_size)),
                     multiQubitOpFunctor<Precision, true>(*data_, num_qubits,
                                                          matrix, wires_view));
             }

@@ -196,6 +196,15 @@ template <class Precision, bool inverse = false> struct multiQubitOpFunctor {
 
     using KokkosComplexVector = Kokkos::View<Kokkos::complex<Precision> *>;
     using KokkosIntVector = Kokkos::View<std::size_t *>;
+    using ScratchViewComplex =
+        Kokkos::View<Kokkos::complex<Precision> *,
+                     Kokkos::DefaultExecutionSpace::scratch_memory_space,
+                     Kokkos::MemoryTraits<Kokkos::Unmanaged>>;
+    using ScratchViewSizeT =
+        Kokkos::View<std::size_t *,
+                     Kokkos::DefaultExecutionSpace::scratch_memory_space,
+                     Kokkos::MemoryTraits<Kokkos::Unmanaged>>;
+    using MemberType = Kokkos::TeamPolicy<>::member_type;
 
     KokkosComplexVector arr;
     KokkosComplexVector matrix;
@@ -214,65 +223,78 @@ template <class Precision, bool inverse = false> struct multiQubitOpFunctor {
     }
 
     KOKKOS_INLINE_FUNCTION
-    void operator()(std::size_t kp) const {
-        const std::size_t k = kp * dim;
-        using Pennylane::Lightning_Kokkos::Util::bitswap;
-        KokkosIntVector indices{"indices", dim};
-        KokkosComplexVector coeffs_in{"coeffs_in", dim};
+    void operator()(const MemberType &teamMember) const {
+        const std::size_t k = teamMember.league_rank() * dim;
+        ScratchViewComplex coeffs_in(teamMember.team_scratch(0), dim);
+        ScratchViewSizeT indices(teamMember.team_scratch(0), dim);
         if constexpr (inverse) {
 
-            for (size_t inner_idx = 0; inner_idx < dim; inner_idx++) {
-                std::size_t idx = k | inner_idx;
-                const std::size_t n_wires = dim;
+            if (teamMember.team_rank() == 0) {
+                Kokkos::parallel_for(
+                    Kokkos::ThreadVectorRange(teamMember, dim),
+                    [&](const std::size_t inner_idx) {
+                        std::size_t idx = k | inner_idx;
+                        const std::size_t n_wires = wires.size();
 
-                for (std::size_t pos = 0; pos < n_wires; pos++) {
-                    size_t x = ((idx >> (n_wires - pos - 1)) ^
-                                (idx >> (num_qubits - wires[pos] - 1))) &
-                               1U;
-                    idx = idx ^ ((x << (n_wires - pos - 1)) |
-                                 (x << (num_qubits - wires[pos] - 1)));
-                }
+                        for (std::size_t pos = 0; pos < n_wires; pos++) {
+                            std::size_t x =
+                                ((idx >> (n_wires - pos - 1)) ^
+                                 (idx >> (num_qubits - wires(pos) - 1))) &
+                                1U;
+                            idx = idx ^ ((x << (n_wires - pos - 1)) |
+                                         (x << (num_qubits - wires(pos) - 1)));
+                        }
 
-                indices[inner_idx] = idx;
-                coeffs_in[inner_idx] = arr[idx];
+                        indices(inner_idx) = idx;
+                        coeffs_in(inner_idx) = arr(idx);
+                    });
             }
+            teamMember.team_barrier();
+            Kokkos::parallel_for(
+                Kokkos::TeamThreadRange(teamMember, dim),
+                [&](const std::size_t i) {
+                    const auto idx = indices[i];
+                    arr(idx) = 0.0;
 
-            for (size_t i = 0; i < dim; i++) {
-                const auto idx = indices[i];
-                arr[idx] = 0.0;
-
-                for (size_t j = 0; j < dim; j++) {
-                    const std::size_t base_idx = j * dim;
-                    arr[idx] +=
-                        Kokkos::conj(matrix[base_idx + i]) * coeffs_in[j];
-                }
-            }
+                    for (size_t j = 0; j < dim; j++) {
+                        const std::size_t base_idx = j * dim;
+                        arr(idx) +=
+                            Kokkos::conj(matrix[base_idx + i]) * coeffs_in[j];
+                    }
+                });
         } else {
-            for (size_t inner_idx = 0; inner_idx < dim; inner_idx++) {
-                std::size_t idx = k | inner_idx;
-                const std::size_t n_wires = wires.size();
+            if (teamMember.team_rank() == 0) {
+                Kokkos::parallel_for(
+                    Kokkos::ThreadVectorRange(teamMember, dim),
+                    [&](const std::size_t inner_idx) {
+                        std::size_t idx = k | inner_idx;
+                        const std::size_t n_wires = wires.size();
 
-                for (std::size_t pos = 0; pos < n_wires; pos++) {
-                    size_t x = ((idx >> (n_wires - pos - 1)) ^
-                                (idx >> (num_qubits - wires[pos] - 1))) &
-                               1U;
-                    idx = idx ^ ((x << (n_wires - pos - 1)) |
-                                 (x << (num_qubits - wires[pos] - 1)));
-                }
+                        for (std::size_t pos = 0; pos < n_wires; pos++) {
+                            std::size_t x =
+                                ((idx >> (n_wires - pos - 1)) ^
+                                 (idx >> (num_qubits - wires(pos) - 1))) &
+                                1U;
+                            idx = idx ^ ((x << (n_wires - pos - 1)) |
+                                         (x << (num_qubits - wires(pos) - 1)));
+                        }
 
-                indices[inner_idx] = idx;
-                coeffs_in[inner_idx] = arr[idx];
+                        indices(inner_idx) = idx;
+                        coeffs_in(inner_idx) = arr(idx);
+                    });
             }
+            teamMember.team_barrier();
+            Kokkos::parallel_for(Kokkos::TeamThreadRange(teamMember, dim),
+                                 [&](const std::size_t i) {
+                                     const auto idx = indices[i];
+                                     arr(idx) = 0.0;
+                                     const std::size_t base_idx = i * dim;
 
-            for (size_t i = 0; i < dim; i++) {
-                const auto idx = indices[i];
-                arr[idx] = 0.0;
-                const std::size_t base_idx = i * dim;
-
-                for (size_t j = 0; j < dim; j++) {
-                    arr[idx] += matrix[base_idx + j] * coeffs_in[j];
-                }
-            }
+                                     for (std::size_t j = 0; j < dim; j++) {
+                                         arr(idx) += matrix(base_idx + j) *
+                                                     coeffs_in(j);
+                                     }
+                                 });
         }
     }
 };
