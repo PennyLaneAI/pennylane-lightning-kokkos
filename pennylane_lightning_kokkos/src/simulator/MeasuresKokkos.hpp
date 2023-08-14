@@ -337,23 +337,12 @@ template <class Precision> class MeasuresKokkos {
         } else if (wires.size() == 2) {
             return getExpectationValueTwoQubitOp(matrix, wires, params);
         } else {
-            Kokkos::View<const size_t *, Kokkos::HostSpace,
-                         Kokkos::MemoryTraits<Kokkos::Unmanaged>>
-                wires_host(wires.data(), wires.size());
-            const size_t num_qubits = original_sv.getNumQubits();
-            const Kokkos::View<Kokkos::complex<Precision> *> arr_data =
-                original_sv.getData();
-
-            Kokkos::View<size_t *> wires_view("wires_view", wires.size());
-            Kokkos::deep_copy(wires_view, wires_host);
-            Precision expval = 0;
-            Kokkos::parallel_reduce(
-                Kokkos::RangePolicy<KokkosExecSpace>(
-                    0, Lightning_Kokkos::Util::exp2(num_qubits - wires.size())),
-                getExpectationValueMultiQubitOpFunctor(arr_data, num_qubits,
-                                                       matrix, wires_view),
-                expval);
-            return expval;
+            StateVectorKokkos<Precision> ob_sv(original_sv.getNumQubits());
+            ob_sv.DeviceToDevice(original_sv.getData());
+            ob_sv.applyMultiQubitOp(matrix, wires, false);
+            return Pennylane::Lightning_Kokkos::Util::
+                getRealOfComplexInnerProduct(original_sv.getData(),
+                                             ob_sv.getData());
         }
     }
 
