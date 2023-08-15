@@ -232,7 +232,7 @@ template <class Precision, bool inverse = false> struct multiQubitOpFunctor {
             if (teamMember.team_rank() == 0) {
                 Kokkos::parallel_for(
                     Kokkos::ThreadVectorRange(teamMember, dim),
-                    [&](const std::size_t inner_idx) {
+                    KOKKOS_LAMBDA(const std::size_t inner_idx) {
                         std::size_t idx = k | inner_idx;
                         const std::size_t n_wires = wires.size();
 
@@ -252,7 +252,7 @@ template <class Precision, bool inverse = false> struct multiQubitOpFunctor {
             teamMember.team_barrier();
             Kokkos::parallel_for(
                 Kokkos::TeamThreadRange(teamMember, dim),
-                [&](const std::size_t i) {
+                KOKKOS_LAMBDA(const std::size_t i) {
                     const auto idx = indices[i];
                     arr(idx) = 0.0;
 
@@ -266,7 +266,7 @@ template <class Precision, bool inverse = false> struct multiQubitOpFunctor {
             if (teamMember.team_rank() == 0) {
                 Kokkos::parallel_for(
                     Kokkos::ThreadVectorRange(teamMember, dim),
-                    [&](const std::size_t inner_idx) {
+                    KOKKOS_LAMBDA(const std::size_t inner_idx) {
                         std::size_t idx = k | inner_idx;
                         const std::size_t n_wires = wires.size();
 
@@ -284,17 +284,17 @@ template <class Precision, bool inverse = false> struct multiQubitOpFunctor {
                     });
             }
             teamMember.team_barrier();
-            Kokkos::parallel_for(Kokkos::TeamThreadRange(teamMember, dim),
-                                 [&](const std::size_t i) {
-                                     const auto idx = indices[i];
-                                     arr(idx) = 0.0;
-                                     const std::size_t base_idx = i * dim;
+            Kokkos::parallel_for(
+                Kokkos::TeamThreadRange(teamMember, dim),
+                KOKKOS_LAMBDA(const std::size_t i) {
+                    const auto idx = indices[i];
+                    arr(idx) = 0.0;
+                    const std::size_t base_idx = i * dim;
 
-                                     for (std::size_t j = 0; j < dim; j++) {
-                                         arr(idx) += matrix(base_idx + j) *
-                                                     coeffs_in(j);
-                                     }
-                                 });
+                    for (std::size_t j = 0; j < dim; j++) {
+                        arr(idx) += matrix(base_idx + j) * coeffs_in(j);
+                    }
+                });
         }
     }
 };

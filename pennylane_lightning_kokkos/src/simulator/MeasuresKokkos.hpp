@@ -337,8 +337,7 @@ template <class Precision> class MeasuresKokkos {
         } else if (wires.size() == 2) {
             return getExpectationValueTwoQubitOp(matrix, wires, params);
         } else {
-            StateVectorKokkos<Precision> ob_sv(original_sv.getNumQubits());
-            ob_sv.DeviceToDevice(original_sv.getData());
+            StateVectorKokkos<Precision> ob_sv(original_sv);
             ob_sv.applyMultiQubitOp(matrix, wires, false);
             return Pennylane::Lightning_Kokkos::Util::
                 getRealOfComplexInnerProduct(original_sv.getData(),

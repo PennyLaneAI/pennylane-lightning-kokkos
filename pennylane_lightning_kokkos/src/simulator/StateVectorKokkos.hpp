@@ -134,8 +134,7 @@ template <class Precision> class StateVectorKokkos {
         Kokkos::View<size_t *,
                      Kokkos::DefaultExecutionSpace::scratch_memory_space,
                      Kokkos::MemoryTraits<Kokkos::Unmanaged>>;
-    using team_policy = Kokkos::TeamPolicy<>;
-    using member_type = Kokkos::TeamPolicy<>::member_type;
+    using TeamPolicy = Kokkos::TeamPolicy<>;
 
     StateVectorKokkos() = delete;
     StateVectorKokkos(size_t num_qubits, const Kokkos::InitializationSettings &kokkos_args = {})
@@ -781,14 +780,14 @@ template <class Precision> class StateVectorKokkos {
             if (!inverse) {
                 Kokkos::parallel_for(
                     "multiQubitOpFunctor",
-                    team_policy(two2N, Kokkos::AUTO, dim)
+                    TeamPolicy(two2N, Kokkos::AUTO, dim)
                         .set_scratch_size(0, Kokkos::PerTeam(scratch_size)),
                     multiQubitOpFunctor<Precision, false>(*data_, num_qubits,
                                                           matrix, wires_view));
             } else {
                 Kokkos::parallel_for(
                     "multiQubitOpFunctor",
-                    team_policy(two2N, Kokkos::AUTO, dim)
+                    TeamPolicy(two2N, Kokkos::AUTO, dim)
                         .set_scratch_size(0, Kokkos::PerTeam(scratch_size)),
                     multiQubitOpFunctor<Precision, true>(*data_, num_qubits,
                                                          matrix, wires_view));
