@@ -142,6 +142,9 @@ Vincent Michaud-Rioux, Lee James O'Riordan
   [(#17)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/17)
 
 
+ * Add AMD GPU wheels building with HIP backend for lightning.kokkos in workflows.
+ [(#21)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/21)
+
 ### Breaking changes
 
 * Change LightningKokkos to inherit from QubitDevice instead of LightningQubit. Numpy data initialization is decoupled.

@@ -13,7 +13,7 @@ set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15" CACHE STRING "Minimum OS X deployment ve
 
 project(pennylane_lightning_kokkos
     DESCRIPTION "Lightning-Kokkos bindings for PennyLane. Backed by the Kokkos library."
-    LANGUAGES CXX C
+    LANGUAGES CXX C 
 )
 
 ##########################

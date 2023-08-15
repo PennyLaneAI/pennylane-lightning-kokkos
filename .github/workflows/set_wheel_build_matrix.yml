@@ -14,6 +14,12 @@ on:
       python_version:
         description: "Python versions."
         value: ${{ jobs.set-builder-matrix.outputs.python_version }}
+      amd_gpu_exec_model:
+        description: "The wheel building model."
+        value: ${{ jobs.set-builder-matrix.outputs.amd_gpu_exec_model }}
+      amd_gpu_arch:
+        description: "AMD GPU architecture."
+        value: ${{ jobs.set-builder-matrix.outputs.amd_gpu_arch }}
       cpu_exec_model:
         description: "Kokkos' cpu execution model."
         value: ${{ jobs.set-builder-matrix.outputs.cpu_exec_model }}
@@ -51,7 +57,15 @@ jobs:
               --range)" >> $GITHUB_OUTPUT
           fi
 
-      - name: Kokkos execution strategy (CPU)
+      - name: AMD GPU wheels building strategy
+        id: amd_gpu_exec_model
+        run: echo "::set-output name=amd_gpu_exec_model::[\"HIP\"]"
+
+      - name: AMD GPU architecture
+        id: amd_gpu_arch
+        run: echo "::set-output name=amd_gpu_arch::[\"VEGA900\",\"VEGA906\",\"VEGA908\",\"VEGA90A\"]"
+
+      - name: CPU wheels execution strategy (CPU)
         id: cpu_exec_model
         run: echo "cpu_exec_model=[\"SERIAL\",\"OPENMP\"]" >> $GITHUB_OUTPUT
 
@@ -65,6 +79,8 @@ jobs:
 
     outputs:
       python_version: ${{ steps.pyver.outputs.python_version }}
+      amd_gpu_exec_model: ${{ steps.amd_gpu_exec_model.outputs.amd_gpu_exec_model }}
+      amd_gpu_arch: ${{ steps.amd_gpu_arch.outputs.amd_gpu_arch }}
       cpu_exec_model: ${{ steps.cpu_exec_model.outputs.cpu_exec_model }}
       macos_exec_model: ${{ steps.macos_exec_model.outputs.macos_exec_model }}
       kokkos_version: ${{ steps.kokkos_version.outputs.kokkos_version }}
