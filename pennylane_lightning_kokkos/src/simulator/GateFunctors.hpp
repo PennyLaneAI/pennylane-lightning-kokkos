@@ -451,7 +451,8 @@ template <class Precision, bool inverse = false> struct sFunctor {
         rev_wire_shift = (static_cast<size_t>(1U) << rev_wire);
         wire_parity = fillTrailingOnes(rev_wire);
         wire_parity_inv = fillLeadingOnes(rev_wire + 1);
-        shift = (inverse) ? -Kokkos::complex{0.0, 1.0} : Kokkos::complex{0.0, 1.0};
+        shift =
+            (inverse) ? -Kokkos::complex{0.0, 1.0} : Kokkos::complex{0.0, 1.0};
     }
 
     KOKKOS_INLINE_FUNCTION
@@ -1249,8 +1250,8 @@ struct singleExcitationMinusFunctor {
 
         cr = std::cos(angle / 2);
         sj = inverse ? -std::sin(angle / 2) : std::sin(angle / 2);
-        e = inverse ? exp(Kokkos::complex<Precision>{0.0, angle/ 2})
-                    : exp(Kokkos::complex<Precision>{0.0, -angle/ 2});
+        e = inverse ? exp(Kokkos::complex<Precision>{0.0, angle / 2})
+                    : exp(Kokkos::complex<Precision>{0.0, -angle / 2});
 
         arr = arr_;
     }
@@ -1314,8 +1315,8 @@ struct singleExcitationPlusFunctor {
 
         cr = std::cos(angle / 2);
         sj = inverse ? -std::sin(angle / 2) : std::sin(angle / 2);
-        e = inverse ? exp(Kokkos::complex<Precision>{0.0, -angle/ 2})
-                    : exp(Kokkos::complex<Precision>{0.0, angle/ 2});
+        e = inverse ? exp(Kokkos::complex<Precision>{0.0, -angle / 2})
+                    : exp(Kokkos::complex<Precision>{0.0, angle / 2});
 
         arr = arr_;
     }
@@ -1555,8 +1556,8 @@ struct doubleExcitationMinusFunctor {
 
         cr = std::cos(angle / 2);
         sj = inverse ? -std::sin(angle / 2) : std::sin(angle / 2);
-        e = inverse ? exp(Kokkos::complex<Precision>{0.0, angle/ 2})
-                    : exp(Kokkos::complex<Precision>{0.0, -angle/ 2});
+        e = inverse ? exp(Kokkos::complex<Precision>{0.0, angle / 2})
+                    : exp(Kokkos::complex<Precision>{0.0, -angle / 2});
 
         arr = arr_;
     }
@@ -1708,8 +1709,8 @@ struct doubleExcitationPlusFunctor {
 
         cr = std::cos(angle / 2);
         sj = inverse ? -std::sin(angle / 2) : std::sin(angle / 2);
-        e = inverse ? exp(Kokkos::complex<Precision>{0.0, -angle/ 2})
-                    : exp(Kokkos::complex<Precision>{0.0, angle/ 2});
+        e = inverse ? exp(Kokkos::complex<Precision>{0.0, -angle / 2})
+                    : exp(Kokkos::complex<Precision>{0.0, angle / 2});
 
         arr = arr_;
     }
