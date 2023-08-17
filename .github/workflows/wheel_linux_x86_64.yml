@@ -161,7 +161,7 @@ jobs:
           CIBW_TEST_REQUIRES: numpy~=1.21 scipy pytest pytest-cov pytest-mock flaky
 
           CIBW_BEFORE_TEST: |
-            python -m pip install git+https://github.com/PennyLaneAI/pennylane.git@a4c31d6430d485bf341732c5ff99f1c15307aae8
+            python -m pip install git+https://github.com/PennyLaneAI/pennylane.git@master
             python -m pip install --index-url https://test.pypi.org/simple/ pennylane-lightning --pre --force-reinstall --no-deps
 
           CIBW_TEST_COMMAND: |
