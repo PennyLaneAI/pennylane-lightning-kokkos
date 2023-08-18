@@ -10,10 +10,14 @@
 
 ### Bug fixes
 
+* `apply` no longer mutates the inputted list of operations.
+  [(#78)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/78)
+
 ### Contributors
 
 This release contains contributions from (in alphabetical order):
 
+Vincent Michaud-Rioux
 
 ---
 
