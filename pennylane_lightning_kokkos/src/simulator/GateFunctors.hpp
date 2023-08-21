@@ -196,12 +196,19 @@ template <class Precision, bool inverse = false> struct multiQubitOpFunctor {
 
     using KokkosComplexVector = Kokkos::View<Kokkos::complex<Precision> *>;
     using KokkosIntVector = Kokkos::View<std::size_t *>;
+    using ScratchViewComplex =
+        Kokkos::View<Kokkos::complex<Precision> *,
+                     Kokkos::DefaultExecutionSpace::scratch_memory_space,
+                     Kokkos::MemoryTraits<Kokkos::Unmanaged>>;
+    using ScratchViewSizeT =
+        Kokkos::View<std::size_t *,
+                     Kokkos::DefaultExecutionSpace::scratch_memory_space,
+                     Kokkos::MemoryTraits<Kokkos::Unmanaged>>;
+    using MemberType = Kokkos::TeamPolicy<>::member_type;
 
     KokkosComplexVector arr;
     KokkosComplexVector matrix;
-    KokkosIntVector indices;
     KokkosIntVector wires;
-    KokkosComplexVector coeffs_in;
     std::size_t dim;
     std::size_t num_qubits;
 
@@ -209,8 +216,6 @@ template <class Precision, bool inverse = false> struct multiQubitOpFunctor {
                         const KokkosComplexVector &matrix_,
                         KokkosIntVector &wires_) {
         dim = 1U << wires_.size();
-        indices = KokkosIntVector("indices", dim);
-        coeffs_in = KokkosComplexVector("coeffs_in", dim);
         num_qubits = num_qubits_;
         wires = wires_;
         arr = arr_;
@@ -218,63 +223,78 @@ template <class Precision, bool inverse = false> struct multiQubitOpFunctor {
     }
 
     KOKKOS_INLINE_FUNCTION
-    void operator()(std::size_t kp) const {
-        const std::size_t k = kp * dim;
-        using Pennylane::Lightning_Kokkos::Util::bitswap;
+    void operator()(const MemberType &teamMember) const {
+        const std::size_t k = teamMember.league_rank() * dim;
+        ScratchViewComplex coeffs_in(teamMember.team_scratch(0), dim);
+        ScratchViewSizeT indices(teamMember.team_scratch(0), dim);
         if constexpr (inverse) {
 
-            for (size_t inner_idx = 0; inner_idx < dim; inner_idx++) {
-                std::size_t idx = k | inner_idx;
-                const std::size_t n_wires = dim;
+            if (teamMember.team_rank() == 0) {
+                Kokkos::parallel_for(
+                    Kokkos::ThreadVectorRange(teamMember, dim),
+                    [&](const std::size_t inner_idx) {
+                        std::size_t idx = k | inner_idx;
+                        const std::size_t n_wires = wires.size();
 
-                for (std::size_t pos = 0; pos < n_wires; pos++) {
-                    size_t x = ((idx >> (n_wires - pos - 1)) ^
-                                (idx >> (num_qubits - wires[pos] - 1))) &
-                               1U;
-                    idx = idx ^ ((x << (n_wires - pos - 1)) |
-                                 (x << (num_qubits - wires[pos] - 1)));
-                }
+                        for (std::size_t pos = 0; pos < n_wires; pos++) {
+                            std::size_t x =
+                                ((idx >> (n_wires - pos - 1)) ^
+                                 (idx >> (num_qubits - wires(pos) - 1))) &
+                                1U;
+                            idx = idx ^ ((x << (n_wires - pos - 1)) |
+                                         (x << (num_qubits - wires(pos) - 1)));
+                        }
 
-                indices[inner_idx] = idx;
-                coeffs_in[inner_idx] = arr[idx];
+                        indices(inner_idx) = idx;
+                        coeffs_in(inner_idx) = arr(idx);
+                    });
             }
+            teamMember.team_barrier();
+            Kokkos::parallel_for(
+                Kokkos::TeamThreadRange(teamMember, dim),
+                [&](const std::size_t i) {
+                    const auto idx = indices[i];
+                    arr(idx) = 0.0;
 
-            for (size_t i = 0; i < dim; i++) {
-                const auto idx = indices[i];
-                arr[idx] = 0.0;
-
-                for (size_t j = 0; j < dim; j++) {
-                    const std::size_t base_idx = j * dim;
-                    arr[idx] +=
-                        Kokkos::conj(matrix[base_idx + i]) * coeffs_in[j];
-                }
-            }
+                    for (size_t j = 0; j < dim; j++) {
+                        const std::size_t base_idx = j * dim;
+                        arr(idx) +=
+                            Kokkos::conj(matrix[base_idx + i]) * coeffs_in[j];
+                    }
+                });
         } else {
-            for (size_t inner_idx = 0; inner_idx < dim; inner_idx++) {
-                std::size_t idx = k | inner_idx;
-                const std::size_t n_wires = wires.size();
+            if (teamMember.team_rank() == 0) {
+                Kokkos::parallel_for(
+                    Kokkos::ThreadVectorRange(teamMember, dim),
+                    [&](const std::size_t inner_idx) {
+                        std::size_t idx = k | inner_idx;
+                        const std::size_t n_wires = wires.size();
 
-                for (std::size_t pos = 0; pos < n_wires; pos++) {
-                    size_t x = ((idx >> (n_wires - pos - 1)) ^
-                                (idx >> (num_qubits - wires[pos] - 1))) &
-                               1U;
-                    idx = idx ^ ((x << (n_wires - pos - 1)) |
-                                 (x << (num_qubits - wires[pos] - 1)));
-                }
+                        for (std::size_t pos = 0; pos < n_wires; pos++) {
+                            std::size_t x =
+                                ((idx >> (n_wires - pos - 1)) ^
+                                 (idx >> (num_qubits - wires(pos) - 1))) &
+                                1U;
+                            idx = idx ^ ((x << (n_wires - pos - 1)) |
+                                         (x << (num_qubits - wires(pos) - 1)));
+                        }
 
-                indices[inner_idx] = idx;
-                coeffs_in[inner_idx] = arr[idx];
+                        indices(inner_idx) = idx;
+                        coeffs_in(inner_idx) = arr(idx);
+                    });
             }
+            teamMember.team_barrier();
+            Kokkos::parallel_for(Kokkos::TeamThreadRange(teamMember, dim),
+                                 [&](const std::size_t i) {
+                                     const auto idx = indices[i];
+                                     arr(idx) = 0.0;
+                                     const std::size_t base_idx = i * dim;
 
-            for (size_t i = 0; i < dim; i++) {
-                const auto idx = indices[i];
-                arr[idx] = 0.0;
-                const std::size_t base_idx = i * dim;
-
-                for (size_t j = 0; j < dim; j++) {
-                    arr[idx] += matrix[base_idx + j] * coeffs_in[j];
-                }
-            }
+                                     for (std::size_t j = 0; j < dim; j++) {
+                                         arr(idx) += matrix(base_idx + j) *
+                                                     coeffs_in(j);
+                                     }
+                                 });
         }
     }
 };
@@ -431,7 +451,8 @@ template <class Precision, bool inverse = false> struct sFunctor {
         rev_wire_shift = (static_cast<size_t>(1U) << rev_wire);
         wire_parity = fillTrailingOnes(rev_wire);
         wire_parity_inv = fillLeadingOnes(rev_wire + 1);
-        shift = (inverse) ? -Kokkos::complex(0, 1) : Kokkos::complex(0, 1);
+        shift =
+            (inverse) ? -Kokkos::complex{0.0, 1.0} : Kokkos::complex{0.0, 1.0};
     }
 
     KOKKOS_INLINE_FUNCTION
@@ -496,8 +517,8 @@ template <class Precision, bool inverse = false> struct phaseShiftFunctor {
         wire_parity_inv = fillLeadingOnes(rev_wire + 1);
         const Precision &angle = params[0];
 
-        s = inverse ? exp(-Kokkos::complex<Precision>(0, angle))
-                    : exp(Kokkos::complex<Precision>(0, angle));
+        s = inverse ? exp(-Kokkos::complex<Precision>{0.0, angle})
+                    : exp(Kokkos::complex<Precision>{0.0, angle});
     }
 
     KOKKOS_INLINE_FUNCTION
@@ -789,7 +810,7 @@ template <class Precision, bool inverse = false> struct cRotFunctor {
         const Precision p{phi + omega};
         const Precision m{phi - omega};
 
-        auto imag = Kokkos::complex<Precision>(0, 1);
+        auto imag = Kokkos::complex<Precision>{0.0, 1.0};
         rot_mat_0b00 = Kokkos::exp(static_cast<Precision>(p / 2) * (-imag)) * c;
         rot_mat_0b01 = -Kokkos::exp(static_cast<Precision>(m / 2) * imag) * s;
         rot_mat_0b10 = Kokkos::exp(static_cast<Precision>(m / 2) * (-imag)) * s;
@@ -1229,8 +1250,8 @@ struct singleExcitationMinusFunctor {
 
         cr = std::cos(angle / 2);
         sj = inverse ? -std::sin(angle / 2) : std::sin(angle / 2);
-        e = inverse ? exp(Kokkos::complex<Precision>(0, angle / 2))
-                    : exp(Kokkos::complex<Precision>(0, -angle / 2));
+        e = inverse ? exp(Kokkos::complex<Precision>{0.0, angle / 2})
+                    : exp(Kokkos::complex<Precision>{0.0, -angle / 2});
 
         arr = arr_;
     }
@@ -1294,8 +1315,8 @@ struct singleExcitationPlusFunctor {
 
         cr = std::cos(angle / 2);
         sj = inverse ? -std::sin(angle / 2) : std::sin(angle / 2);
-        e = inverse ? exp(Kokkos::complex<Precision>(0, -angle / 2))
-                    : exp(Kokkos::complex<Precision>(0, angle / 2));
+        e = inverse ? exp(Kokkos::complex<Precision>{0.0, -angle / 2})
+                    : exp(Kokkos::complex<Precision>{0.0, angle / 2});
 
         arr = arr_;
     }
@@ -1535,8 +1556,8 @@ struct doubleExcitationMinusFunctor {
 
         cr = std::cos(angle / 2);
         sj = inverse ? -std::sin(angle / 2) : std::sin(angle / 2);
-        e = inverse ? exp(Kokkos::complex<Precision>(0, angle / 2))
-                    : exp(Kokkos::complex<Precision>(0, -angle / 2));
+        e = inverse ? exp(Kokkos::complex<Precision>{0.0, angle / 2})
+                    : exp(Kokkos::complex<Precision>{0.0, -angle / 2});
 
         arr = arr_;
     }
@@ -1688,8 +1709,8 @@ struct doubleExcitationPlusFunctor {
 
         cr = std::cos(angle / 2);
         sj = inverse ? -std::sin(angle / 2) : std::sin(angle / 2);
-        e = inverse ? exp(Kokkos::complex<Precision>(0, -angle / 2))
-                    : exp(Kokkos::complex<Precision>(0, angle / 2));
+        e = inverse ? exp(Kokkos::complex<Precision>{0.0, -angle / 2})
+                    : exp(Kokkos::complex<Precision>{0.0, angle / 2});
 
         arr = arr_;
     }
@@ -1780,8 +1801,8 @@ struct controlledPhaseShiftFunctor {
         parity_middle =
             fillLeadingOnes(rev_wire_min + 1) & fillTrailingOnes(rev_wire_max);
 
-        s = inverse ? exp(-Kokkos::complex<Precision>(0, angle))
-                    : exp(Kokkos::complex<Precision>(0, angle));
+        s = inverse ? exp(-Kokkos::complex<Precision>{0.0, angle})
+                    : exp(Kokkos::complex<Precision>{0.0, angle});
 
         arr = arr_;
     }
@@ -2415,8 +2436,8 @@ struct generatorSingleExcitationFunctor {
         const std::size_t i11 = i00 | rev_wire0_shift | rev_wire1_shift;
 
         arr[i00] = ComplexPrecision{};
-        arr[i01] *= ComplexPrecision{0, 1};
-        arr[i10] *= ComplexPrecision{0, -1};
+        arr[i01] *= ComplexPrecision{0.0, 1.0};
+        arr[i10] *= ComplexPrecision{0.0, -1.0};
         arr[i11] = ComplexPrecision{};
         KE::swap(arr[i10], arr[i01]);
     }
@@ -2466,8 +2487,8 @@ struct generatorSingleExcitationMinusFunctor {
         const std::size_t i01 = i00 | rev_wire0_shift;
         const std::size_t i10 = i00 | rev_wire1_shift;
 
-        arr[i01] *= ComplexPrecision{0, 1};
-        arr[i10] *= ComplexPrecision{0, -1};
+        arr[i01] *= ComplexPrecision{0, 1.0};
+        arr[i10] *= ComplexPrecision{0, -1.0};
         KE::swap(arr[i10], arr[i01]);
     }
 };
@@ -2518,8 +2539,8 @@ struct generatorSingleExcitationPlusFunctor {
         const std::size_t i11 = i00 | rev_wire0_shift | rev_wire1_shift;
 
         arr[i00] *= -1;
-        arr[i01] *= ComplexPrecision{0, 1};
-        arr[i10] *= ComplexPrecision{0, -1};
+        arr[i01] *= ComplexPrecision{0, 1.0};
+        arr[i10] *= ComplexPrecision{0, -1.0};
         arr[i11] *= -1;
 
         KE::swap(arr[i10], arr[i01]);
@@ -2653,7 +2674,7 @@ struct generatorDoubleExcitationFunctor {
         arr[i0000] = ComplexPrecision{};
         arr[i0001] = ComplexPrecision{};
         arr[i0010] = ComplexPrecision{};
-        arr[i0011] = v12 * ComplexPrecision{0, -1};
+        arr[i0011] = v12 * ComplexPrecision{0, -1.0};
         arr[i0100] = ComplexPrecision{};
         arr[i0101] = ComplexPrecision{};
         arr[i0110] = ComplexPrecision{};
@@ -2662,7 +2683,7 @@ struct generatorDoubleExcitationFunctor {
         arr[i1001] = ComplexPrecision{};
         arr[i1010] = ComplexPrecision{};
         arr[i1011] = ComplexPrecision{};
-        arr[i1100] = v3 * ComplexPrecision{0, 1};
+        arr[i1100] = v3 * ComplexPrecision{0, 1.0};
         arr[i1101] = ComplexPrecision{};
         arr[i1110] = ComplexPrecision{};
         arr[i1111] = ComplexPrecision{};
@@ -2773,8 +2794,8 @@ struct generatorDoubleExcitationMinusFunctor {
         const std::size_t i0011 = i0000 | rev_wire1_shift | rev_wire0_shift;
         const std::size_t i1100 = i0000 | rev_wire3_shift | rev_wire2_shift;
 
-        arr[i0011] *= ComplexPrecision{0, 1};
-        arr[i1100] *= ComplexPrecision{0, -1};
+        arr[i0011] *= ComplexPrecision{0, 1.0};
+        arr[i1100] *= ComplexPrecision{0, -1.0};
         KE::swap(arr[i1100], arr[i0011]);
     }
 };
@@ -2883,8 +2904,8 @@ struct generatorDoubleExcitationPlusFunctor {
         const std::size_t i0011 = i0000 | rev_wire1_shift | rev_wire0_shift;
         const std::size_t i1100 = i0000 | rev_wire3_shift | rev_wire2_shift;
 
-        arr[i0011] *= ComplexPrecision{0, -1};
-        arr[i1100] *= ComplexPrecision{0, 1};
+        arr[i0011] *= ComplexPrecision{0, -1.0};
+        arr[i1100] *= ComplexPrecision{0, 1.0};
         KE::swap(arr[i1100], arr[i0011]);
     }
 };
@@ -3135,7 +3156,7 @@ template <class Precision, bool inverse = false> struct rotFunctor {
         const Precision p{phi + omega};
         const Precision m{phi - omega};
 
-        auto imag = Kokkos::complex<Precision>(0, 1);
+        auto imag = Kokkos::complex<Precision>{0.0, 1.0};
         rot_mat_0b00 = Kokkos::exp(static_cast<Precision>(p / 2) * (-imag)) * c;
         rot_mat_0b01 = -Kokkos::exp(static_cast<Precision>(m / 2) * imag) * s;
         rot_mat_0b10 = Kokkos::exp(static_cast<Precision>(m / 2) * (-imag)) * s;

@@ -10,6 +10,9 @@
 
 ### Bug fixes
 
+* Fix `applyMultiQubitOp`'s functor which had a bug causing incorrect gate application with parallel Kokkos backends.
+  [(#75)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/75)
+
 * `apply` no longer mutates the inputted list of operations.
   [(#78)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/78)
 
