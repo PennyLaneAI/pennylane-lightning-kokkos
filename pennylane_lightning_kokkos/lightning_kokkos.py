@@ -740,7 +740,7 @@ if CPP_BINARY_AVAILABLE:
             )
 
 else:  # CPP_BINARY_AVAILABLE:
-    from pennylane_lightning import LightningQubit
+    from pennylane_lightning.lightning_qubit import LightningQubit
 
     class LightningKokkos(LightningQubit):
         name = "PennyLane plugin for Kokkos-backed Lightning device"

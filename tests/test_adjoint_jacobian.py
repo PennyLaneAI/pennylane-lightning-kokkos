@@ -85,7 +85,7 @@ class TestAdjointJacobian:
     """Tests for the adjoint_jacobian method"""
 
     from pennylane_lightning_kokkos import LightningKokkos as lk
-    from pennylane_lightning import LightningQubit as lq
+    from pennylane_lightning.lightning_qubit import LightningQubit as lq
 
     @pytest.fixture(params=[None, InitializationSettings().set_num_threads(2)])
     def dev_kokkos(self, request):
