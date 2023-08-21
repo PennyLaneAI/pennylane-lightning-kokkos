@@ -34,7 +34,6 @@ from pennylane import (
     QuantumFunctionError,
     StatePrep,
 )
-from pennylane_lightning import LightningQubit
 from pennylane.operation import Tensor, Operation
 from pennylane.measurements import Expectation, MeasurementProcess, State
 from pennylane.ops.op_math import Adjoint
@@ -741,6 +740,7 @@ if CPP_BINARY_AVAILABLE:
             )
 
 else:  # CPP_BINARY_AVAILABLE:
+    from pennylane_lightning import LightningQubit
 
     class LightningKokkos(LightningQubit):
         name = "PennyLane plugin for Kokkos-backed Lightning device"
