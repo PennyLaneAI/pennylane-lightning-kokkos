@@ -81,7 +81,7 @@ def test_gate_unitary_correct(op, op_name):
     """Test if lightning.kokkos correctly applies gates by reconstructing the unitary matrix and
     comparing to the expected version"""
 
-    if op_name in ("BasisState", "StatePrep"):
+    if op_name in ("BasisState", "QubitStateVector", "StatePrep"):
         pytest.skip("Skipping operation because it is a state preparation")
     if op_name in (
         "ControlledQubitUnitary",
@@ -119,7 +119,7 @@ def test_inverse_unitary_correct(op, op_name):
     """Test if lightning.kokkos correctly applies inverse gates by reconstructing the unitary matrix
     and comparing to the expected version"""
 
-    if op_name in ("BasisState", "StatePrep"):
+    if op_name in ("BasisState", "QubitStateVector", "StatePrep"):
         pytest.skip("Skipping operation because it is a state preparation")
     if op_name in (
         "ControlledQubitUnitary",

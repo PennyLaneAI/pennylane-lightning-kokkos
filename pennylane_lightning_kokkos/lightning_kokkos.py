@@ -30,6 +30,7 @@ from pennylane import (
     Projector,
     QuantumFunctionError,
     QubitDevice,
+    QubitStateVector,
     Rot,
     StatePrep,
 )
@@ -404,7 +405,7 @@ if CPP_BINARY_AVAILABLE:
         def apply(self, operations, **kwargs):
             # State preparation is currently done in Python
             if operations:  # make sure operations[0] exists
-                if isinstance(operations[0], StatePrep):
+                if isinstance(operations[0], (QubitStateVector, StatePrep)):
                     self._apply_state_vector_kokkos(
                         operations[0].parameters[0].copy(), operations[0].wires
                     )
@@ -414,7 +415,7 @@ if CPP_BINARY_AVAILABLE:
                     operations = operations[1:]
 
             for operation in operations:
-                if isinstance(operation, (StatePrep, BasisState)):
+                if isinstance(operation, (BasisState, QubitStateVector, StatePrep)):
                     raise DeviceError(
                         f"Operation {operation.name} cannot be used after other Operations have already been applied on a {self.short_name} device."
                     )
@@ -666,7 +667,7 @@ if CPP_BINARY_AVAILABLE:
                 # get op_idx-th operator among differentiable operators
                 op, _, _ = tape.get_operation(op_idx)
 
-                if isinstance(op, Operation) and not isinstance(op, (BasisState, StatePrep)):
+                if isinstance(op, Operation) and not isinstance(op, (BasisState, QubitStateVector, StatePrep)):
                     # We now just ignore non-op or state preps
                     tp_shift.append(tp)
                     record_tp_rows.append(all_params)
