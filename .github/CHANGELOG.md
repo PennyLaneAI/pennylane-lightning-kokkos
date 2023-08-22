@@ -4,6 +4,9 @@
 
 ### Breaking changes
 
+* Rename `QubitStateVector` to `StatePrep` in the `LightningKokkos` class.
+  [#79] (https://github.com/PennyLaneAI/pennylane-lightning-gpu/pull/79)
+
 ### Improvements
 
 ### Documentation

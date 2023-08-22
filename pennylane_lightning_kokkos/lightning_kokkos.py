@@ -23,18 +23,17 @@ from itertools import product
 import numpy as np
 from pennylane import (
     active_return,
-    math,
-    QubitDevice,
     BasisState,
-    QubitStateVector,
     DeviceError,
-    Projector,
     Hermitian,
-    Rot,
+    math,
+    Projector,
     QuantumFunctionError,
+    QubitDevice,
     QubitStateVector,
+    Rot,
+    StatePrep,
 )
-from pennylane_lightning import LightningQubit
 from pennylane.operation import Tensor, Operation
 from pennylane.measurements import Expectation, MeasurementProcess, State
 from pennylane.ops.op_math import Adjoint
@@ -49,11 +48,11 @@ from ._version import __version__
 
 try:
     from .lightning_kokkos_qubit_ops import (
+        AdjointJacobianKokkos_C128,
+        AdjointJacobianKokkos_C64,
         InitializationSettings,
         LightningKokkos_C128,
         LightningKokkos_C64,
-        AdjointJacobianKokkos_C128,
-        AdjointJacobianKokkos_C64,
         print_configuration,
     )
 
@@ -76,62 +75,63 @@ def _kokkos_configuration():
 
 
 allowed_operations = {
-    "Identity",
-    "BasisState",
-    "QubitStateVector",
-    "QubitUnitary",
-    "ControlledQubitUnitary",
-    "MultiControlledX",
-    "DiagonalQubitUnitary",
-    "PauliX",
-    "PauliY",
-    "PauliZ",
-    "MultiRZ",
-    "Hadamard",
-    "S",
-    "Adjoint(S)",
-    "T",
-    "Adjoint(T)",
-    "SX",
-    "Adjoint(SX)",
-    "CNOT",
-    "SWAP",
-    "ISWAP",
-    "PSWAP",
     "Adjoint(ISWAP)",
-    "SISWAP",
+    "Adjoint(S)",
     "Adjoint(SISWAP)",
-    "SQISW",
-    "CSWAP",
-    "Toffoli",
-    "CY",
-    "CZ",
-    "PhaseShift",
+    "Adjoint(SX)",
+    "Adjoint(T)",
+    "BasisState",
+    "CNOT",
     "ControlledPhaseShift",
+    "ControlledQubitUnitary",
     "CPhase",
-    "RX",
-    "RY",
-    "RZ",
-    "Rot",
+    "CRot",
     "CRX",
     "CRY",
     "CRZ",
-    "CRot",
+    "CSWAP",
+    "CY",
+    "CZ",
+    "DiagonalQubitUnitary",
+    "DoubleExcitation",
+    "DoubleExcitationMinus",
+    "DoubleExcitationPlus",
+    "ECR",
+    "Hadamard",
+    "Identity",
     "IsingXX",
+    "IsingXY",
     "IsingYY",
     "IsingZZ",
-    "IsingXY",
-    "SingleExcitation",
-    "SingleExcitationPlus",
-    "SingleExcitationMinus",
-    "DoubleExcitation",
-    "DoubleExcitationPlus",
-    "DoubleExcitationMinus",
-    "QubitCarry",
-    "QubitSum",
+    "ISWAP",
+    "MultiControlledX",
+    "MultiRZ",
     "OrbitalRotation",
+    "PauliX",
+    "PauliY",
+    "PauliZ",
+    "PhaseShift",
+    "PSWAP",
     "QFT",
-    "ECR",
+    "QubitCarry",
+    "QubitStateVector",
+    "QubitSum",
+    "QubitUnitary",
+    "Rot",
+    "RX",
+    "RY",
+    "RZ",
+    "S",
+    "SingleExcitation",
+    "SingleExcitationMinus",
+    "SingleExcitationPlus",
+    "SISWAP",
+    "SQISW",
+    "StatePrep",
+    "SWAP",
+    "SX",
+    "T",
+    "Toffoli",
 }
 
 
@@ -405,7 +405,7 @@ if CPP_BINARY_AVAILABLE:
         def apply(self, operations, **kwargs):
             # State preparation is currently done in Python
             if operations:  # make sure operations[0] exists
-                if isinstance(operations[0], QubitStateVector):
+                if isinstance(operations[0], StatePrep):
                     self._apply_state_vector_kokkos(
                         operations[0].parameters[0].copy(), operations[0].wires
                     )
@@ -415,7 +415,7 @@ if CPP_BINARY_AVAILABLE:
                     operations = operations[1:]
 
             for operation in operations:
-                if isinstance(operation, (QubitStateVector, BasisState)):
+                if isinstance(operation, (BasisState, StatePrep)):
                     raise DeviceError(
                         f"Operation {operation.name} cannot be used after other Operations have already been applied on a {self.short_name} device."
                     )
@@ -667,7 +667,7 @@ if CPP_BINARY_AVAILABLE:
                 # get op_idx-th operator among differentiable operators
                 op, _, _ = tape.get_operation(op_idx)
 
-                if isinstance(op, Operation) and not isinstance(op, (BasisState, QubitStateVector)):
+                if isinstance(op, Operation) and not isinstance(op, (BasisState, StatePrep)):
                     # We now just ignore non-op or state preps
                     tp_shift.append(tp)
                     record_tp_rows.append(all_params)
@@ -741,6 +741,7 @@ if CPP_BINARY_AVAILABLE:
             )
 
 else:  # CPP_BINARY_AVAILABLE:
+    from pennylane_lightning.lightning_qubit import LightningQubit
 
     class LightningKokkos(LightningQubit):
         name = "PennyLane plugin for Kokkos-backed Lightning device"

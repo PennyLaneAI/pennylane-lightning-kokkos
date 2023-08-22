@@ -1,13 +1,13 @@
 name: Wheel::Linux::x86_64
 
 # **What it does**: Builds python wheels for Linux (ubuntu-latest) architecture x86_64 and store it as artifacts.
-#                   Python versions: 3.8, 3.9, 3.10, 3.11.
+#                   Python versions: 3.9, 3.10, 3.11.
 # **Why we have it**: To build wheels for pennylane-lightning-kokkos installation.
 # **Who does it impact**: Wheels to be uploaded to PyPI.
 
 env:
   GCC_VERSION: 11
-  PY_VERSION: 3.8
+  PY_VERSION: 3.9
 
 on:
   pull_request:
@@ -102,7 +102,7 @@ jobs:
         container_img: ["quay.io/pypa/manylinux2014_x86_64"]
         kokkos_version: ${{ fromJson(needs.set_wheel_build_matrix.outputs.kokkos_version) }}
 
-    name: ${{ matrix.os }} (Python ${{ fromJson('{"cp38-*":"3.8", "cp39-*":"3.9","cp310-*":"3.10","cp311-*":"3.11" }')[matrix.cibw_build] }} ${{ matrix.exec_model }})
+    name: ${{ matrix.os }} (Python ${{ fromJson('{ "cp39-*":"3.9","cp310-*":"3.10","cp311-*":"3.11" }')[matrix.cibw_build] }} ${{ matrix.exec_model }})
     runs-on: ${{ matrix.os }}
     container: ${{ matrix.container_img }}
 
@@ -135,7 +135,7 @@ jobs:
           yum update -y && yum install -y docker
   
       - name: Install cibuildwheel
-        run: python3.8 -m pip install cibuildwheel~=2.11.0
+        run: python3.9 -m pip install cibuildwheel~=2.11.0
 
       - name: Build wheels
         env:
@@ -174,12 +174,12 @@ jobs:
           OMP_PROC_BIND: false
 
         run: 
-          python3.8 -m cibuildwheel --output-dir wheelhouse
+          python3.9 -m cibuildwheel --output-dir wheelhouse
 
       - name: Validate wheels
         run: |
-          python3.8 -m pip install twine
-          python3.8 -m twine check ./wheelhouse/*.whl
+          python3.9 -m pip install twine
+          python3.9 -m twine check ./wheelhouse/*.whl
 
       - uses: actions-ecosystem/action-regex-match@v2
         id: rc_build

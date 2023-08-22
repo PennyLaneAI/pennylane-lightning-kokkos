@@ -206,18 +206,18 @@ class TestApply:
         "operation,expected_output,par",
         [
             (qml.BasisState, [0, 0, 1, 0], [1, 0]),
-            (qml.BasisState, [0, 0, 1, 0], [1, 0]),
             (qml.BasisState, [0, 0, 0, 1], [1, 1]),
             (qml.QubitStateVector, [0, 0, 1, 0], [0, 0, 1, 0]),
-            (qml.QubitStateVector, [0, 0, 1, 0], [0, 0, 1, 0]),
             (qml.QubitStateVector, [0, 0, 0, 1], [0, 0, 0, 1]),
+            (qml.StatePrep, [0, 0, 1, 0], [0, 0, 1, 0]),
+            (qml.StatePrep, [0, 0, 0, 1], [0, 0, 0, 1]),
             (
-                qml.QubitStateVector,
+                qml.StatePrep,
                 [1 / math.sqrt(3), 0, 1 / math.sqrt(3), 1 / math.sqrt(3)],
                 [1 / math.sqrt(3), 0, 1 / math.sqrt(3), 1 / math.sqrt(3)],
             ),
             (
-                qml.QubitStateVector,
+                qml.StatePrep,
                 [1 / math.sqrt(3), 0, -1 / math.sqrt(3), 1 / math.sqrt(3)],
                 [1 / math.sqrt(3), 0, -1 / math.sqrt(3), 1 / math.sqrt(3)],
             ),
