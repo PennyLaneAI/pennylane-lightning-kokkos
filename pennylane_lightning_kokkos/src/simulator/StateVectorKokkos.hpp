@@ -1623,7 +1623,8 @@ template <class Precision> class StateVectorKokkos {
      * @brief Copy data from the device space to the host space.
      *
      */
-    inline void DeviceToHost(Kokkos::complex<Precision> *sv, size_t length) {
+    inline void DeviceToHost(Kokkos::complex<Precision> *sv,
+                             size_t length) const {
         Kokkos::deep_copy(UnmanagedComplexHostView(sv, length), *data_);
     }
 

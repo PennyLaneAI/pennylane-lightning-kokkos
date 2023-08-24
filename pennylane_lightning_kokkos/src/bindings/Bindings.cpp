@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#define PYBIND11_DETAILED_ERROR_MESSAGES
 #include <set>
 #include <tuple>
 #include <variant>
@@ -582,7 +583,31 @@ void StateVectorKokkos_class_bindings(py::module &m) {
             "Synchronize data from the host device to GPU.")
         .def("numQubits", &StateVectorKokkos<PrecisionT>::getNumQubits)
         .def("dataLength", &StateVectorKokkos<PrecisionT>::getLength)
-        .def("resetKokkos", &StateVectorKokkos<PrecisionT>::resetStateVector);
+        .def("resetKokkos", &StateVectorKokkos<PrecisionT>::resetStateVector)
+        .def(py::pickle(
+            [](const StateVectorKokkos<PrecisionT> &self) { // __getstate__
+                /* Return a tuple that fully encodes the state of the object */
+
+                std::vector<std::complex<PrecisionT>> data(self.getLength(),
+                                                           {0, 0});
+                self.DeviceToHost(
+                    reinterpret_cast<Kokkos::complex<PrecisionT> *>(
+                        data.data()),
+                    self.getLength());
+
+                return py::make_tuple(data);
+            },
+            [](py::tuple t) { // __setstate__
+                if (t.size() != 1)
+                    throw std::runtime_error("Invalid state!");
+
+                /* Create a new C++ instance */
+                auto vec = t[0].cast<std::vector<std::complex<PrecisionT>>>();
+                StateVectorKokkos<PrecisionT> p(
+                    reinterpret_cast<Kokkos::complex<PrecisionT> *>(vec.data()),
+                    vec.size());
+                return p;
+            }));
 
     //***********************************************************************//
     //                              Observable
@@ -615,7 +640,23 @@ void StateVectorKokkos_class_bindings(py::module &m) {
                 auto other_cast = other.cast<NamedObsKokkos<PrecisionT>>();
                 return self == other_cast;
             },
-            "Compare two observables");
+            "Compare two observables")
+        .def(py::pickle(
+            [](const NamedObsKokkos<PrecisionT> &self) { // __getstate__
+                /* Return a tuple that fully encodes the state of the object */
+                return py::make_tuple(self.obs_name_, self.wires_);
+            },
+            [](py::tuple t) { // __setstate__
+                if (t.size() != 2)
+                    throw std::runtime_error("Invalid state!");
+
+                /* Create a new C++ instance */
+                NamedObsKokkos<PrecisionT> p(
+                    t[0].cast<std::string>(),
+                    t[1].cast<std::vector<std::size_t>>());
+
+                return p;
+            }));
 
     class_name = "HermitianObsKokkos_C" + bitsize;
     py::class_<HermitianObsKokkos<PrecisionT>,
@@ -698,7 +739,23 @@ void StateVectorKokkos_class_bindings(py::module &m) {
                 auto other_cast = other.cast<HamiltonianKokkos<PrecisionT>>();
                 return self == other_cast;
             },
-            "Compare two observables");
+            "Compare two observables")
+        .def(py::pickle(
+            [](const HamiltonianKokkos<PrecisionT> &self) { // __getstate__
+                /* Return a tuple that fully encodes the state of the object */
+                return py::make_tuple(self.coeffs_, self.obs_);
+            },
+            [](py::tuple t) { // __setstate__
+                if (t.size() != 2)
+                    throw std::runtime_error("Invalid state!");
+
+                /* Create a new C++ instance */
+                HamiltonianKokkos<PrecisionT> p(
+                    t[0].cast<std::vector<PrecisionT>>(),
+                    t[1].cast<std::vector<ObsPtr>>());
+
+                return p;
+            }));
 
     class_name = "SparseHamiltonianKokkos_C" + bitsize;
     py::class_<SparseHamiltonianKokkos<PrecisionT>,
@@ -746,20 +803,43 @@ void StateVectorKokkos_class_bindings(py::module &m) {
              const std::vector<std::vector<size_t>> &,
              const std::vector<bool> &,
              const std::vector<std::vector<std::complex<PrecisionT>>> &>())
-        .def("__repr__", [](const OpsData<PrecisionT> &ops) {
-            using namespace Pennylane::Lightning_Kokkos::Util;
-            std::ostringstream ops_stream;
-            for (size_t op = 0; op < ops.getSize(); op++) {
-                ops_stream << "{'name': " << ops.getOpsName()[op];
-                ops_stream << ", 'params': " << ops.getOpsParams()[op];
-                ops_stream << ", 'inv': " << ops.getOpsInverses()[op];
-                ops_stream << "}";
-                if (op < ops.getSize() - 1) {
-                    ops_stream << ",";
-                }
-            }
-            return "Operations: [" + ops_stream.str() + "]";
-        });
+        .def("__repr__",
+             [](const OpsData<PrecisionT> &ops) {
+                 using namespace Pennylane::Lightning_Kokkos::Util;
+                 std::ostringstream ops_stream;
+                 for (size_t op = 0; op < ops.getSize(); op++) {
+                     ops_stream << "{'name': " << ops.getOpsName()[op];
+                     ops_stream << ", 'params': " << ops.getOpsParams()[op];
+                     ops_stream << ", 'inv': " << ops.getOpsInverses()[op];
+                     ops_stream << "}";
+                     if (op < ops.getSize() - 1) {
+                         ops_stream << ",";
+                     }
+                 }
+                 return "Operations: [" + ops_stream.str() + "]";
+             })
+        .def(py::pickle(
+            [](const OpsData<PrecisionT> &self) { // __getstate__
+                /* Return a tuple that fully encodes the state of the object */
+                return py::make_tuple(self.getOpsName(), self.getOpsParams(),
+                                      self.getOpsWires(), self.getOpsInverses(),
+                                      self.getOpsMatrices());
+            },
+            [](py::tuple t) { // __setstate__
+                if (t.size() != 5)
+                    throw std::runtime_error("Invalid state!");
+
+                /* Create a new C++ instance */
+                OpsData<PrecisionT> p(
+                    t[0].cast<std::vector<std::string>>(),
+                    t[1].cast<std::vector<std::vector<PrecisionT>>>(),
+                    t[2].cast<std::vector<std::vector<size_t>>>(),
+                    t[3].cast<std::vector<bool>>(),
+                    t[4].cast<
+                        std::vector<std::vector<std::complex<PrecisionT>>>>());
+
+                return p;
+            }));
 
     //***********************************************************************//
     //                              Adj Jac
@@ -818,7 +898,19 @@ void StateVectorKokkos_class_bindings(py::module &m) {
                  adj.adjointJacobian(sv, jac, observables, operations,
                                      trainableParams, false);
                  return py::array_t<ParamT>(py::cast(jac));
-             });
+             })
+        .def(py::pickle(
+            [](const AdjointJacobianKokkos<PrecisionT> &self) { // __getstate__
+                /* Return a tuple that fully encodes the state of the object */
+                static_cast<void>(self);
+                return py::make_tuple();
+            },
+            [](py::tuple t) { // __setstate__
+                if (t.size() > 0)
+                    throw std::runtime_error("Invalid state!");
+
+                return AdjointJacobianKokkos<PrecisionT>();
+            }));
 }
 
 // Necessary to avoid mangled names when manually building module
