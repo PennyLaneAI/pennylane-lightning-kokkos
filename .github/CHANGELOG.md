@@ -4,16 +4,26 @@
 
 ### Breaking changes
 
+* Rename `QubitStateVector` to `StatePrep` in the `LightningKokkos` class.
+  [#79] (https://github.com/PennyLaneAI/pennylane-lightning-gpu/pull/79)
+
 ### Improvements
 
 ### Documentation
 
 ### Bug fixes
 
+* Fix `applyMultiQubitOp`'s functor which had a bug causing incorrect gate application with parallel Kokkos backends.
+  [(#75)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/75)
+
+* `apply` no longer mutates the inputted list of operations.
+  [(#78)](https://github.com/PennyLaneAI/pennylane-lightning-kokkos/pull/78)
+
 ### Contributors
 
 This release contains contributions from (in alphabetical order):
 
+Vincent Michaud-Rioux
 
 ---
 

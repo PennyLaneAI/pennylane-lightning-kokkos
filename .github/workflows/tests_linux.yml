@@ -16,7 +16,7 @@ on:
   pull_request:
 
 env:
-  PY_VERSION: 3.8
+  PY_VERSION: 3.9
   GCC_VERSION: 11
   COVERAGE_FLAGS: "--cov=pennylane_lightning_kokkos --cov-report=term-missing --cov-report=xml:./coverage.xml --no-flaky-report -p no:warnings --tb=native"
   OMP_NUM_THREADS: "2"
