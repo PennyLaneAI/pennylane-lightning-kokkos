@@ -22,7 +22,6 @@ from itertools import product
 
 import numpy as np
 from pennylane import (
-    active_return,
     BasisState,
     DeviceError,
     Hermitian,
@@ -683,7 +682,9 @@ if CPP_BINARY_AVAILABLE:
             jac = jac.reshape(-1, len(tp_shift))
             jac_r = np.zeros((jac.shape[0], all_params))
             jac_r[:, record_tp_rows] = jac
-            return self._adjoint_jacobian_processing(jac_r) if active_return() else jac_r
+            if hasattr(qml, "active_return"):
+                return self._adjoint_jacobian_processing(jac_r) if qml.active_return() else jac_r
+            return self._adjoint_jacobian_processing(jac_r)
 
         def vjp(self, measurements, dy, starting_state=None, use_device_state=False):
             """Generate the processing function required to compute the vector-Jacobian products of a tape."""
