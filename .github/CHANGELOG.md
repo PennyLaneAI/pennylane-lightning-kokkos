@@ -1,15 +1,9 @@
-# Release 0.32.0-dev
-
-### New features since last release
+# Release 0.32.0
 
 ### Breaking changes
 
 * Rename `QubitStateVector` to `StatePrep` in the `LightningKokkos` class.
   [#79] (https://github.com/PennyLaneAI/pennylane-lightning-gpu/pull/79)
-
-### Improvements
-
-### Documentation
 
 ### Bug fixes
 
