@@ -3,6 +3,9 @@ PennyLane-Lightning-Kokkos Plugin
 
 .. header-start-inclusion-marker-do-not-remove
 
+PennyLane-Lightning-Kokkos was integrated in `PennyLane-Lightning <https://github.com/PennyLaneAI/pennylane-lightning>`_ v0.32, and hence the PennyLane organization stopped maintaining this repository at v0.32.
+The development of PennyLane-Lightning-Kokkos continues under `PennyLane-Lightning <https://github.com/PennyLaneAI/pennylane-lightning>`_ so we encourage you to report `issues <https://github.com/PennyLaneAI/pennylane-lightning/issues>`_, make `pull requests <https://github.com/PennyLaneAI/pennylane-lightning/pulls>`_, etc. there.
+
 The `PennyLane-Lightning-Kokkos <https://github.com/PennyLaneAI/pennylane-lightning-kokkos>`_ plugin provides a fast state-vector simulator written in C++.
 It enables parallel execution with various parallel backends, including C++ threads, OpenMP, CUDA, ROCM/HIP and SYCL via the `Kokkos library <https://github.com/kokkos/kokkos>`_.
 For more details, have a look at our `blog post <https://pennylane.ai/blog/2023/04/pennylane-goes-kokkos-a-novel-hardware-agnostic-parallel-backend-for-quantum-simulations>`_.
