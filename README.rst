@@ -6,7 +6,7 @@ PennyLane-Lightning-Kokkos Plugin
 Disclosure
 ==========
 
-The PennyLane organization has archived this repository, which is a snapshot of PennyLane-Lightning-Kokkos v0.32.
+The PennyLaneAI organization has archived this repository, which is a snapshot of PennyLane-Lightning-Kokkos v0.32.
 This backend was integrated into `PennyLane-Lightning <https://github.com/PennyLaneAI/pennylane-lightning>`_ where its development continues.
 We direct users and developers to `PennyLane-Lightning <https://github.com/PennyLaneAI/pennylane-lightning>`_ to report `issues <https://github.com/PennyLaneAI/pennylane-lightning/issues>`_, make `pull requests <https://github.com/PennyLaneAI/pennylane-lightning/pulls>`_, etc.
 
