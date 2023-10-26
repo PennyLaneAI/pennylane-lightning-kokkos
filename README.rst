@@ -3,8 +3,8 @@ PennyLane-Lightning-Kokkos Plugin
 
 .. header-start-inclusion-marker-do-not-remove
 
-Disclosure
-==========
+❗ Warning
+=========
 
 The PennyLaneAI organization has archived this repository, which is a snapshot of PennyLane-Lightning-Kokkos v0.32.
 This backend was integrated into `PennyLane-Lightning <https://github.com/PennyLaneAI/pennylane-lightning>`_ where its development continues.
